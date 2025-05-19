@@ -1,0 +1,767 @@
+{% load static %}
+{% block sidebar %}
+<!-- [ Sidebar Menu ] start -->
+<nav class="pc-sidebar">
+  <div class="navbar-wrapper">
+    <div class="m-header">
+      <a href="../dashboard/index.html" class="b-brand text-primary">
+        <!-- ========   Change your logo from here   ============ -->
+        <img src="{% static 'images/logo-dark.svg' %}" alt="logo image" class="logo-lg" />
+        <span class="badge bg-brand-color-2 rounded-pill ms-2 theme-version">v1.0</span>
+      </a>
+    </div>
+    <div class="navbar-content">
+      <ul class="pc-navbar">
+        <li class="pc-item pc-caption">
+          <label>ناوبری</label>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-gauge"></i>
+            </span>
+            <span class="pc-mtext">داشبورد</span>
+            <span class="pc-arrow"><i data-feather="chevron-left"></i></span>
+            <span class="pc-badge">2</span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../dashboard/index.html">تجزیه و تحلیل</a></li>
+            <li class="pc-item"><a class="pc-link" href="../dashboard/affiliate.html">وابسته</a></li>
+            <li class="pc-item"><a class="pc-link" href="../dashboard/finance.html">مالی</a></li>
+            <li class="pc-item"><a class="pc-link" href="../admins/helpdesk-dashboard.html">میز راهنما</a></li>
+            <li class="pc-item"><a class="pc-link" href="../dashboard/invoice.html">فاکتور</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link"
+            ><span class="pc-micon"> <i class="ph-duotone ph-layout"></i></span><span class="pc-mtext">طرح بندی ها</span
+            ><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-horizontal.html">افقی</a></li>
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-vertical.html">عمودی</a></li>
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-vertical-tab.html">عمودی + تب</a></li>
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-tab.html">تب</a></li>
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-2-column.html">2 ستون</a></li>
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-big-compact.html">جمع و جور بزرگ</a></li>
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-compact.html">جمع و جور</a></li>
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-moduler.html">ماژولار</a></li>
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-creative.html">خلاقانه</a></li>
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-detached.html">جدا شده</a></li>
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-advanced.html">پیشرفته</a></li>
+            <li class="pc-item"><a class="pc-link" href="../demo/layout-extended.html">تمدید شده</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-caption">
+          <label>ویجت</label>
+          <i class="ph-duotone ph-chart-pie"></i>
+        </li>
+        <li class="pc-item">
+          <a href="../widget/w_statistics.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-projector-screen-chart"></i>
+            </span>
+            <span class="pc-mtext">آمار</span>
+          </a>
+        </li>
+        <li class="pc-item">
+          <a href="../widget/w_user.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-identification-card"></i>
+            </span>
+            <span class="pc-mtext">کاربر</span>
+          </a>
+        </li>
+        <li class="pc-item">
+          <a href="../widget/w_data.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-database"></i>
+            </span>
+            <span class="pc-mtext">داده</span>
+          </a>
+        </li>
+        <li class="pc-item">
+          <a href="../widget/w_chart.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-chart-pie"></i>
+            </span>
+            <span class="pc-mtext">نمودار</span></a
+          >
+        </li>
+        <li class="pc-item pc-caption">
+          <label>برنامه</label>
+          <i class="ph-duotone ph-buildings"></i>
+        </li>
+        <li class="pc-item">
+          <a href="../application/calendar.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-calendar-blank"></i>
+            </span>
+            <span class="pc-mtext">تقویم</span></a
+          >
+        </li>
+        <li class="pc-item">
+          <a href="../application/chat.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-chats-circle"></i>
+            </span>
+            <span class="pc-mtext">چت</span></a
+          >
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-image"></i>
+            </span>
+            <span class="pc-mtext">گالری</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../application/gallery-grid.html">شبکه</a></li>
+            <li class="pc-item"><a class="pc-link" href="../application/gallery-masonry.html">ماسونری</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-shopping-cart"></i>
+            </span>
+            <span class="pc-mtext">فروشگاهی</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../application/ecom_product.html">محصول</a></li>
+            <li class="pc-item"><a class="pc-link" href="../application/ecom_product-details.html">جزئیات محصول</a></li>
+            <li class="pc-item"><a class="pc-link" href="../application/ecom_product-list.html">فهرست محصولات</a></li>
+            <li class="pc-item"><a class="pc-link" href="../application/ecom_product-add.html">افزودن محصول جدید</a></li>
+            <li class="pc-item"><a class="pc-link" href="../application/ecom_checkout.html"> تسویه حساب</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link"
+            ><span class="pc-micon"><i class="ph-duotone ph-lifebuoy"></i></span><span class="pc-mtext">میز راهنما</span
+            ><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../admins/helpdesk-dashboard.html">داشبورد</a></li>
+            <li class="pc-item pc-hasmenu">
+              <a class="pc-link" href="#!"
+                >تیکت<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="../admins/helpdesk-create-ticket.html">ایجاد</a></li>
+                <li class="pc-item"><a class="pc-link" href="../admins/helpdesk-ticket.html">فهرست</a></li>
+                <li class="pc-item"><a class="pc-link" href="../admins/helpdesk-ticket-details.html">جزئیات</a></li>
+              </ul>
+            </li>
+            <li class="pc-item"><a class="pc-link" href="../admins/helpdesk-customer.html">مشتری</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-newspaper"></i>
+            </span>
+            <span class="pc-mtext">فاکتور 1</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../application/invoice-list.html">فهرست فاکتور</a></li>
+            <li class="pc-item"><a class="pc-link" href="../application/invoice-create.html">ایجاد</a></li>
+            <li class="pc-item"><a class="pc-link" href="../application/invoice-view.html">پیش نمایش</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link"
+            ><span class="pc-micon"><i class="ph-duotone ph-newspaper"></i></span><span class="pc-mtext">فاکتور 2</span
+            ><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../admins/invoice-dashboard.html">داشبورد</a></li>
+            <li class="pc-item"><a class="pc-link" href="../admins/invoice-create.html">ایجاد</a></li>
+            <li class="pc-item"><a class="pc-link" href="../admins/invoice-view.html">جزئیات</a></li>
+            <li class="pc-item"><a class="pc-link" href="../admins/invoice-list.html">فهرست</a></li>
+            <li class="pc-item"><a class="pc-link" href="../admins/invoice-edit.html">ویرایش</a></li>
+          </ul>
+        </li>
+        <li class="pc-item">
+          <a href="../application/mail.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-envelope-open"></i>
+            </span>
+            <span class="pc-mtext"> ایمیل</span></a
+          >
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-identification-badge"></i>
+            </span>
+            <span class="pc-mtext">عضویت</span>
+            <span class="pc-arrow"><i data-feather="chevron-left"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../admins/membership-dashboard.html">داشبورد</a></li>
+            <li class="pc-item"><a class="pc-link" href="../admins/membership-list.html">فهرست</a></li>
+            <li class="pc-item"><a class="pc-link" href="../admins/membership-pricing.html">تعرفه ها</a></li>
+            <li class="pc-item"><a class="pc-link" href="../admins/membership-setting.html">تنظیمات</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-books"></i>
+            </span>
+            <span class="pc-mtext">دوره های آنلاین</span>
+            <span class="pc-arrow"><i data-feather="chevron-left"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../admins/course-dashboard.html">داشبورد</a></li>
+            <li class="pc-item pc-hasmenu">
+              <a class="pc-link" href="#!"
+                >معلم<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="../admins/course-teacher-list.html">فهرست</a></li>
+                <li class="pc-item"><a class="pc-link" href="../admins/course-teacher-apply.html">درخواست</a></li>
+                <li class="pc-item"><a class="pc-link" href="../admins/course-teacher-add.html">افزودن</a></li>
+              </ul>
+            </li>
+            <li class="pc-item pc-hasmenu">
+              <a class="pc-link" href="#!"
+                >دانش آموز<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="../admins/course-student-list.html">فهرست</a></li>
+                <li class="pc-item"><a class="pc-link" href="../admins/course-student-Apply.html">درخواست</a></li>
+                <li class="pc-item"><a class="pc-link" href="../admins/course-student-add.html">افزودن</a></li>
+              </ul>
+            </li>
+            <li class="pc-item pc-hasmenu">
+              <a class="pc-link" href="#!"
+                >دروس<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="../admins/course-course-view.html">نمایش</a></li>
+                <li class="pc-item"><a class="pc-link" href="../admins/course-course-add.html">افزودن</a></li>
+              </ul>
+            </li>
+            <li class="pc-item"><a class="pc-link" href="../admins/course-pricing.html">تعرفه ها</a></li>
+            <li class="pc-item"><a class="pc-link" href="../admins/course-site.html">سایت</a></li>
+            <li class="pc-item pc-hasmenu">
+              <a class="pc-link" href="#!"
+                >تنظیمات<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="../admins/course-setting-payment.html">پرداخت</a></li>
+                <li class="pc-item"><a class="pc-link" href="../admins/course-setting-pricing.html">تعرفه ها</a></li>
+                <li class="pc-item"><a class="pc-link" href="../admins/course-setting-notifications.html">نوتیفیکیشن ها</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li class="pc-item">
+          <a href="../application/plans.html" class="pc-link">ا
+            <span class="pc-micon">
+              <i class="ph-duotone ph-currency-circle-dollar"></i>
+            </span>
+            <span class="pc-mtext">پلن ها</span></a
+          >
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-user-circle"></i>
+            </span>
+            <span class="pc-mtext">کاربران</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../application/account-profile.html">نمایه حساب</a></li>
+            <li class="pc-item"><a class="pc-link" href="../application/social-media.html"> رسانه های اجتماعی</a></li>
+            <li class="pc-item"><a class="pc-link" href="../application/user-card.html">کارت کاربر</a></li>
+            <li class="pc-item"><a class="pc-link" href="../application/user-list.html">فهرست کاربر</a></li>
+            <li class="pc-item"><a class="pc-link" href="../application/team.html">تیم</a></li>
+          </ul>
+        </li>
+
+        <li class="pc-item pc-caption">
+          <label>صفحات</label>
+          <i class="ph-duotone ph-devices"></i>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-shield-checkered"></i>
+            </span>
+            <span class="pc-mtext">احراز هویت</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item pc-hasmenu">
+              <a href="#!" class="pc-link"
+                >احراز هویت 1<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/login-v1.html">ورود به سیستم</a></li>
+                <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/register-v1.html">ثبت نام</a></li>
+                <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/forgot-password-v1.html">گذرواژه را فراموش کرده‌ام</a></li >
+                <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/reset-password-v1.html">بازنشانی رمز عبور</a> </li >
+                <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/code-verification-v1.html">تأیید کد</a></li >
+              </ul>
+            </li>
+            <li class="pc-item pc-hasmenu">
+              <a href="#!" class="pc-link"
+                >احراز هویت 2<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/login-v2.html">ورود به سیستم</a></li>
+                <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/register-v2.html">ثبت نام</a></li>
+                <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/forgot-password-v2.html">گذرواژه را فراموش کرده‌اید</a> </li >
+                <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/reset-password-v2.html">بازنشانی رمز عبور</a> </li >
+                <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/code-verification-v2.html">تأیید کد</a></li >
+              </ul>
+            </li>
+            <li class="pc-item"><a class="pc-link" href="../pages/login-modal.html">مودال ورود به سیستم</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-wrench"></i>
+            </span>
+            <span class="pc-mtext">تعمیر و نگهداری</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/error-404.html">خطای 404</a></li>
+            <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/connection-lost.html">اتصال قطع شد</a></li>
+            <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/under-construction.html">در حال ساخت</a></li>
+            <li class="pc-item"><a class="pc-link" target="_blank" href="../pages/coming-soon.html">به زودی</a></li>
+          </ul>
+        </li>
+        <li class="pc-item"
+          ><a href="../pages/contact-us.html" class="pc-link"
+            ><span class="pc-micon"> <i class="ph-duotone ph-target"></i> </span><span class="pc-mtext">تماس با ما</span></a
+          >
+        </li>
+        <li class="pc-item"
+          ><a href="../index.html" class="pc-link" target="_blank"
+            ><span class="pc-micon"> <i class="ph-duotone ph-rocket"></i> </span>
+            <span class="pc-mtext pc-icon-link">لندینگ <i class="ti ti-link text-primary f-14"></i></span>
+          </a>
+        </li>
+        <li class="pc-item"
+          ><a href="../pages/loading.html" class="pc-link"
+            ><span class="pc-micon"> <i class="ph-duotone ph-fan"></i> </span><span class="pc-mtext">لودینگ</span></a
+          >
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-magnifying-glass"></i>
+            </span>
+            <span class="pc-mtext">جستجو</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../pages/search-page.html">جستجوی صفحه</a></li>
+            <li class="pc-item"><a class="pc-link" href="../pages/contact-search.html">جستجوی تماس</a></li>
+          </ul>
+        </li>
+        <li class="pc-item">
+          <a href="../pages/settings.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-globe"></i>
+            </span>
+            <span class="pc-mtext">تنظیمات سایت</span>
+          </a>
+        </li>
+        <li class="pc-item pc-caption">
+          <label>اجزای رابط کاربری</label>
+          <i class="ph-duotone ph-compass-tool"></i>
+        </li>
+        <li class="pc-item">
+          <a href="../elements/bc_alert.html" class="pc-link" target="_blank"
+            ><span class="pc-micon"> <i class="ph-duotone ph-compass-tool"></i></span>
+            <span class="pc-mtext pc-icon-link">کامپوننت ها <i class="ti ti-link text-primary f-14"></i></span>
+          </a>
+        </li>
+        <li class="pc-item">
+          <a href="../elements/animation.html" class="pc-link">
+            <span class="pc-micon"> <i class="ph-duotone ph-flower"></i> </span><span class="pc-mtext">انیمیشن</span></a
+          >
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link"
+            ><span class="pc-micon"> <i class="ph-duotone ph-flower-lotus"></i></span><span class="pc-mtext">آیکن ها</span
+            ><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../elements/icon-feather.html">Feather</a></li>
+            <li class="pc-item"><a class="pc-link" href="../elements/icon-fontawesome.html">Font Awesome 5</a></li>
+            <li class="pc-item"><a class="pc-link" href="../elements/icon-material.html">Material</a></li>
+            <li class="pc-item"><a class="pc-link" href="../elements/icon-tabler.html">Tabler</a></li>
+            <li class="pc-item"><a class="pc-link" href="../elements/icon-phosphor.html">Phosphor</a></li>
+            <li class="pc-item"><a class="pc-link" href="../elements/icon-custom.html">Custom</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-caption">
+          <label>فرم ها</label>
+          <i class="ph-duotone ph-textbox"></i>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-textbox"></i>
+            </span>
+            <span class="pc-mtext">المان های فرم</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../forms/form_elements.html">فرم پایه</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form_floating.html">فرم شناور</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_basic.html">گزینه‌های فرم</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_input_group.html">گروه‌های ورودی</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_checkbox.html">چک باکس</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_radio.html">رادیو</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_switch.html">سوئیچ</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_megaoption.html">گزینه مگا</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-plug-charging"></i>
+            </span>
+            <span class="pc-mtext">پلاگین های فرم ها</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item pc-hasmenu">
+              <a class="pc-link" href="#"
+                >تاریخ<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="../forms/form2_datepicker.html">Datepicker</a></li>
+                <li class="pc-item"><a class="pc-link" href="../forms/form2_daterangepicker.html">Date Range Picker</a> </li>
+                <li class="pc-item"><a class="pc-link" href="../forms/form2_timepicker.html">Timepicker</a></li>
+              </ul>
+            </li>
+            <li class="pc-item pc-hasmenu">
+              <a class="pc-link" href="#"
+                >انتخاب<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="../forms/form2_choices.html">Choices js</a></li>
+              </ul>
+            </li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_rating.html">Rating</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_recaptcha.html">Google reCaptcha</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_inputmask.html">Input Masks</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_clipboard.html">Clipboard</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_nouislider.html">Nouislider</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_switchjs.html">Bootstrap Switch</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_typeahead.html">Typeahead</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-pen-nib"></i>
+            </span>
+            <span class="pc-mtext">ویرایشگرهای متن</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_tinymce.html">Tinymce</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_quill.html">Quill</a></li>
+            <li class="pc-item pc-hasmenu">
+              <a class="pc-link" href="#"
+                >CK editor<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="../forms/editor-classic.html">classic</a></li>
+                <li class="pc-item"><a class="pc-link" href="../forms/editor-document.html">Document</a></li>
+                <li class="pc-item"><a class="pc-link" href="../forms/editor-inline.html">Inline</a></li>
+                <li class="pc-item"><a class="pc-link" href="../forms/editor-balloon.html">Balloon</a></li>
+              </ul>
+            </li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_markdown.html">Markdown</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-windows-logo"></i>
+            </span>
+            <span class="pc-mtext">طرح بندی فرم ها</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_lay-default.html">طرح بندی ها</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_lay-multicolumn.html">چند ستونی</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_lay-actionbars.html">نوارهای اکشن</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_lay-stickyactionbars.html">نوارهای اکشن چسبنده</a> </li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-cloud-arrow-up"></i>
+            </span>
+            <span class="pc-mtext">آپلود فایل</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../forms/file-upload.html">Dropzone</a></li>
+            <li class="pc-item"><a class="pc-link" href="../forms/form2_flu-uppy.html">Uppy</a></li>
+          </ul>
+        </li>
+        <li class="pc-item">
+          <a href="../forms/form2_wizard.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-tabs"></i>
+            </span>
+            <span class="pc-mtext">ویزارد</span></a
+          >
+        </li>
+        <li class="pc-item">
+          <a href="../forms/form-validation.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-password"></i>
+            </span>
+            <span class="pc-mtext">اعتبار سنجی فرم</span></a
+          >
+        </li>
+        <li class="pc-item"
+          ><a href="../forms/image_crop.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-crop"></i>
+            </span>
+            <span class="pc-mtext">برش دهنده تصویر</span></a
+          ></li
+        >
+        <li class="pc-item pc-caption">
+          <label>جداول</label>
+          <i class="ph-duotone ph-table"></i>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-table"></i>
+            </span>
+            <span class="pc-mtext">جدول بوت استرپ</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_bootstrap.html">جدول اصلی</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_sizing.html">جدول اندازه</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_border.html">جدول حاشیه</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_styling.html">جدول استایل</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-grid-nine"></i>
+            </span>
+            <span class="pc-mtext">جدول وانیلی</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_dt-simple.html">تولید اولیه اولیه</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_dt-dynamic-import.html">وارد کردن پویا</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_dt-render-column-cells.html">پرداخت سلولهای ستون</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_dt-column-manipulation.html">دستکاری ستون</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_dt-datetime-sorting.html">مرتب‌سازی زمان تاریخ</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_dt-methods.html">روش ها</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_dt-add-rows.html">افزودن ردیف</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_dt-fetch-api.html">واکشی API</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_dt-filters.html">فیلترها</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/tbl_dt-export.html">صادرات</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-text-columns"></i>
+            </span>
+            <span class="pc-mtext">جدول داده ها</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../table/dt_advance.html">تولید اولیه اولیه</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_styling.html">استایل دهی</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_api.html">API</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_plugin.html">افزونه</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_sources.html">منابع داده</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-wall"></i>
+            </span>
+            <span class="pc-mtext">پسوندهای DT</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../table/dt_ext_autofill.html">تکمیل خودکار</a></li>
+            <li class="pc-item pc-hasmenu">
+              <a href="#!" class="pc-link"
+                >دکمه<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="../table/dt_ext_basic_buttons.html">دکمه اصلی</a></li>
+                <li class="pc-item"><a class="pc-link" href="../table/dt_ext_export_buttons.html">صادرات داده</a></li>
+              </ul>
+            </li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_ext_col_reorder.html">تغییر ترتیب کول</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_ext_fixed_columns.html">ستون‌های ثابت</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_ext_fixed_header.html">هدر ثابت</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_ext_key_table.html">جدول کلید</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_ext_responsive.html">پاسخگو</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_ext_row_reorder.html">تغییر ترتیب ردیف</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_ext_scroller.html">پیمایش</a></li>
+            <li class="pc-item"><a class="pc-link" href="../table/dt_ext_select.html">انتخاب جدول</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-caption">
+          <label>چارت و نقشه ها</label>
+          <i class="ph-duotone ph-chart-pie-slice"></i>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-chart-donut"></i>
+            </span>
+            <span class="pc-mtext">چارت ها</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../chart/chart-apex.html">چارت Apex</a></li>
+            <li class="pc-item"><a class="pc-link" href="../chart/chart-peity.html">چارت Peity</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-map-trifold"></i>
+            </span>
+            <span class="pc-mtext">نقشه ها</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../chart/map-vector.html">Vector Map</a></li>
+            <li class="pc-item"><a class="pc-link" href="../chart/map-gmap.html">Gmaps</a></li>
+          </ul>
+        </li>
+
+        <li class="pc-item pc-caption">
+          <label>سایر</label>
+          <i class="ph-duotone ph-suitcase"></i>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link"
+            ><span class="pc-micon"> <i class="ph-duotone ph-tree-structure"></i> </span><span class="pc-mtext">سطح بندی منو</span
+            ><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="#!">سطح 2.1</a></li>
+            <li class="pc-item pc-hasmenu">
+              <a href="#!" class="pc-link"
+                >سطح 2.2<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="#!">سطح 3.1</a></li>
+                <li class="pc-item"><a class="pc-link" href="#!">سطح 3.2</a></li>
+                <li class="pc-item pc-hasmenu">
+                  <a href="#!" class="pc-link"
+                    >سطح 3.3<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+                  ></a>
+                  <ul class="pc-submenu">
+                    <li class="pc-item"><a class="pc-link" href="#!">سطح 4.1</a></li>
+                    <li class="pc-item"><a class="pc-link" href="#!">سطح 4.2</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li class="pc-item pc-hasmenu">
+              <a href="#!" class="pc-link"
+                >سطح 2.3<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+              ></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="#!">سطح 3.1</a></li>
+                <li class="pc-item"><a class="pc-link" href="#!">سطح 3.2</a></li>
+                <li class="pc-item pc-hasmenu">
+                  <a href="#!" class="pc-link"
+                    >سطح 3.3<span class="pc-arrow"><i data-feather="chevron-left"></i></span
+                  ></a>
+                  <ul class="pc-submenu">
+                    <li class="pc-item"><a class="pc-link" href="#!">سطح 4.1</a></li>
+                    <li class="pc-item"><a class="pc-link" href="#!">سطح 4.2</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li class="pc-item"
+          ><a href="../other/sample-page.html" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-desktop"></i>
+            </span>
+            <span class="pc-mtext">صفحه نمونه</span></a
+          ></li
+        >
+
+      </ul>
+      <div class="card nav-action-card bg-brand-color-4">
+        <div class="card-body" style="background-image: url('{% static "images/layout/nav-card-bg.svg')" %}">
+          <h5 class="text-dark">مرکز راهنمایی</h5>
+          <p class="text-dark text-opacity-75">لطفا برای سوالات بیشتر با ما تماس بگیرید.</p>
+          <a href="https://phoenixcoded.support-hub.io/" class="btn btn-primary" target="_blank">به مرکز کمک بروید</a>
+        </div>
+      </div>
+    </div>
+    <div class="card pc-user-card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <img src="{% static 'images/user/avatar-1.jpg' %}" alt="user-image" class="user-avtar wid-45 rounded-circle" />
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <div class="dropdown">
+              <a href="#" class="arrow-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,20">
+                <div class="d-flex align-items-center">
+                  <div class="flex-grow-1 me-2">
+                    <h6 class="mb-0">اشکان کیانی</h6>
+                    <small>سوپر ادمین</small>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <div class="btn btn-icon btn-link-secondary avtar">
+                      <i class="ph-duotone ph-windows-logo"></i>    
+                    </div>
+                  </div>
+                </div>
+              </a>
+              <div class="dropdown-menu">
+                <ul>
+                  <li>
+                    <a class="pc-user-links">
+                      <i class="ph-duotone ph-user"></i>
+                      <span>حساب کاربری</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="pc-user-links">
+                      <i class="ph-duotone ph-gear"></i>
+                      <span>تنظیمات</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="pc-user-links">
+                      <i class="ph-duotone ph-lock-key"></i>
+                      <span>قفل صفحه</span>
+                    </a>
+                    </li>
+                  <li>
+                    <a class="pc-user-links">
+                      <i class="ph-duotone ph-power"></i>
+                      <span>خروج</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+<!-- [ Sidebar Menu ] end -->
+{% endblock %}
