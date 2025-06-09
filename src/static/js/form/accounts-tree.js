@@ -1,29 +1,5 @@
-<div class="collapse multi-collapse show">
-              <div class="address-check-block">
-              <div id="account-tree-container" class="mt-3">
-              <form class="create-account-form">
-                  {{ accountform.as_p }}
-                  <button type="submit">ذخیره و انتخاب حساب</button>
-              </form>
-              </div>
-                <div id="account-tree-container" class="mt-3">
-                <ul>
-                    {% for node in list_accounts %}
-                        {% if node.is_root %}
-                            {% include 'account_base/accounts_node.html' with node=node %}
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-                </div>
-              </div>
-            </div>
-            
-            
-                
-<script>
-    function getCSRFToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
-
+function getCSRFToken() {
+return document.querySelector('[name=csrfmiddlewaretoken]').value;
 }
 
 document.querySelectorAll('.toggle').forEach(btn => {
@@ -35,6 +11,7 @@ document.querySelectorAll('.toggle').forEach(btn => {
         }
     });
 });
+
 $(document).ready(function () {
     let csrfToken = getCSRFToken(); // Get CSRF token
 
@@ -59,7 +36,7 @@ $(document).ready(function () {
                         if (!$select.find(`option[value="${data.id}"]`).length) {
                             $select.append(`<option value="${data.id}" selected>${data.name}</option>`);
                         }}
-                    
+
                 } else {
                     alert("خطا: " + JSON.stringify(data.errors));
                 }
@@ -124,5 +101,3 @@ function addAccountToTree(id, name, parentId, $formContext) {
 }
 
 });
-</script>
-  

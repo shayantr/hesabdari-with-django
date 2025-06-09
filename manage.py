@@ -5,6 +5,7 @@ import sys
 
 
 def main():
+    sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'src.hesabdari.envs.settings')
     try:

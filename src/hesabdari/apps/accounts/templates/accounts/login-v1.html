@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+
+<body data-pc-preset="preset-1" data-pc-sidebar-theme="light" data-pc-sidebar-caption="true" data-pc-direction="rtl" data-pc-theme="light">
+  <!-- [ Pre-loader ] start -->
+  <div class="loader-bg">
+    <div class="loader-track">
+      <div class="loader-fill"></div>
+    </div>
+  </div>
+  <!-- [ Pre-loader ] End -->
+
+  <div class="auth-main v1">
+    <div class="auth-wrapper">
+      <div class="auth-form">
+        <div class="card my-5">
+          <div class="card-body">
+                        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+            <div class="text-center">
+              <img src="{% static 'images/authentication/img-auth-login.png' %}" alt="images" class="img-fluid mb-3">
+              <h4 class="f-w-500 mb-1">با ایمیل خود وارد شوید</h4>
+              <p class="mb-3">حساب ندارید؟ <a href="../pages/register-v1.html" class="link-primary ms-1">ایجاد حساب</a></p>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+            <div class="mb-3">
+                {{ form.username }}
+            </div>
+            <div class="mb-3">
+                {{ form.password }}
+            </div>
+            <div class="d-flex mt-1 justify-content-between align-items-center">
+              <div class="form-check">
+                {{ form.remember_me  }}
+                <label class="form-check-label text-muted" for="customCheckc1">{{ form.remember_me.label }}</label>
+              </div>
+
+              <a href="../pages/forgot-password-v1.html"><h6 class="f-w-400 mb-0">گذرواژه را فراموش کرده‌اید؟</h6></a>
+            </div>
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-primary">ورود به سیستم</button>
+            </div>
+            </form>
+
+            <div class="saprator my-3">
+              <span>یا</span>
+            </div>
+            <div class="text-center">
+              <ul class="list-inline mx-auto mt-3 mb-0">
+                <li class="list-inline-item">
+                  <a href="https://www.facebook.com/" class="avtar avtar-s rounded-circle bg-facebook" target="_blank">
+                    <i class="fab fa-facebook-f text-white"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item">
+                  <a href="https://twitter.com/" class="avtar avtar-s rounded-circle bg-twitter" target="_blank">
+                    <i class="fab fa-twitter text-white"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item">
+                  <a href="https://myaccount.google.com/" class="avtar avtar-s rounded-circle bg-googleplus" target="_blank">
+                    <i class="fab fa-google text-white"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!-- [ Main Content ] end -->
+{% endblock %}

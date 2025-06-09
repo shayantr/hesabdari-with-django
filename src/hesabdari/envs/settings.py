@@ -9,11 +9,15 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import locale
 from pathlib import Path
+import sys
+
+
+from django.conf.global_settings import MEDIA_URL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,12 +29,15 @@ SECRET_KEY = 'django-insecure-_o)xpka_zznl@2iw_fnc-^pbia5^!16m!h&8w6m=tohot9)sb%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.41', '192.168.1.37','localhost', '127.0.0.1']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'dal',
+    'dal_select2',
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,7 +46,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'treebeard',
     'mptt',
-    # 'account_base',
+    # 'mptt_admin',
+    'jalali_date',
+    "django_jalali",
+    'hesabdari.apps.account_base',
+    'hesabdari.apps.home',
+    'hesabdari.apps.accounts',
+    'django_render_partial',
+    'django_select2',
 
 ]
 
@@ -73,6 +87,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'hesabdari.wsgi.application'
+ASGI_APPLICATION = 'hesabdari.asgi.application'
 
 
 # Database
@@ -88,6 +103,8 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
+
+AUTH_USER_MODEL = 'accounts.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -106,22 +123,54 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
+
+# default settings (optional)
+JALALI_DATE_DEFAULTS = {
+   # if change it to true then all dates of the list_display will convert to the Jalali.
+   'LIST_DISPLAY_AUTO_CONVERT': True,
+   'Strftime': {
+        'date': '%y/%m/%d',
+        'datetime': '%H:%M:%S _ %y/%m/%d',
+    },
+    'Static': {
+        'js': [
+            'admin/js/django_jalali.min.js',
+        ],
+        'css': {
+            'all': [
+              'admin/css/django_jalali.min.css',
+            ]
+        }
+    },
+}
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+if sys.platform.startswith('win32'):
+    locale.setlocale(locale.LC_ALL, "Persian_Iran.UTF-8")
+else:
+    locale.setlocale(locale.LC_ALL, "fa_IR.UTF-8")
 
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = 'fa-ir'
+TIME_ZONE = 'Asia/Tehran'
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
+locale.setlocale(locale.LC_ALL, "fa_IR.UTF-8")
+
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]
+STATIC_ROOT = BASE_DIR / "assets"
 
+MEDIA_URL = 'media/'
+
+MEDIA_ROOT = BASE_DIR / "uploads"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 

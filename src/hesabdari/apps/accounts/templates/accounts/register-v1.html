@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body %}
+    <body data-pc-preset="preset-1" data-pc-sidebar-theme="light" data-pc-sidebar-caption="true" data-pc-direction="rtl" data-pc-theme="light">
+  <!-- [ Pre-loader ] start -->
+  <div class="loader-bg">
+    <div class="loader-track">
+      <div class="loader-fill"></div>
+    </div>
+  </div>
+  <!-- [ Pre-loader ] End -->
+
+  <div class="auth-main v1">
+    <div class="auth-wrapper">
+      <div class="auth-form">
+        <div class="card my-5">
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% for field in form %}
+            {% if field.errors %}
+            <div class="alert alert-danger">
+                {{ field.errors }}
+            </div>
+            {% endif %}
+        {% endfor %}
+            <form method="post">
+                {% csrf_token %}
+          <div class="card-body">
+            <div class="text-center">
+              <img src="{% static 'images/authentication/img-auth-register.png' %}" alt="images" class="img-fluid mb-3">
+              <h4 class="f-w-500 mb-1">با شماره خود ثبت نام کنید</h4>
+              <p class="mb-3">از قبل یک حساب دارید؟ <a href="../pages/login-v1.html" class="link-primary">ورود به سیستم</a></p>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="mb-3">
+                    {{ form.first_name }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="mb-3">
+                  {{ form.last_name }}
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              {{ form.email }}
+            </div>
+            <div class="mb-3">
+              {{ form.phone_number }}
+            </div>
+            <div class="mb-3">
+              {{ form.password }}
+            </div>
+            <div class="mb-3">
+              {{ form.confirm_password }}
+            </div>
+            <div class="d-flex mt-1 justify-content-between">
+              <div class="form-check">
+                <input class="form-check-input input-primary" type="checkbox" id="customCheckc1" checked="">
+                <label class="form-check-label text-muted" for="customCheckc1">من با همه شرایط و ضوابط موافقم</label>
+              </div>
+            </div>
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-primary">ایجاد حساب</button>
+            </div>
+          </div>
+            </form>
+        </div>
+      </div>
+{% endblock %}

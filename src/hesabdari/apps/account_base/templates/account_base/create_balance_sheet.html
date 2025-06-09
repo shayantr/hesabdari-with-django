@@ -1,10 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+<div class="form-wrapper" id="{{ i.uniqueid }}">
+    <div class="remove-form" style="color:red; cursor:pointer;">حذف</div>
+    <div class="border rounded p-3">
+        <label class="form-label">{{ i.form_balance.account.label }}</label>
+        {{ i.form_balance.account }}
+        <h5 id="{{ i.uniqueid }}-accounts-list"></h5>
+        <input type="hidden" id="{{ i.uniqueid }}-accounts-list">
+        <div class="modal fade" id="{{ i.uniqueid }}-accounts-lists" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="collapse multi-collapse show">
+                            <h5 class="mb-0">انتخاب حساب</h5>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer justify-content-between collapse multi-collapse show">
+                        <div class="flex-grow-1 text-end">
+                            <button type="button" class="btn btn-link-danger" data-bs-dismiss="modal">لغو</button>
+                            <button type="button" id="select-account-{{ i.uniqueid }}" class="btn btn-primary" data-bs-dismiss="modal">ذخیره</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="button"
+            class="btn btn-sm btn-light-secondary" data-bs-toggle="modal" 
+            data-bs-target="#{{ i.uniqueid }}-accounts-lists"
+            id="{{ i.uniqueid }}-accounts-list">
+            <i class="ph-duotone ph-pencil-simple-line"></i> تغییر
+        </button>
+    </div>
+    {{ i.form_balance.transaction_type }}
+    <div class="cashonly input-group mb-3">
+        <label for="form-label">{{ i.form_balance.amount.label }}</label>
+        <div class="input-group mb-3">
+            {{ i.form_balance.amount }}
+            <span class="input-group-text">تومان</span>  
+        </div>
+    </div>
+    <div class="mb-0">
+        <label class="form-label">{{ i.form_balance.description.label }}</label>
+        <div class="form-control">{{ i.form_balance.description }}</div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">{{ i.form_balance.image.label }}</label>
+        {{ i.form_balance.image }}
+    </div>
+    <label>
+        <input type="checkbox" class="toggle-cheque-form" />
+        اضافه کردن چک
+    </label>
+    <div class="cheque-form border rounded p-3 h-100 text-white bg-info" style="display: none; margin-top: 10px;">
+        {{ i.form_cheque }}
+    </div>
+</div>
