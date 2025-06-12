@@ -194,7 +194,7 @@
           <i class="ph-duotone ph-lock-key"></i>
           <span>قفل صفحه</span>
         </a>
-        <a href="#!" class="dropdown-item">
+        <a href="{% url 'profile:logout' %}" class="dropdown-item">
           <i class="ph-duotone ph-power"></i>
           <span>خروج</span>
         </a>
@@ -489,7 +489,7 @@
                     <span>افزودن حساب</span>
                   </span>
                 </a>
-                <a href="#" class="dropdown-item">
+                <a href="{% url 'profile:logout' %}" class="dropdown-item">
                   <span class="d-flex align-items-center">
                     <i class="ph-duotone ph-power"></i>
                     <span>خروج</span>

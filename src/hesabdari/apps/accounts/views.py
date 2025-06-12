@@ -1,9 +1,11 @@
-from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View, FormView
 
 from django.contrib.auth import get_user_model, login, logout
+from urllib3 import request
 
-from hesabdari.apps.accounts.forms import LoginForm, RegisterForm, CodeVerifyForm
+from hesabdari.apps.accounts.forms import LoginForm, RegisterForm, CodeVerifyForm, ResetPasswordForm, PhoneForm
 from hesabdari.apps.accounts.models import ActivationCode
 from hesabdari.apps.accounts.utils.utils import send_sms_code
 
@@ -13,6 +15,11 @@ User = get_user_model()
 class LoginView(FormView):
     form_class = LoginForm
     template_name = 'accounts/login-v1.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('home')
+        return super(LoginView, self).dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         login(self.request, form.user)
@@ -29,27 +36,99 @@ class RegisterView(FormView):
     template_name = 'accounts/register-v1.html'
     form_class = RegisterForm
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('home')
+        return super(RegisterView, self).dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         user = form.save(self.request)
         activation, created = ActivationCode.objects.get_or_create(user=user)
         activation.generate_code()
         send_sms_code(user.phone_number, activation.code)
         self.request.session['uid'] = user.id
-        return redirect('verify')
+        return redirect('profile:verify')
 
-class VerifyView(FormView):
-    template_name = 'accounts/verify.html'
+class ForgetPasswordView(FormView):
+    template_name = 'accounts/forget_password.html'
+    form_class = PhoneForm
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('home')
+        return super(ForgetPasswordView, self).dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        user = User.objects.filter(phone_number=form.cleaned_data['phone_number']).first()
+        if not user:
+            form.add_error('phone_number', 'این شماره تلفن در سامانه ثبت نشده است.')
+            return self.form_invalid(form)
+        activation, created = ActivationCode.objects.get_or_create(user=user)
+        activation.generate_code()
+        send_sms_code(user.phone_number, activation.code)
+        self.request.session['uid'] = user.id
+        return redirect('profile:reset_verify_password')
+
+class ResetVerifyView(FormView):
     form_class = CodeVerifyForm
+    template_name = 'accounts/reset_verify.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('home')
+        return super(ResetVerifyView, self).dispatch(request, *args, **kwargs)
 
     def get_user(self):
         uid = self.request.session.get('uid')
-        print(uid)
+        return User.objects.get(pk=uid)
+
+    def form_valid(self, form):
+        user = self.get_user()
+        code = form.cleaned_data['code']
+        activation, created = ActivationCode.objects.get_or_create(user=user)
+        if not activation or activation.code != code:
+            form.add_error('code', 'کد نادرست است.')
+            return self.form_invalid(form)
+        return redirect('profile:reset_password')
+
+class ResetPasswordView(FormView):
+    form_class = ResetPasswordForm
+    template_name = 'accounts/reset-password.html'
+
+    def get_user(self):
+        uid = self.request.session.get('uid')
         return User.objects.filter(pk=uid).first()
 
     def form_valid(self, form):
         user = self.get_user()
         if not user:
-            return redirect('register')
+            return redirect('forgot_password')
+
+        user.set_password(form.cleaned_data['password'])
+        user.save()
+
+        ActivationCode.objects.filter(user=user).delete()
+        del self.request.session['uid']
+
+        return redirect('profile:login')
+
+
+class VerifyView(FormView):
+    template_name = 'accounts/verify.html'
+    form_class = CodeVerifyForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('home')
+        return super(VerifyView, self).dispatch(request, *args, **kwargs)
+
+    def get_user(self):
+        uid = self.request.session.get('uid')
+        return User.objects.filter(pk=uid).first()
+
+    def form_valid(self, form):
+        user = self.get_user()
+        if not user:
+            return redirect('profile:register')
 
         code = form.cleaned_data['code']
         try:
@@ -79,4 +158,4 @@ class VerifyView(FormView):
 
 def logout_view(request):
     logout(request)
-    redirect('home')
+    return redirect('home')

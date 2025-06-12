@@ -50,8 +50,8 @@ def extract_all_prefixes(post_data, file_data):
 
 def createbalancesheet(request):
     all_prefixes = extract_all_prefixes(request.POST, request.FILES) if request.method == "POST" else set()
-    print(request.user)
-    document = DocumentForm(request.POST or None, initial={'user':request.user.is_authenticated})
+    # document = DocumentForm(request.POST or None)
+    document_instance = Document(user=request.user)
     all_balanceforms = [BalanceSheetForm(request.POST, request.FILES or None, prefix=f'{i}-new-balance') for i in all_prefixes]
     all_chequeforms = [CashierChequeForm(request.POST or None, prefix=f'{i}-new-cheque') for i in all_prefixes]
     if request.method == "POST":
@@ -59,40 +59,38 @@ def createbalancesheet(request):
         all_debt = 0
         all_forms_valid = True
 
-        if document.is_valid():
-            document_instance = document.save(commit=False)
 
-            for balance, cheque in zip(all_balanceforms, all_chequeforms):
-                if not balance.is_valid() or not cheque.is_valid():
-                    all_forms_valid = False
 
-            if all_forms_valid:
-                for balance in all_balanceforms:
-                    if balance.cleaned_data.get('transaction_type') == "debt":
-                        all_debt += balance.cleaned_data.get('amount') or 0
-                    elif balance.cleaned_data.get('transaction_type') == "credit":
-                        all_credit += balance.cleaned_data.get('amount') or 0
+        for balance, cheque in zip(all_balanceforms, all_chequeforms):
+            if not balance.is_valid() or not cheque.is_valid():
+                all_forms_valid = False
 
-                if all_credit != all_debt:
-                    return JsonResponse({'success': False, 'errors': 'مجموع بدهکاری و بستانکاری برابر نیست.'},)
-                else:
-                    document_instance.save()
-                    for balance, cheque in zip(all_balanceforms, all_chequeforms):
-                        b = balance.save(commit=False)
-                        if cheque.cleaned_data.get('name'):
-                            c = cheque.save()
-                            b.cheque = c
-                        b.document = document_instance
-                        b.save()
-                    return JsonResponse({'success': True, "redirect_url": reverse("test")},)
+        if all_forms_valid:
+            for balance in all_balanceforms:
+                if balance.cleaned_data.get('transaction_type') == "debt":
+                    all_debt += balance.cleaned_data.get('amount') or 0
+                elif balance.cleaned_data.get('transaction_type') == "credit":
+                    all_credit += balance.cleaned_data.get('amount') or 0
+
+            if all_credit != all_debt:
+                return JsonResponse({'success': False, 'errors': 'مجموع بدهکاری و بستانکاری برابر نیست.'},)
+            else:
+                document_instance.save()
+                for balance, cheque in zip(all_balanceforms, all_chequeforms):
+                    b = balance.save(commit=False)
+                    if cheque.cleaned_data.get('name'):
+                        c = cheque.save()
+                        b.cheque = c
+                    b.document = document_instance
+                    b.save()
+                return JsonResponse({'success': True, "redirect_url": reverse("test")},)
 
     context = {
-        'documentform': document,
         'all_balanceforms': all_balanceforms,
         'all_chequeforms': all_chequeforms,
     }
 
-    return render(request, 'account_base/test.html', context)
+    return render(request, 'account_base/create-document.html', context)
 
 
 class GetFormFragmentView(generic.View):
@@ -183,7 +181,7 @@ class UpdateBalanceView(generic.View):
         context = {
             'combined_forms': combined_forms
         }
-        return render(request, "account_base/test.html", context)
+        return render(request, "account_base/create-document.html", context)
     def post(self, request, pk):
         document = get_object_or_404(Document, pk=pk)
         all_credit = 0
@@ -240,7 +238,7 @@ class UpdateBalanceView(generic.View):
                         b.cheque = c
                     b.document = document
                     b.save()
-                return JsonResponse({'success': True, "redirect_url": reverse("test")}, )
+                return JsonResponse({'success': True, "redirect_url": reverse("home")}, )
 
         context = {
             'documentform': document,
@@ -249,7 +247,7 @@ class UpdateBalanceView(generic.View):
             'form_action_url': reverse('UpdateBalanceView', args=[pk])
         }
 
-        return render(request, 'account_base/test.html', context)
+        return render(request, 'account_base/create-document.html', context)
 
 # def deletechequeview(request, pk):
 #     if request.method == 'POST':

@@ -86,7 +86,7 @@
         {{ i.form_balance.image }}
     </div>
     <label>
-        <input type="checkbox" class="toggle-cheque-form" {% if i.form_cheque.name.value == None %}{% else %}checked id="{{ i.form_cheque.id }}"{% endif %} />
+        <input type="checkbox" class="toggle-cheque-form" {% if i.form_cheque.name.value == None %}{% else %}checked id="{{ i.chequeid }}"{% endif %}/>
         اضافه کردن چک
     </label>
     <div class="cheque-form border rounded p-3 h-100 text-white bg-info" style="display: {% if i.form_cheque.name.value == None %}none{% else %}block{% endif %}; margin-top: 10px;">

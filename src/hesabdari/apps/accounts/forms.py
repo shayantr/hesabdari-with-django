@@ -116,3 +116,38 @@ class CodeVerifyForm(forms.Form):
             'placeholder': self.fields['code'].label
         })
 
+class ResetPasswordForm(forms.Form):
+    password = forms.CharField(label="رمز عبور", widget=forms.PasswordInput)
+    confirm_password = forms.CharField(label="تکرار رمز عبور", widget=forms.PasswordInput)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': 'form-control',
+                'placeholder': field.label,
+            })
+
+        for field in self.fields:
+            if self.errors.get(field):
+                self.fields[field].widget.attrs['class'] += ' is-invalid'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm = cleaned_data.get("confirm_password")
+        if password and confirm and password != confirm:
+            raise ValidationError("رمز عبور و تکرار آن یکسان نیستند.")
+        return cleaned_data
+
+
+
+class PhoneForm(forms.Form):
+    phone_number = forms.CharField(label='شماره تلفن خود را وارد کنید.', max_length=16)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['phone_number'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': self.fields['phone_number'].label
+        })
