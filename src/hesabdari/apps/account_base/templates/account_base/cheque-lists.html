@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load jinja_filters %}
+{% block header %}
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}" />
+    <script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
+
+
+
+{% endblock %}
+
+{% block body %}
+<div>
+    <h2>گزارش چک ها</h2>
+    
+    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="pills-debit-tab" data-bs-toggle="pill" data-bs-target="#debits" type="button" role="tab" aria-controls="pills-debit" aria-selected="true">دریافتنی</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pills-credit-tab" data-bs-toggle="pill" data-bs-target="#credits" type="button" role="tab" aria-controls="pills-credit" aria-selected="false">پرداختنی</button>
+    </li>
+    </ul>
+    <div class="tab-content" id="pills-tabContent">
+    
+        <div id="debits" class="tab-pane fade show active" id="pills-debit" role="tabpanel" aria-labelledby="pills-debit-tab" tabindex="0">
+            <form id="debit-filter-form">
+                <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;"> 
+                    <div class="col-md-3 mb-2">
+                                <input type="text" name="cheque_name" placeholder="جستجو نام چک" class="form-control mb-2">
+                            </div>
+                    <div class="col-md-3 mb-2">
+                                <input type="text" name="description" placeholder="جستجو در توضیحات" class="form-control mb-2">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                            <input type="text" name="amount" placeholder="مبلغ سررسید" class="form-control mb-2">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                            <select class="form-select" id="inputGroupSelect04" aria-label="Example select with button addon" name="cheque_status">
+                                <option value="">همه وضعیت‌ها</option>
+                                <option value="جاری">جاری</option>
+                                <option value="عودتی">عودتی</option>
+                                <option value="وصولی">وصولی</option>
+                                <option value="برگشتنی">برگشتنی</option>
+                                <option value="امانی">امانی</option>
+                            </select>
+                            </div>
+                </div>
+                                        <!-- بخش اول: تاریخ ثبت -->
+                <div class="row mb-3 p-3 rounded" style="background-color: #e8f0fe;">
+                    <label class="mb-2 fw-bold">تاریخ ثبت:</label>
+                    <div class="col-md-6 mb-2">
+                        <input type="text" class="form-control" name="created_at_from" data-jdp placeholder="تاریخ ثبت از">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <input type="text" class="form-control" name="created_at_to" data-jdp placeholder="تاریخ ثبت تا">
+                    </div>
+                </div>
+                                    <!-- بخش دوم: تاریخ سررسید -->
+                <div class="row mb-3 p-3 rounded" style="background-color: #fef7e0;">
+                    <label class="mb-2 fw-bold">تاریخ سررسید:</label>
+                    <div class="col-md-6 mb-2">
+                        <input type="text" class="form-control" name="due_date_from" data-jdp placeholder="تاریخ سررسید از">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <input type="text" class="form-control" name="due_date_to" data-jdp placeholder="تاریخ سررسید تا">
+                    </div>
+                </div>
+
+            </form>
+            
+        <div id="debit-cheques-list">
+                        {% include "partials/debit_cheques.html" %}
+
+                        
+        </div>
+                    </div>
+        <div id="credits" class="tab-pane fade show" id="pills-credit" role="tabpanel" aria-labelledby="pills-credit-tab" tabindex="0">
+            <form id="credit-filter-form">
+                <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;"> 
+                    <div class="col-md-3 mb-2">
+                        <input type="text" name="cheque_name" placeholder="جستجو نام چک" class="form-control mb-2">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <input type="text" name="description" placeholder="جستجو در توضیحات" class="form-control mb-2">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <input type="text" name="amount" placeholder="مبلغ سررسید" class="form-control mb-2">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <select class="form-select" id="inputGroupSelect04" aria-label="Example select with button addon" name="cheque_status">
+                            <option value="">همه وضعیت‌ها</option>
+                            <option value="جاری">جاری</option>
+                            <option value="عودتی">عودتی</option>
+                            <option value="وصولی">وصولی</option>
+                            <option value="برگشتنی">برگشتنی</option>
+                            <option value="امانی">امانی</option>
+                        </select>
+                    </div>
+                </div>
+                                        <!-- بخش اول: تاریخ ثبت -->
+                <div class="row mb-3 p-3 rounded" style="background-color: #e8f0fe;">
+                    <label class="mb-2 fw-bold">تاریخ ثبت:</label>
+                    <div class="col-md-6 mb-2">
+                        <input type="text" class="form-control" name="created_at_from" data-jdp placeholder="تاریخ ثبت از">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <input type="text" class="form-control" name="created_at_to" data-jdp placeholder="تاریخ ثبت تا">
+                    </div>
+                </div>
+                                    <!-- بخش دوم: تاریخ سررسید -->
+                <div class="row mb-3 p-3 rounded" style="background-color: #fef7e0;">
+                    <label class="mb-2 fw-bold">تاریخ سررسید:</label>
+                    <div class="col-md-6 mb-2">
+                        <input type="text" class="form-control" name="due_date_from" data-jdp placeholder="تاریخ سررسید از">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <input type="text" class="form-control" name="due_date_to" data-jdp placeholder="تاریخ سررسید تا">
+                    </div>
+                </div>
+
+            </form>
+            <div id="credit-cheques-list">
+
+            {% include "partials/credit_cheques.html" %}
+
+            
+            </div>
+        </div>
+    </div>
+    </div>
+    <script src="{% static 'js/plugins/isotope.pkgd.min.js' %}"></script>
+    <script src="{% static 'js/plugins/index.js' %}"></script>
+    <script>
+    jalaliDatepicker.startWatch();
+
+    $(document).ready(function () {
+        function filterDebits() {
+            $.ajax({
+                url: "{% url 'filter_debit_cheques' %}",
+                data: $('#debit-filter-form').serialize(),
+                success: function (data) {
+                    $('#debit-cheques-list').html(data.html);
+                }
+            });
+        }
+    
+        $('#debit-filter-form input, #debit-filter-form select').on('input change keyup', function () {
+            filterDebits();
+        });
+        function filtercredits() {
+            $.ajax({
+                url: "{% url 'filter_credit_cheques' %}",
+                data: $('#credit-filter-form').serialize(),
+                success: function (data) {
+                    $('#credit-cheques-list').html(data.html);
+                }
+            });
+        }
+    
+        $('#credit-filter-form input, #credit-filter-form select').on('input change keyup', function () {
+            filtercredits();
+        });
+    });
+    </script>
+{% endblock %}

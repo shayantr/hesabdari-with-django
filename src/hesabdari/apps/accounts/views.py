@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy
 from django.views.generic import View, FormView
 
 from django.contrib.auth import get_user_model, login, logout
@@ -15,11 +16,17 @@ User = get_user_model()
 class LoginView(FormView):
     form_class = LoginForm
     template_name = 'accounts/login-v1.html'
+    success_url = reverse_lazy('home')
 
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return redirect('home')
-        return super(LoginView, self).dispatch(request, *args, **kwargs)
+    # def dispatch(self, request, *args, **kwargs):
+    #     print(request.user)
+    #     if request.user.is_authenticated:
+    #         return redirect('home')
+    #     return super(LoginView, self).dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        # اولویت با پارامتر next است
+        return self.request.POST.get('next') or self.request.GET.get('next') or self.success_url
 
     def form_valid(self, form):
         login(self.request, form.user)
@@ -29,7 +36,7 @@ class LoginView(FormView):
         else:
             # expires when closing browser
             self.request.session.set_expiry(0)
-        return redirect('home')
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class RegisterView(FormView):
@@ -157,5 +164,6 @@ class VerifyView(FormView):
             return self.form_invalid(form)
 
 def logout_view(request):
+    request.session.flush()
     logout(request)
     return redirect('home')

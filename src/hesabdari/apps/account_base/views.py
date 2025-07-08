@@ -1,15 +1,20 @@
 from collections import namedtuple
 from itertools import zip_longest
+from lib2to3.fixes.fix_input import context
 
 import jdatetime
 import uuid
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import format_html
 from django.views import generic
+from django.views.decorators.http import require_POST
 
 from hesabdari.apps.account_base.forms import BalanceSheetForm, CashierChequeForm, \
     DocumentForm, AccountsForm
@@ -47,7 +52,7 @@ def extract_all_prefixes(post_data, file_data):
             prefixes.add(prefix)
     return prefixes
 
-
+@login_required
 def createbalancesheet(request):
     all_prefixes = extract_all_prefixes(request.POST, request.FILES) if request.method == "POST" else set()
     # document = DocumentForm(request.POST or None)
@@ -102,8 +107,8 @@ class GetFormFragmentView(generic.View):
             datease = ''
         uniqueid = str(uuid.uuid1())[:4]
         transaction_type = request.POST.get('transaction_type')
-        form_cheque = CashierChequeForm(prefix=f'{uniqueid}-new-cheque', initial={'user':User.objects.get(id=1)})
-        form_balance = BalanceSheetForm(prefix=f'{uniqueid}-new-balance', initial={'transaction_type': transaction_type, 'user':User.objects.get(id=1)})
+        form_cheque = CashierChequeForm(prefix=f'{uniqueid}-new-cheque', initial={'user':request.user.id})
+        form_balance = BalanceSheetForm(prefix=f'{uniqueid}-new-balance', initial={'transaction_type': transaction_type, 'user':request.user.id})
         if transaction_type == 'debt':
             form_html = render_to_string('account_base/form_fragment.html',
                                          {'form_balance': form_balance,'form_cheque':form_cheque,
@@ -163,7 +168,9 @@ def extract_all_update_prefixes(post_data, file_data):
             prefix = key.split('-')[0]
             prefixes.add(prefix)
     return prefixes
-class UpdateBalanceView(generic.View):
+
+
+class UpdateBalanceView(LoginRequiredMixin, generic.View):
     def get(self, request, pk):
         document = get_object_or_404(Document, pk=pk)
         balancesheet = BalanceSheet.objects.filter(document=document)
@@ -186,6 +193,7 @@ class UpdateBalanceView(generic.View):
         document = get_object_or_404(Document, pk=pk)
         all_credit = 0
         all_debt = 0
+        user = request.user
         balancesheets = BalanceSheet.objects.filter(document=document)
         combinedform = namedtuple('combined_form', ['uniqueid', 'form_balance', 'form_cheque'])
         combined_forms = []
@@ -226,15 +234,20 @@ class UpdateBalanceView(generic.View):
                 for item in combined_forms:
                     b = item.form_balance.save(commit=False)
                     if item.form_cheque.cleaned_data.get('name'):
-                        c = item.form_cheque.save()
+                        c = item.form_cheque.save(commit=False)
+                        c.user = user
+                        c.save()
                         b.cheque = c
                     b.document = document
                     b.save()
                 #save new balance and cheque forms
                 for balance, cheque in zip(all_new_balanceforms, all_new_chequeforms):
                     b = balance.save(commit=False)
+                    b.user = user
                     if cheque.cleaned_data.get('name'):
-                        c = cheque.save()
+                        c = cheque.save(commit=False)
+                        c.user = user
+                        c.save()
                         b.cheque = c
                     b.document = document
                     b.save()
@@ -249,6 +262,111 @@ class UpdateBalanceView(generic.View):
 
         return render(request, 'account_base/create-document.html', context)
 
-# def deletechequeview(request, pk):
-#     if request.method == 'POST':
-#         cheque
+
+@login_required
+@require_POST
+def deletechequeview(request):
+    cheque_id = request.POST.get('cheque_id')
+    if not cheque_id:
+        return JsonResponse({'success': False, 'error': 'شناسه چک ارسال نشده'})
+
+    cheque = CashierCheque.objects.filter(pk=cheque_id, user=request.user).first()
+    if cheque is None:
+        return JsonResponse({'success': False, 'error': 'چک پیدا نشد'})
+
+    cheque.delete()
+    return JsonResponse({'success': True})
+
+
+
+class ChequeListView(LoginRequiredMixin, generic.View):
+    def get(self, request):
+        qs = BalanceSheet.objects.filter(
+            Q(user=request.user.id) & Q(cheque__isnull=False)
+        ).select_related('cheque')
+        debits = qs.filter(transaction_type='debt')
+        credits = qs.filter(transaction_type='credit')
+
+        context = {
+            'debits': debits,
+            'credits': credits,
+        }
+        return render(request, 'account_base/cheque-lists.html', context)
+
+def filter_debit_cheques(request):
+    debits = BalanceSheet.objects.filter(
+        Q(user=request.user.id),
+        Q(transaction_type='debt'),
+        Q(cheque__isnull=False)
+    ).select_related('cheque').only(
+    'cheque__name', 'cheque__cheque_status', 'cheque__maturity_date',
+    'cheque__created_at', 'amount', 'description'
+)
+
+    name = request.GET.get('cheque_name')
+    status = request.GET.get('cheque_status')
+    amount = request.GET.get('amount')
+    due_date_from = request.GET.get('due_date_from')
+    due_date_to = request.GET.get('due_date_to')
+    created_at_from = request.GET.get('created_at_from')
+    created_at_to = request.GET.get('created_at_to')
+    description = request.GET.get('description')
+
+    if due_date_from:
+        debits = debits.filter(user=request.user.id, cheque__maturity_date__gte=due_date_from)
+    if due_date_to:
+        debits = debits.filter(user=request.user.id, cheque__maturity_date__lte=due_date_to)
+    if created_at_from:
+        debits = debits.filter(user=request.user.id, cheque__created_at__gte=created_at_from)
+    if created_at_to:
+        debits = debits.filter(user=request.user.id, cheque__created_at__lte=created_at_to)
+    if amount:
+        debits = debits.filter(user=request.user.id, amount=amount)
+    if status:
+        debits = debits.filter(user=request.user.id, cheque__cheque_status=status)
+    if name:
+        debits = debits.filter(cheque__name__icontains=name)
+    if description:
+        debits = debits.filter(description__contains=description)
+    html = render_to_string('partials/debit_cheques.html', {'debits': debits})
+    return JsonResponse({'html': html})
+
+def filter_credit_cheques(request):
+    credits = BalanceSheet.objects.filter(
+        Q(user=request.user.id),
+        Q(transaction_type='credit'),
+        Q(cheque__isnull=False)
+    ).select_related('cheque').only(
+    'cheque__name', 'cheque__cheque_status', 'cheque__maturity_date',
+    'cheque__created_at', 'amount', 'description'
+)
+
+    name = request.GET.get('cheque_name')
+    status = request.GET.get('cheque_status')
+    amount = request.GET.get('amount')
+    due_date_from = request.GET.get('due_date_from')
+    due_date_to = request.GET.get('due_date_to')
+    created_at_from = request.GET.get('created_at_from')
+    created_at_to = request.GET.get('created_at_to')
+    description = request.GET.get('description')
+
+    if due_date_from:
+        credits = credits.filter(user=request.user.id, cheque__maturity_date__gte=due_date_from)
+    if due_date_to:
+        credits = credits.filter(user=request.user.id, cheque__maturity_date__lte=due_date_to)
+    if created_at_from:
+        credits = credits.filter(user=request.user.id, cheque__created_at__gte=created_at_from)
+    if created_at_to:
+        credits = credits.filter(user=request.user.id, cheque__created_at__lte=created_at_to)
+    if amount:
+        credits = credits.filter(user=request.user.id, amount=amount)
+    if status:
+        credits = credits.filter(user=request.user.id, cheque__cheque_status=status)
+    if description:
+        credits = credits.filter(user=request.user.id, description__contains=description)
+    if name:
+        credits = credits.filter(user=request.user.id, cheque__name__icontains=name)
+    print(credits)
+
+    html = render_to_string('partials/credit_cheques.html', {'credits': credits})
+    return JsonResponse({'html': html})

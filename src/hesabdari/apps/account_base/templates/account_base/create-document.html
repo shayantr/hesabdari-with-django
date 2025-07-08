@@ -7,6 +7,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}" />
     <script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
+    
+    
         <style>
         .form-wrapper {
             border: 1px solid #ccc;
@@ -91,6 +93,10 @@
     </label>
     <div class="cheque-form border rounded p-3 h-100 text-white bg-info" style="display: {% if i.form_cheque.name.value == None %}none{% else %}block{% endif %}; margin-top: 10px;">
         {{ i.form_cheque }}
+        <div class="remove-cheque" {% if i.form_cheque.name.value == None %}none{% else %}block{% endif %} style="margin-top: 1%">
+            <button type="button" data-chequeid="{{ i.chequeid }}" class="delete-cheque-btn" style="color:red">حذف</button>
+        </div>
+
     </div>
 <script>
         $('#select-account-{{ i.uniqueid }}').click(function () {
@@ -234,7 +240,7 @@
             </div>
             <button class="btn btn-primary me-2" id="saveall" type="submit">ذخیره همه</button>
         </form>
-    
+
 <script>
 jalaliDatepicker.startWatch();
 
@@ -421,37 +427,38 @@ $(document).ready(function () {
 });
 
 
-{#$(document).ready(function() {#}
-{#  $('.toggle-cheque-form').on('change', function() {#}
-{#    const checkboxId = $(this).attr('id');#}
-{##}
-{#    // فقط اگر id داشت و چک‌باکس غیرفعال شد#}
-{#    if (checkboxId && !$(this).is(':checked')) {#}
-{#      const formId = $(this).data('form-id');#}
-{#      const $form = $('#' + formId);#}
-{##}
-{#      $.ajax({#}
-{#        url: '/delete-form/',#}
-{#        type: 'POST',#}
-{#        data: {#}
-{#          'form_id': formId,#}
-{#          'checkbox_id': checkboxId,#}
-{#          'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()#}
-{#        },#}
-{#        success: function(response) {#}
-{#          if (response.status === 'ok') {#}
-{#            $form.remove();#}
-{#          } else {#}
-{#            alert('خطا در حذف فرم');#}
-{#          }#}
-{#        },#}
-{#        error: function() {#}
-{#          alert('ارتباط با سرور برقرار نشد');#}
-{#        }#}
-{#      });#}
-{#    }#}
-{#  });#}
-{#});#}
+$(document).ready(function() {
+    $('.delete-cheque-btn').on('click', function() {
+        var chequeId = $(this).data('chequeid');  // فقط همونی که کلیک شد
+        var button = $(this);  // برای حذف یا تغییر متن بعد از موفقیت
+        var formWrapper = button.closest('.form-wrapper');
+        var chequeForm = button.closest('.cheque-form');
+
+        $.ajax({
+            url: '{% url "delete-cheque-view" %}',
+            type: 'POST',
+            data: {
+                'cheque_id': chequeId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert('چک با موفقیت حذف شد');
+                    button.remove();
+                    formWrapper.find('.toggle-cheque-form').prop('checked', false);
+                    chequeForm.hide();
+                    chequeForm.find('input, textarea, select').val('');
+                    chequeForm.find('select').prop('selectedIndex', 0); // برای select‌ها
+                
+                    
+                } else {
+                    alert('خطا: ' + response.error);
+                }
+            }
+        });
+    });
+});
+
 
 </script>
 

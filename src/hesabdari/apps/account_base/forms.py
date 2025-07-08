@@ -58,6 +58,3 @@ class CashierChequeForm(forms.ModelForm):
             'cheque_status': forms.Select(attrs={'class': 'dropdown form-select form-select-lg'}),
 
         }
-
-
-
