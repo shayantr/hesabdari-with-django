@@ -148,15 +148,15 @@ JALALI_DATE_DEFAULTS = {
 
 if sys.platform.startswith('win32'):
     locale.setlocale(locale.LC_ALL, "Persian_Iran.UTF-8")
-else:
-    locale.setlocale(locale.LC_ALL, "fa_IR.UTF-8")
+# else:
+#     locale.setlocale(locale.LC_ALL, "fa_IR.UTF-8")
 
 LANGUAGE_CODE = 'fa-ir'
 TIME_ZONE = 'Asia/Tehran'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-locale.setlocale(locale.LC_ALL, "fa_IR.UTF-8")
+# locale.setlocale(locale.LC_ALL, "fa_IR.UTF-8")
 
 
 
