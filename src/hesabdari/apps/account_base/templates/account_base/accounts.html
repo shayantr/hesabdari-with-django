@@ -4,7 +4,7 @@
               <form class="create-account-form">
                   {{ accountform.as_p }}
 
-                  <button type="submit">ذخیره و انتخاب حساب</button>
+                  <button type="click">ذخیره و انتخاب حساب</button>
               </form>
               </div>
                 <div id="account-tree-container" class="mt-3">
@@ -39,7 +39,7 @@ document.querySelectorAll('.toggle').forEach(btn => {
 $(document).ready(function () {
     let csrfToken = getCSRFToken(); // Get CSRF token
 
-    $('.create-account-form').on('submit', function (e) {
+    $('.create-account-form').on('click', function (e) {
         e.preventDefault();
         const $form = $(this);
 
