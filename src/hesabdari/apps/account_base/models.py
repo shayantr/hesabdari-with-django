@@ -39,7 +39,7 @@ class BalanceSheet(models.Model):
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='balancesheet')
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='items', blank=True, null=True)
-    date_created = models.DateTimeField(auto_now_add=True, editable=True)
+    date_created = jmodels.jDateField(auto_now_add=True, editable=True)
     account = models.ForeignKey(AccountsClass, on_delete=models.CASCADE, related_name='balance_sheets')
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE_CHOICES)
     cheque = models.ForeignKey('CashierCheque', on_delete=models.SET_NULL, null=True, blank=True, related_name='balance_sheet')

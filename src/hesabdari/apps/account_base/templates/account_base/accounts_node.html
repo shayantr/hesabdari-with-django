@@ -1,16 +1,18 @@
 <li>
+<div class="1"></div>
     {% if node.get_children %}
         <span class="toggle">▶</span>
     {% else %}
         <span style="margin-right: 18px;"></span>
     {% endif %}
     <input class="form-check-input" type="radio" name="names" value="{{ node.id }}">
-    {{ node.name }}
-
+    <span class="account-name" data-id="{{ node.id }}">{{ node.name }}</span>
+    <button type="button" class="btn-edit-account btn btn-sm btn-outline-primary" data-id="{{ node.id }}">ویرایش</button>
+    <button type="button" class="btn-delete-account btn btn-sm btn-outline-danger" data-id="{{ node.id }}">حذف</button>
     {% if node.get_children %}
         <ul class="children">
             {% for child in node.get_children %}
-                {% include 'account_base/list_accounts.html' with node=child %}
+                {% include 'account_base/accounts_node.html' with node=child %}
             {% endfor %}
         </ul>
     {% endif %}

@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -88,7 +88,7 @@ def createbalancesheet(request):
                         b.cheque = c
                     b.document = document_instance
                     b.save()
-                return JsonResponse({'success': True, "redirect_url": reverse("test")},)
+                return JsonResponse({'success': True, "redirect_url": reverse("create-document")},)
 
     context = {
         'all_balanceforms': all_balanceforms,
@@ -370,3 +370,41 @@ def filter_credit_cheques(request):
 
     html = render_to_string('partials/credit_cheques.html', {'credits': credits})
     return JsonResponse({'html': html})
+
+class BalanceListView(LoginRequiredMixin, generic.View):
+    def get(self, request):
+        qs = BalanceSheet.objects.filter(user=request.user.id).select_related('cheque')
+        debits = qs.filter(transaction_type='debt')
+        credits = qs.filter(transaction_type='credit')
+
+        context = {
+            'debits': debits,
+            'credits': credits,
+        }
+        return render(request, 'account_base/balance_list.html', context)
+
+def edit_account(request, pk):
+    if request.method == 'POST':
+        try:
+            account = AccountsClass.objects.get(pk=pk)
+            account.name = request.POST.get('name')
+            account.save()
+            return JsonResponse({'success': True})
+        except AccountsClass.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'حساب یافت نشد'})
+
+def delete_account(request, pk):
+    if request.method == 'POST':
+        try:
+            account = AccountsClass.objects.get(pk=pk)
+            if account.get_children_count() > 0:
+                return JsonResponse({'success': False, 'error': 'این حساب زیرمجموعه دارد'})
+            if BalanceSheet.objects.filter(user=request.user.id).filter(account=account).exists():
+                return JsonResponse({'success': False, 'error': 'این حساب در سندی در حال استفاده است.'})
+            else:
+                account.delete()
+                return JsonResponse({'success': True})
+        except AccountsClass.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'حساب پیدا نشد'})
+    else:
+        raise Http404()

@@ -9,15 +9,6 @@ class AccountsForm(MoveNodeForm):
         model = AccountsClass
         fields = ['name']
 
-    # def save(self, commit=True, parent=None):
-    #     """ این متد برای تعیین والد دسته‌بندی در ذخیره‌سازی فرم است. """
-    #     instance = super().save(commit=False)  # هنوز در دیتابیس ذخیره نمی‌شود
-    #     if parent:
-    #         instance.insert_at(parent, save=commit)  # اضافه کردن به والد
-    #     elif commit:
-    #         instance.save()
-    #     return instance
-
 
 class DocumentForm(forms.ModelForm):
     class Meta:
