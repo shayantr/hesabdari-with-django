@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="improve ui create-document.html">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+        <option value="JavaScript File" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;shayantr&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/shayantr/hesabdari-with-django.git&quot;,
+    &quot;accountId&quot;: &quot;55222c0c-d13d-409b-8433-f5da4c85c420&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="2tDvTJqiR9sajJBY7iZ1WtN8NZb" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Django Server.hesabdari.executor": "Run",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "django.template.preview.state": "SHOW_EDITOR",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/Shaya/Desktop/djangoProject/backup/maghaze",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\PyCharm 2024.2.4\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Shaya\Desktop\learning project\hesabdari\hesabdari\src\static\js" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Shaya\Desktop\learning project\hesabdari\hesabdari\src\hesabdari\apps\accounts" />
+      <recent name="C:\Users\Shaya\Desktop\learning project\hesabdari\hesabdari\src\static\js" />
+      <recent name="C:\Users\Shaya\Desktop\learning project\hesabdari\hesabdari\src\templates\base" />
+      <recent name="C:\Users\Shaya\Desktop\learning project\hesabdari\hesabdari\src\hesabdari\apps" />
+      <recent name="C:\Users\Shaya\Desktop\learning project\hesabdari\hesabdari\src\hesabdari\envs" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="hesabdari" type="Python.DjangoServer" factoryName="Django server">
+      <module name="hesabdari" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="DJANGO_SETTINGS_MODULE" value="src.hesabdari.envs.settings" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="localhost" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-PY-242.23726.102" />
+        <option value="bundled-python-sdk-5e1850174b45-399fe30bd8c1-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-242.23726.102" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="" />
+      <created>1739899466286</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1739899466286</updated>
+      <workItem from="1739899515321" duration="1600000" />
+      <workItem from="1739902549310" duration="12478000" />
+      <workItem from="1739952274037" duration="7727000" />
+      <workItem from="1740045834744" duration="6701000" />
+      <workItem from="1740380075203" duration="5529000" />
+      <workItem from="1740466741988" duration="6210000" />
+      <workItem from="1740904337147" duration="598000" />
+      <workItem from="1741073057465" duration="604000" />
+      <workItem from="1741187608873" duration="868000" />
+      <workItem from="1741189753675" duration="5284000" />
+      <workItem from="1741197034419" duration="6527000" />
+      <workItem from="1741248942467" duration="778000" />
+      <workItem from="1741257654921" duration="680000" />
+      <workItem from="1741425959636" duration="10788000" />
+      <workItem from="1741463864161" duration="5613000" />
+      <workItem from="1741591765590" duration="8623000" />
+      <workItem from="1741775047358" duration="4045000" />
+      <workItem from="1741849128027" duration="14970000" />
+      <workItem from="1742224982575" duration="2084000" />
+      <workItem from="1742376227432" duration="17329000" />
+      <workItem from="1742979252547" duration="71000" />
+      <workItem from="1743070110115" duration="1798000" />
+      <workItem from="1743520549175" duration="2062000" />
+      <workItem from="1743529628616" duration="1257000" />
+      <workItem from="1744003794542" duration="1549000" />
+      <workItem from="1744128419876" duration="12007000" />
+      <workItem from="1744472493367" duration="3946000" />
+      <workItem from="1744556503941" duration="3415000" />
+      <workItem from="1744615667164" duration="11691000" />
+      <workItem from="1744705494165" duration="8768000" />
+      <workItem from="1744789278571" duration="9145000" />
+      <workItem from="1744875413146" duration="2073000" />
+      <workItem from="1745056512182" duration="5099000" />
+      <workItem from="1745126361727" duration="219000" />
+      <workItem from="1745126719999" duration="19379000" />
+      <workItem from="1745223136065" duration="11853000" />
+      <workItem from="1745305113793" duration="4858000" />
+      <workItem from="1745741441528" duration="19216000" />
+      <workItem from="1746026164106" duration="2576000" />
+      <workItem from="1746084940002" duration="10703000" />
+      <workItem from="1746438475770" duration="2754000" />
+      <workItem from="1746445550071" duration="831000" />
+      <workItem from="1746474480613" duration="823000" />
+      <workItem from="1746601927738" duration="3748000" />
+      <workItem from="1746860947591" duration="24186000" />
+      <workItem from="1746977018315" duration="374000" />
+      <workItem from="1746977682505" duration="14727000" />
+      <workItem from="1747029918566" duration="8693000" />
+      <workItem from="1747043300474" duration="7572000" />
+      <workItem from="1747114428738" duration="23495000" />
+      <workItem from="1747303852246" duration="370000" />
+      <workItem from="1747305744663" duration="611000" />
+      <workItem from="1747307818060" duration="927000" />
+      <workItem from="1747322744360" duration="3744000" />
+      <workItem from="1747476296345" duration="2592000" />
+      <workItem from="1747497522779" duration="1365000" />
+      <workItem from="1747499026469" duration="2522000" />
+      <workItem from="1747551671831" duration="18531000" />
+      <workItem from="1747573084103" duration="220000" />
+      <workItem from="1747573324274" duration="2574000" />
+      <workItem from="1747581580525" duration="397000" />
+      <workItem from="1747640342756" duration="12527000" />
+      <workItem from="1748076836330" duration="892000" />
+      <workItem from="1748163087844" duration="10006000" />
+      <workItem from="1748330503781" duration="3725000" />
+      <workItem from="1748418312084" duration="15608000" />
+      <workItem from="1748508324619" duration="3168000" />
+      <workItem from="1748535951602" duration="4060000" />
+      <workItem from="1748850056995" duration="24063000" />
+      <workItem from="1748938078983" duration="4898000" />
+      <workItem from="1748955059128" duration="1272000" />
+      <workItem from="1749291250354" duration="4604000" />
+      <workItem from="1749390504116" duration="26758000" />
+      <workItem from="1749560097640" duration="4450000" />
+      <workItem from="1749580189987" duration="4305000" />
+      <workItem from="1749631711802" duration="6118000" />
+      <workItem from="1749719038622" duration="1880000" />
+      <workItem from="1749722571389" duration="914000" />
+      <workItem from="1749723848014" duration="11371000" />
+      <workItem from="1749980614555" duration="3020000" />
+      <workItem from="1751354417706" duration="9727000" />
+      <workItem from="1751527165922" duration="12649000" />
+      <workItem from="1751706849360" duration="9933000" />
+      <workItem from="1751878262898" duration="18709000" />
+      <workItem from="1751960624550" duration="9099000" />
+      <workItem from="1752255011096" duration="33000" />
+      <workItem from="1752304363909" duration="4663000" />
+      <workItem from="1752424580039" duration="3034000" />
+      <workItem from="1752480705836" duration="5246000" />
+      <workItem from="1752669130934" duration="4153000" />
+      <workItem from="1752768389357" duration="1528000" />
+      <workItem from="1753002309223" duration="5027000" />
+      <workItem from="1753179219163" duration="26693000" />
+      <workItem from="1753258002760" duration="3281000" />
+      <workItem from="1753283469399" duration="8183000" />
+    </task>
+    <task id="LOCAL-00001" summary="login, register and verify models and views and templates">
+      <option name="closed" value="true" />
+      <created>1749473299458</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1749473299458</updated>
+    </task>
+    <task id="LOCAL-00002" summary="login, register and verify models and views and templates.">
+      <option name="closed" value="true" />
+      <created>1749473645551</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1749473645551</updated>
+    </task>
+    <task id="LOCAL-00003" summary="improvment coding.">
+      <option name="closed" value="true" />
+      <created>1749723603513</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1749723603513</updated>
+    </task>
+    <task id="LOCAL-00004" summary="cheque-lists.html added">
+      <option name="closed" value="true" />
+      <created>1751978208195</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1751978208195</updated>
+    </task>
+    <task id="LOCAL-00005" summary="requirements.txt added to django">
+      <option name="closed" value="true" />
+      <created>1752312102427</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1752312102427</updated>
+    </task>
+    <task id="LOCAL-00006" summary="comment locale.setlocale(locale.LC_ALL, &quot;fa_IR.UTF-8&quot;) line in settings.py">
+      <option name="closed" value="true" />
+      <created>1752322081571</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1752322081571</updated>
+    </task>
+    <task id="LOCAL-00007" summary="fixed the sidebar menue">
+      <option name="closed" value="true" />
+      <created>1752426379495</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1752426379495</updated>
+    </task>
+    <task id="LOCAL-00008" summary="edit and delete in modal feature">
+      <option name="closed" value="true" />
+      <created>1753224185522</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1753224185522</updated>
+    </task>
+    <task id="LOCAL-00009" summary="removed swift alerts">
+      <option name="closed" value="true" />
+      <created>1753225337987</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1753225337987</updated>
+    </task>
+    <task id="LOCAL-00010" summary="added swift alerts">
+      <option name="closed" value="true" />
+      <created>1753225452490</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1753225452490</updated>
+    </task>
+    <task id="LOCAL-00011" summary="bug temperory fixed in accounts.html">
+      <option name="closed" value="true" />
+      <created>1753225596334</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1753225596334</updated>
+    </task>
+    <task id="LOCAL-00012" summary="bug temperory fixed in accounts.html v1">
+      <option name="closed" value="true" />
+      <created>1753225744305</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1753225744305</updated>
+    </task>
+    <task id="LOCAL-00013" summary="button temperory fixed in accounts.html">
+      <option name="closed" value="true" />
+      <created>1753225866500</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1753225866500</updated>
+    </task>
+    <task id="LOCAL-00014" summary="created balance-list page">
+      <option name="closed" value="true" />
+      <created>1753287816780</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1753287816780</updated>
+    </task>
+    <task id="LOCAL-00015" summary="bug fixed">
+      <option name="closed" value="true" />
+      <created>1753288164845</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1753288164845</updated>
+    </task>
+    <task id="LOCAL-00016" summary="improve ui">
+      <option name="closed" value="true" />
+      <created>1753306758596</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1753306758596</updated>
+    </task>
+    <task id="LOCAL-00017" summary="improve ui create-document.html">
+      <option name="closed" value="true" />
+      <created>1753306782702</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1753306782703</updated>
+    </task>
+    <task id="LOCAL-00018" summary="improve ui create-document.html">
+      <option name="closed" value="true" />
+      <created>1753306969361</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1753306969361</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="login, register and verify models and views and templates" />
+    <MESSAGE value="login, register and verify models and views and templates." />
+    <MESSAGE value="improvment coding." />
+    <MESSAGE value="cheque-lists.html added" />
+    <MESSAGE value="requirements.txt added to django" />
+    <MESSAGE value="comment locale.setlocale(locale.LC_ALL, &quot;fa_IR.UTF-8&quot;) line in settings.py" />
+    <MESSAGE value="fixed the sidebar menue" />
+    <MESSAGE value="edit and delete in modal feature" />
+    <MESSAGE value="removed swift alerts" />
+    <MESSAGE value="added swift alerts" />
+    <MESSAGE value="bug temperory fixed in accounts.html" />
+    <MESSAGE value="bug temperory fixed in accounts.html v1" />
+    <MESSAGE value="button temperory fixed in accounts.html" />
+    <MESSAGE value="created balance-list page" />
+    <MESSAGE value="bug fixed" />
+    <MESSAGE value="improve ui" />
+    <MESSAGE value="improve ui create-document.html" />
+    <option name="LAST_COMMIT_MESSAGE" value="improve ui create-document.html" />
+  </component>
+</project>
