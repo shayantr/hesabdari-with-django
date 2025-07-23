@@ -33,10 +33,10 @@ class Document(models.Model):
 
 
 class BalanceSheet(models.Model):
-    TRANSACTION_TYPE_CHOICES = [
+    TRANSACTION_TYPE_CHOICES = (
         ('debt', 'بدهی'),
         ('credit', 'بستانکاری'),
-    ]
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='balancesheet')
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='items', blank=True, null=True)
     date_created = jmodels.jDateField(auto_now_add=True, editable=True)
@@ -50,15 +50,19 @@ class BalanceSheet(models.Model):
 
 
 class CashierCheque(models.Model):
-    class ChequeType(models.Choices):
-        current = 'جاری'
-        collection = 'وصولی'
-        bounced = 'برگشتنی'
-        return_ch = 'عودتی'
-        Escrow = 'امانی'
+    class ChequeType(models.TextChoices):
+        CURRENT = 'جاری', 'Current'
+        COLLECTION = 'وصولی', 'Collection'
+        BOUNCED = 'برگشتنی', 'Bounced'
+        RETURN_CH = 'عودتی', 'Return Ch'
+        ESCROW = 'امانی', 'Escrow'
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cashiercheque', blank=True, null=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     Cheque_numbder = models.IntegerField(null=True, blank=True)
     created_at = jmodels.jDateField(auto_now_add=True, editable=True)
     maturity_date = jmodels.jDateField(verbose_name='زمان سررسید', null=True, blank=True)
-    cheque_status = models.CharField(choices=ChequeType.choices, max_length=255, default=ChequeType.current)
+    cheque_status = models.CharField(
+        max_length=255,
+        choices=ChequeType.choices,
+        default=ChequeType.CURRENT,
+    )
