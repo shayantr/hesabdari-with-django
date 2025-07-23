@@ -34,17 +34,13 @@
                                 <input type="text" name="description" placeholder="جستجو در توضیحات" class="form-control mb-2">
                             </div>
                             <div class="col-md-3 mb-2">
-                            <input type="text" name="amount" placeholder="مبلغ" class="form-control mb-2">
+                                <input type="text" name="amount" placeholder="مبلغ" class="form-control mb-2">
                             </div>
                             <div class="col-md-3 mb-2">
-                            <select class="form-select" id="inputGroupSelect04" aria-label="Example select with button addon" name="cheque_status">
-                                <option value="">همه وضعیت‌ها</option>
-                                <option value="جاری">جاری</option>
-                                <option value="عودتی">عودتی</option>
-                                <option value="وصولی">وصولی</option>
-                                <option value="برگشتنی">برگشتنی</option>
-                                <option value="امانی">امانی</option>
-                            </select>
+                                <input type="text" name="balance_id" placeholder="شماره سند" class="form-control mb-2">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <input type="text" name="document_id" placeholder="شماره روکش" class="form-control mb-2">
                             </div>
                 </div>
                                         <!-- بخش اول: تاریخ ثبت -->
@@ -57,21 +53,11 @@
                         <input type="text" class="form-control" name="created_at_to" data-jdp placeholder="تاریخ ثبت تا">
                     </div>
                 </div>
-                                    <!-- بخش دوم: تاریخ سررسید -->
-                <div class="row mb-3 p-3 rounded" style="background-color: #fef7e0;">
-                    <label class="mb-2 fw-bold">تاریخ سررسید:</label>
-                    <div class="col-md-6 mb-2">
-                        <input type="text" class="form-control" name="due_date_from" data-jdp placeholder="تاریخ سررسید از">
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <input type="text" class="form-control" name="due_date_to" data-jdp placeholder="تاریخ سررسید تا">
-                    </div>
-                </div>
 
             </form>
             
-        <div id="debit-cheques-list">
-                        {% include "partials/debit_cheques.html" %}
+        <div id="debit-balance-list">
+                        {% include "partials/debit_balance.html" %}
 
                         
         </div>
@@ -80,23 +66,19 @@
             <form id="credit-filter-form">
                 <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;"> 
                     <div class="col-md-3 mb-2">
-                        <input type="text" name="cheque_name" placeholder="جستجو نام چک" class="form-control mb-2">
+                        <input type="text" name="account_name" placeholder="جستجو نام چک" class="form-control mb-2">
                     </div>
                     <div class="col-md-3 mb-2">
                         <input type="text" name="description" placeholder="جستجو در توضیحات" class="form-control mb-2">
                     </div>
                     <div class="col-md-3 mb-2">
-                        <input type="text" name="amount" placeholder="مبلغ سررسید" class="form-control mb-2">
+                        <input type="text" name="amount" placeholder="مبلغ" class="form-control mb-2">
                     </div>
                     <div class="col-md-3 mb-2">
-                        <select class="form-select" id="inputGroupSelect04" aria-label="Example select with button addon" name="cheque_status">
-                            <option value="">همه وضعیت‌ها</option>
-                            <option value="جاری">جاری</option>
-                            <option value="عودتی">عودتی</option>
-                            <option value="وصولی">وصولی</option>
-                            <option value="برگشتنی">برگشتنی</option>
-                            <option value="امانی">امانی</option>
-                        </select>
+                        <input type="text" name="balance_id" placeholder="شماره سند" class="form-control mb-2">
+                    </div>
+                   <div class="col-md-3 mb-2">
+                        <input type="text" name="document_id" placeholder="شماره روکش" class="form-control mb-2">
                     </div>
                 </div>
                                         <!-- بخش اول: تاریخ ثبت -->
@@ -109,21 +91,10 @@
                         <input type="text" class="form-control" name="created_at_to" data-jdp placeholder="تاریخ ثبت تا">
                     </div>
                 </div>
-                                    <!-- بخش دوم: تاریخ سررسید -->
-                <div class="row mb-3 p-3 rounded" style="background-color: #fef7e0;">
-                    <label class="mb-2 fw-bold">تاریخ سررسید:</label>
-                    <div class="col-md-6 mb-2">
-                        <input type="text" class="form-control" name="due_date_from" data-jdp placeholder="تاریخ سررسید از">
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <input type="text" class="form-control" name="due_date_to" data-jdp placeholder="تاریخ سررسید تا">
-                    </div>
-                </div>
-
             </form>
-            <div id="credit-cheques-list">
+            <div id="credit-balance-list">
 
-            {% include "partials/credit_cheques.html" %}
+            {% include "partials/credit_balance.html" %}
 
             
             </div>
@@ -138,10 +109,10 @@
     $(document).ready(function () {
         function filterDebits() {
             $.ajax({
-                url: "{% url 'filter_debit_cheques' %}",
+                url: "{% url 'filter_debit_balance' %}",
                 data: $('#debit-filter-form').serialize(),
                 success: function (data) {
-                    $('#debit-cheques-list').html(data.html);
+                    $('#debit-balance-list').html(data.html);
                 }
             });
         }
@@ -151,10 +122,10 @@
         });
         function filtercredits() {
             $.ajax({
-                url: "{% url 'filter_credit_cheques' %}",
+                url: "{% url 'filter_credit_balance' %}",
                 data: $('#credit-filter-form').serialize(),
                 success: function (data) {
-                    $('#credit-cheques-list').html(data.html);
+                    $('#credit-balance-list').html(data.html);
                 }
             });
         }

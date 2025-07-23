@@ -408,3 +408,90 @@ def delete_account(request, pk):
             return JsonResponse({'success': False, 'error': 'حساب پیدا نشد'})
     else:
         raise Http404()
+
+class BalanceListView(LoginRequiredMixin, generic.View):
+    def get(self, request):
+        qs = BalanceSheet.objects.filter(user=request.user.id)
+        debits = qs.filter(transaction_type='debt')
+        credits = qs.filter(transaction_type='credit')
+
+        context = {
+            'debits': debits,
+            'credits': credits,
+        }
+        return render(request, 'account_base/balance_list.html', context)
+
+def filter_credit_balance(request):
+    credits = BalanceSheet.objects.filter(
+        Q(user=request.user.id),
+        Q(transaction_type='credit'),
+    )
+
+    account_name = request.GET.get('account_name')
+    amount = request.GET.get('amount')
+    balance_id = request.GET.get('balance_id')
+    document_id = request.GET.get('document_id')
+    created_at_from = request.GET.get('created_at_from')
+    created_at_to = request.GET.get('created_at_to')
+    description = request.GET.get('description')
+
+    if balance_id:
+        credits = credits.filter(id = int(balance_id))
+    if document_id:
+        credits = credits.filter(document_id = document_id)
+    if created_at_from:
+        credits = credits.filter(date_created__gte=created_at_from)
+    if created_at_to:
+        credits = credits.filter(date_created__lte=created_at_to)
+    if amount:
+        credits = credits.filter(amount=amount)
+    if description:
+        credits = credits.filter(description__contains=description)
+    if account_name:
+        credits = credits.filter(account__name__contains=account_name)
+    print(credits)
+
+    html = render_to_string('partials/credit_balance.html', {'credits': credits})
+    return JsonResponse({'html': html})
+
+
+def filter_debit_balance(request):
+    debits = BalanceSheet.objects.filter(
+        Q(user=request.user.id),
+        Q(transaction_type='debt'),
+    )
+    print(debits)
+
+
+    account_name = request.GET.get('account_name')
+    amount = request.GET.get('amount')
+    balance_id = request.GET.get('balance_id')
+    document_id = request.GET.get('document_id')
+    created_at_from = request.GET.get('created_at_from')
+    created_at_to = request.GET.get('created_at_to')
+    description = request.GET.get('description')
+
+    if balance_id:
+        debits = debits.filter(id = int(balance_id))
+    if document_id:
+        debits = debits.filter(document_id = document_id)
+    if created_at_from:
+        if created_at_from == created_at_to:
+            debits = debits.filter(date_created__exact=created_at_from)
+        else:
+            debits = debits.filter(date_created__gte=created_at_from)
+    if created_at_to:
+        if created_at_from == created_at_to:
+            debits = debits.filter(date_created__exact=created_at_to)
+        else:
+            debits = debits.filter(date_created__lte=created_at_to)
+    if amount:
+        debits = debits.filter(mount=amount)
+    if description:
+        debits = debits.filter(description__contains=description)
+    if account_name:
+        debits = debits.filter(account__name__contains=account_name)
+    print(debits)
+
+    html = render_to_string('partials/debit_balance.html', {'debits': debits})
+    return JsonResponse({'html': html})

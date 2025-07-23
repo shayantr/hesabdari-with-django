@@ -1,0 +1,44 @@
+{% load jinja_filters %}
+{% for credit in credits %}
+
+            <div class="card">
+    
+              <div class="card-header">
+              <div class="flex-shrink-0">
+                  <a href="{% url 'UpdateBalanceView' credit.document.id %}"><button class="btn btn-primary btn-sm">ویرایش</button></a>
+                  </div>
+              </div>
+                <div class="d-flex flex-wrap gap-2">
+                  <div class="flex-grow">
+                      {% if credit.image %}
+                          <div class="grid row g-3">
+                              <div class="col-xl-3 col-md-4 col-sm-6">
+                                <a class="card-gallery" data-fslightbox="gallery" href="{{ credit.image.url }}">
+                                  <img class="img-fluid" src="{{ credit.image.url }}" alt="Card image" width="50%">
+                                  
+                                </a>
+                              </div>
+                          </div>
+                      {% endif %}
+                    <h6 class="mb-3"><span class="alert alert-{% if credit.cheque.cheque_status == "جاری"%}primary
+                                                                {% elif credit.cheque.cheque_status == 'عودتی' %}dark
+                                                                {% elif credit.cheque.cheque_status == 'وصولی' %}success
+                                                                {% elif credit.cheque.cheque_status == 'برگشتنی' %}danger
+                                                                {% elif credit.cheque.cheque_status == 'امانی' %}warning
+                                                                {% endif %}" 
+                                           role="alert">{{ credit.cheque.cheque_status }}</span></h6>
+                  </div>
+                </div>
+              <div class="card-body">
+                <p><i class="fas fa-user-circle"> نام حساب: </i><b>{{ credit.account }}</b></p>
+                <h6 class="mb1"><i class="fas fa-money-check-alt"> مبلغ سند: </i>{{ credit.amount|toman }}</h6>
+                <h6 class="mb1"><i class="fas fa-calendar-day"> تاریخ ایجاد سند: </i>{{ credit.date_created }}</h6>
+                <h6 class="mb1"><i class="ti ti-list-numbers"> شماره روکش سند: </i>{{ credit.document.id }}</h6>
+                <h5 class="mb1"><i class="fas fa-calendar-plus"> شماره سند: </i>{{ credit.id }}</h5>
+                <h5 class="mb1"><i class="fas fa-money-check"> وضعیت چک:</i>{% if credit.cheque %}دارد{% else %}ندارد{% endif %}</h5>
+
+
+                <p>توضیحات: {{ credit.description }}</p>
+              </div>
+            </div>
+{% endfor %}
