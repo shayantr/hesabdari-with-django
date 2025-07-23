@@ -41,7 +41,6 @@
     <div class="remove-form" style="color:red; cursor:pointer;">حذف</div>
     <div class="border rounded p-3">
         {{ i.form_balance.user }}
-        <label class="form-label">{{ i.form_balance.account.label }}</label>
         {{ i.form_balance.account }}
         <h5 id="{{ i.uniqueid }}-accounts-list"></h5>
         <input type="hidden" id="{{ i.uniqueid }}-accounts-list">
@@ -73,14 +72,12 @@
     </div>
     {{ i.form_balance.transaction_type }}
     <div class="cashonly input-group mb-3">
-        <label for="form-label">{{ i.form_balance.amount.label }}</label>
         <div class="input-group mb-3">
             {{ i.form_balance.amount }}
             <span class="input-group-text">تومان</span>  
         </div>
     </div>
     <div class="mb-0">
-        <label class="form-label">{{ i.form_balance.description.label }}</label>
         <div class="form-control">{{ i.form_balance.description }}</div>
     </div>
     <div class="mb-3">
@@ -174,14 +171,12 @@
     </div>
     {{ i.form_balance.transaction_type }}
     <div class="cashonly input-group mb-3">
-        <label for="form-label">{{ i.form_balance.amount.label }}</label>
         <div class="input-group mb-3">
             {{ i.form_balance.amount }}
             <span class="input-group-text">تومان</span>  
         </div>
     </div>
     <div class="mb-0">
-        <label class="form-label">{{ i.form_balance.description.label }}</label>
         <div class="form-control">{{ i.form_balance.description }}</div>
     </div>
     <div class="mb-3">

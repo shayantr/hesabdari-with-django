@@ -2,10 +2,17 @@
 {% load static %}
 <div class="form-wrapper" id="{{ uniqueid }}">
     <div class="remove-form" style="color:red; cursor:pointer;">حذف</div>
-    <div class="border rounded p-3">
+    <div class="col-sm-6 col-xl-3">
         {{ form_balance.user }}
-        <label class="form-label">{{ form_balance.account.label }}</label>
+        <div class="mb-0">
         {{ form_balance.account }}
+        <button type="button"
+            class="btn btn-sm btn-light-secondary" data-bs-toggle="modal" 
+            data-bs-target="#{{ uniqueid }}-accounts-lists"
+            id="{{ uniqueid }}-accounts-list">
+            <i class="ph-duotone ph-pencil-simple-line"></i> تغییر
+        </button>
+            </div>
         <h5 id="{{ uniqueid }}-accounts-list"></h5>
         <input type="hidden" id="{{ uniqueid }}-accounts-list">
         <div class="modal fade" id="{{ uniqueid }}-accounts-lists" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
@@ -27,27 +34,19 @@
                 </div>
             </div>
         </div>
-        <button type="button"
-            class="btn btn-sm btn-light-secondary" data-bs-toggle="modal" 
-            data-bs-target="#{{ uniqueid }}-accounts-lists"
-            id="{{ uniqueid }}-accounts-list">
-            <i class="ph-duotone ph-pencil-simple-line"></i> تغییر
-        </button>
+        
     </div>
     {{ form_balance.transaction_type }}
     <div class="cashonly input-group mb-3">
-        <label for="form-label">{{ form_balance.amount.label }}</label>
         <div class="input-group mb-3">
+            <span class="input-group-text">{{ form_balance.amount.label }}</span>
             {{ form_balance.amount }}
-            <span class="input-group-text">تومان</span>  
         </div>
     </div>
     <div class="mb-0">
-        <label class="form-label">{{ form_balance.description.label }}</label>
         <div class="form-control">{{ form_balance.description }}</div>
     </div>
     <div class="mb-3">
-        <label class="form-label">{{ form_balance.image.label }}</label>
         {{ form_balance.image }}
     </div>
     <label>

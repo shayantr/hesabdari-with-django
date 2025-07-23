@@ -29,7 +29,7 @@ class AccountsClass(MP_Node):
 
 class Document(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents')
-    date_created = models.DateTimeField(auto_now_add=True, editable=True)
+    date_created = jmodels.jDateField(auto_now_add=True, editable=True)
 
 
 class BalanceSheet(models.Model):

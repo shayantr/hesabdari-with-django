@@ -21,10 +21,10 @@ class BalanceSheetForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'user': forms.HiddenInput(),
-            'maturityـamount': forms.TextInput(attrs={'class': 'form-control', 'placeholder':'مبلغ نقدی', 'id': "floatingInput"}),
+            'maturityـamount': forms.TextInput(attrs={'class': 'form-control', 'placeholder':'مبلغ', 'id': "floatingInput"}),
             'account': forms.Select(attrs={'class': 'dropdown form-select form-select-lg' }),
-            'description': forms.Textarea(attrs={'class': 'form-control'}),
-            'image': forms.FileInput(attrs={'class': 'form-control','accept': 'image/jpeg,application/pdf'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'توضیحات', "cols":20, "rows":1}),
+            'image': forms.FileInput(attrs={'class': 'form-control','accept': 'image/jpeg,application/pdf', 'placeholder': 'بارگزاری عکس'}),
             'transaction_type': forms.HiddenInput(),
             'document': forms.HiddenInput(),
             'cheque': forms.HiddenInput(),
