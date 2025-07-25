@@ -88,7 +88,7 @@ def createbalancesheet(request):
                         b.cheque = c
                     b.document = document_instance
                     b.save()
-                return JsonResponse({'success': True, "redirect_url": reverse("create-document")},)
+                return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")},)
 
     context = {
         'all_balanceforms': all_balanceforms,
@@ -119,6 +119,27 @@ class GetFormFragmentView(generic.View):
                                           'transaction_type': transaction_type, 'uniqueid':uniqueid})
         return JsonResponse({'form_html': form_html, 'datease':datease })
 
+
+
+# class AccountsView(generic.View):
+#     def get(self, request):
+#         list_accounts = AccountsClass.objects.all().order_by('tree_id', 'lft')
+#         accountform = AccountsForm()
+#         tree_data = [build_tree(root) for root in AccountsClass.get_root_nodes()]
+#
+#
+#         form_html = render_to_string('account_base/accounts.html',
+#                                      {'list_accounts': list_accounts, "accountform":accountform})
+#         return JsonResponse({'form_html': form_html, 'tree_data':tree_data})
+#
+#     def post(self, request):
+#         list_accounts = AccountsClass.objects.all()
+#         print(list_accounts)
+#         context = {
+#             'list_accounts': list_accounts
+#         }
+#         return JsonResponse({'list_accounts': list_accounts })
+
 def build_tree(node):
     return {
         'id': node.id,
@@ -128,35 +149,56 @@ def build_tree(node):
 
 class AccountsView(generic.View):
     def get(self, request):
-        list_accounts = AccountsClass.get_tree()
+        # ترتیب نمایش درخت با استفاده از lft (برای MPTT)
+        list_accounts = AccountsClass.objects.all().order_by('tree_id', 'lft')
+
+        # فرم جدید
         accountform = AccountsForm()
-        tree_data = [build_tree(root) for root in AccountsClass.get_root_nodes()]
 
+        # ساختار درختی برای ارسال به JS یا نمایش پویا
+        tree_data = [build_tree(root) for root in AccountsClass.objects.root_nodes()]
 
-        form_html = render_to_string('account_base/accounts.html',
-                                     {'list_accounts': list_accounts, "accountform":accountform})
-        return JsonResponse({'form_html': form_html, 'tree_data':tree_data})
+        # رندر HTML فرم و لیست درخت
+        form_html = render_to_string(
+            'account_base/accounts.html',
+            {
+                'list_accounts': list_accounts,
+                'accountform': accountform
+            },
+            request=request
+        )
 
-    def post(self, request):
-        list_accounts = AccountsClass.objects.all()
-        print(list_accounts)
-        context = {
-            'list_accounts': list_accounts
-        }
-        return JsonResponse({'list_accounts': list_accounts })
+        return JsonResponse({
+            'form_html': form_html,
+            'tree_data': tree_data
+        })
 
-class CreateAccounts(generic.View):
-    def post(self, request):
-        accountform = AccountsForm(request.POST or None)
-        if accountform.is_valid():
-            account = accountform.save()
-            parent = AccountsClass.get_parent(account) or None
-            return JsonResponse({
-                'success': True,
-                'id': account.id,
-                'name': account.name,
-                'parent_id': parent.id if parent else None
-            })
+# class CreateAccounts(generic.View):
+#     def post(self, request):
+#         accountform = AccountsForm(request.POST or None)
+#         if accountform.is_valid():
+#             account = accountform.save()
+#             parent = AccountsClass.get_parent(account) or None
+#             return JsonResponse({
+#                 'success': True,
+#                 'id': account.id,
+#                 'name': account.name,
+#                 'parent_id': parent.id if parent else None,
+#
+#             })
+
+def create_accounts(request):
+    form = AccountsForm(request.POST)
+    if form.is_valid():
+        new_account = form.save()
+        return JsonResponse({
+            'success': True,
+            'id': new_account.id,
+            'name': new_account.name,
+            'parent_id': new_account.parent.id if new_account.parent else None
+        })
+    else:
+        return JsonResponse({'success': False, 'errors': form.errors})
 
         return JsonResponse({'success': False, 'errors': accountform.errors})
 def extract_all_update_prefixes(post_data, file_data):
@@ -251,7 +293,7 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
                         b.cheque = c
                     b.document = document
                     b.save()
-                return JsonResponse({'success': True, "redirect_url": reverse("home")}, )
+                return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")}, )
 
         context = {
             'documentform': document,
@@ -313,19 +355,19 @@ def filter_debit_cheques(request):
     description = request.GET.get('description')
 
     if due_date_from:
-        debits = debits.filter(user=request.user.id, cheque__maturity_date__gte=due_date_from)
+        debits = debits.filter(cheque__user_id=request.user.id, cheque__maturity_date__gte=due_date_from)
     if due_date_to:
-        debits = debits.filter(user=request.user.id, cheque__maturity_date__lte=due_date_to)
+        debits = debits.filter(cheque__user_id=request.user.id, cheque__maturity_date__lte=due_date_to)
     if created_at_from:
-        debits = debits.filter(user=request.user.id, cheque__created_at__gte=created_at_from)
+        debits = debits.filter(cheque__user_id=request.user.id, cheque__created_at__gte=created_at_from)
     if created_at_to:
-        debits = debits.filter(user=request.user.id, cheque__created_at__lte=created_at_to)
+        debits = debits.filter(cheque__user_id=request.user.id, cheque__created_at__lte=created_at_to)
     if amount:
-        debits = debits.filter(user=request.user.id, amount=amount)
+        debits = debits.filter(amount=amount)
     if status:
-        debits = debits.filter(user=request.user.id, cheque__cheque_status=status)
+        debits = debits.filter(cheque__user_id=request.user.id, cheque__cheque_status=status)
     if name:
-        debits = debits.filter(cheque__name__icontains=name)
+        debits = debits.filter(cheque__user_id=request.user.id, cheque__name__icontains=name)
     if description:
         debits = debits.filter(description__contains=description)
     html = render_to_string('partials/debit_cheques.html', {'debits': debits})
@@ -351,21 +393,21 @@ def filter_credit_cheques(request):
     description = request.GET.get('description')
 
     if due_date_from:
-        credits = credits.filter(user=request.user.id, cheque__maturity_date__gte=due_date_from)
+        credits = credits.filter(cheque__user_id=request.user.id, cheque__maturity_date__gte=due_date_from)
     if due_date_to:
-        credits = credits.filter(user=request.user.id, cheque__maturity_date__lte=due_date_to)
+        credits = credits.filter(cheque__user_id=request.user.id, cheque__maturity_date__lte=due_date_to)
     if created_at_from:
-        credits = credits.filter(user=request.user.id, cheque__created_at__gte=created_at_from)
+        credits = credits.filter(cheque__user_id=request.user.id, cheque__created_at__gte=created_at_from)
     if created_at_to:
-        credits = credits.filter(user=request.user.id, cheque__created_at__lte=created_at_to)
+        credits = credits.filter(cheque__user_id=request.user.id, cheque__created_at__lte=created_at_to)
     if amount:
-        credits = credits.filter(user=request.user.id, amount=amount)
+        credits = credits.filter(amount=amount)
     if status:
-        credits = credits.filter(user=request.user.id, cheque__cheque_status=status)
+        credits = credits.filter(cheque__user_id=request.user.id, cheque__cheque_status=status)
     if description:
-        credits = credits.filter(user=request.user.id, description__contains=description)
+        credits = credits.filter(cheque__user_id=request.user.id, description__contains=description)
     if name:
-        credits = credits.filter(user=request.user.id, cheque__name__icontains=name)
+        credits = credits.filter(cheque__user_id=request.user.id, cheque__name__icontains=name)
     print(credits)
 
     html = render_to_string('partials/credit_cheques.html', {'credits': credits})
@@ -383,21 +425,30 @@ class BalanceListView(LoginRequiredMixin, generic.View):
         }
         return render(request, 'account_base/balance_list.html', context)
 
+# def edit_account(request, pk):
+#     if request.method == 'POST':
+#         try:
+#             account = AccountsClass.objects.get(pk=pk)
+#             account.name = request.POST.get('name')
+#             account.save()
+#             return JsonResponse({'success': True})
+#         except AccountsClass.DoesNotExist:
+#             return JsonResponse({'success': False, 'error': 'حساب یافت نشد'})
+
 def edit_account(request, pk):
-    if request.method == 'POST':
-        try:
-            account = AccountsClass.objects.get(pk=pk)
-            account.name = request.POST.get('name')
-            account.save()
-            return JsonResponse({'success': True})
-        except AccountsClass.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'حساب یافت نشد'})
+    account = get_object_or_404(AccountsClass, pk=pk)
+    name = request.POST.get('name')
+    if name:
+        account.name = name
+        account.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'نام خالی است'})
 
 def delete_account(request, pk):
     if request.method == 'POST':
         try:
             account = AccountsClass.objects.get(pk=pk)
-            if account.get_children_count() > 0:
+            if account.get_children():
                 return JsonResponse({'success': False, 'error': 'این حساب زیرمجموعه دارد'})
             if BalanceSheet.objects.filter(user=request.user.id).filter(account=account).exists():
                 return JsonResponse({'success': False, 'error': 'این حساب در سندی در حال استفاده است.'})

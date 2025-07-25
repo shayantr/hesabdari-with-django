@@ -4,10 +4,10 @@ from treebeard.forms import MoveNodeForm
 from hesabdari.apps.account_base.models import AccountsClass, BalanceSheet, CashierCheque, Document
 
 
-class AccountsForm(MoveNodeForm):
+class AccountsForm(forms.ModelForm):
     class Meta:
         model = AccountsClass
-        fields = ['name']
+        fields = '__all__'
 
 
 class DocumentForm(forms.ModelForm):

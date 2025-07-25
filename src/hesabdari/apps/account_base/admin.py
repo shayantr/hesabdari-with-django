@@ -16,7 +16,8 @@ class AccountsAdmin(DraggableMPTTAdmin):
 class AccountsClassAdmin(TreeAdmin):
     form = movenodeform_factory(AccountsClass)  # امکان جابجایی درختی
 
-admin.site.register(AccountsClass, AccountsClassAdmin)
+# admin.site.register(AccountsClass, AccountsClassAdmin)
+admin.site.register(AccountsClass)
 
 admin.site.register(CashierCheque)
 admin.site.register(BalanceSheet)

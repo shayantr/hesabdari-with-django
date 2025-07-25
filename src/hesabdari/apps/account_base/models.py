@@ -8,21 +8,32 @@ from hesabdari.apps.accounts.models import User
 
 # Create your models here.
 
-class AccountsClass(MP_Node):
+# class AccountsClass(MP_Node):
+#     name = models.CharField(max_length=255)
+#     node_order_by = ['name']
+#     def __str__(self):
+#         # Get all ancestors (excluding self) in order from root to parent
+#         ancestors = self.get_ancestors()
+#
+#         # Collect ucode values from ancestors and self
+#         name_list = [ancestor.name for ancestor in ancestors if ancestor.name]  # Filter out None values
+#         if self.name:
+#             name_list.append(self.name)
+#         # Join all ucodes with a separator (e.g., ' > ')
+#         name_list = " > ".join(name_list) if name_list else "خالی"
+#
+#         return f"({name_list})"
+
+
+class AccountsClass(MPTTModel):
     name = models.CharField(max_length=255)
-    node_order_by = ['name']
+    parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+
+    class MPTTMeta:
+        order_insertion_by = ['name']
+
     def __str__(self):
-        # Get all ancestors (excluding self) in order from root to parent
-        ancestors = self.get_ancestors()
-
-        # Collect ucode values from ancestors and self
-        name_list = [ancestor.name for ancestor in ancestors if ancestor.name]  # Filter out None values
-        if self.name:
-            name_list.append(self.name)
-        # Join all ucodes with a separator (e.g., ' > ')
-        name_list = " > ".join(name_list) if name_list else "خالی"
-
-        return f"({name_list})"
+        return self.name
 
 
 
@@ -51,11 +62,11 @@ class BalanceSheet(models.Model):
 
 class CashierCheque(models.Model):
     class ChequeType(models.TextChoices):
-        CURRENT = 'جاری', 'Current'
-        COLLECTION = 'وصولی', 'Collection'
-        BOUNCED = 'برگشتنی', 'Bounced'
-        RETURN_CH = 'عودتی', 'Return Ch'
-        ESCROW = 'امانی', 'Escrow'
+        CURRENT = 'جاری', 'جاری'
+        COLLECTION = 'وصولی', 'وصولی'
+        BOUNCED = 'برگشتنی', 'برگشتنی'
+        RETURN_CH = 'عودتی', 'عودتی'
+        ESCROW = 'امانی', 'امانی'
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cashiercheque', blank=True, null=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     Cheque_numbder = models.IntegerField(null=True, blank=True)

@@ -1,265 +1,231 @@
 <div class="collapse multi-collapse show">
-              <div class="address-check-block">
-              <div id="account-tree-container" class="mt-3">
-              <form class="create-account-form">
-                  {{ accountform.as_p }}
+  <div class="address-check-block">
+    <div id="create-account-form-container" class="mt-3">
+      <form class="create-account-form">
+        {% csrf_token %}
+        {{ accountform.as_p }}
+        <button type="submit" class="btn btn-primary">
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+          ذخیره و انتخاب حساب
+        </button>
+      </form>
+    </div>
 
-                  <button type="submit">ذخیره و انتخاب حساب</button>
-              </form>
-              </div>
-                <div id="account-tree-container" class="mt-3">
-                <ul>
-                    {% for node in list_accounts %}
-                        {% if node.is_root %}
-                            {% include 'account_base/accounts_node.html' with node=node %}
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-                </div>
-              </div>
-            </div>
+    <div id="account-tree-container" class="mt-3">
+      <ul>
+        {% for node in list_accounts %}
+          {% if node.is_root_node %}
+            {% include 'account_base/accounts_node.html' with node=node %}
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
             
             
                 
 <script>
-    function getCSRFToken() {
+function getCSRFToken() {
     return document.querySelector('[name=csrfmiddlewaretoken]').value;
-
 }
 
-document.querySelectorAll('.toggle').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const parent = btn.closest('li');
-        const children = parent.querySelector('.children');
+// باز و بسته کردن درخت
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('toggle')) {
+        const children = e.target.closest('li').querySelector('.children');
         if (children) {
-            children.style.display = children.style.display === 'block' ? 'none' : 'block';
+            const isOpen = children.style.display === 'block';
+            children.style.display = isOpen ? 'none' : 'block';
+            e.target.textContent = isOpen ? '▶' : '▼';
         }
-    });
+    }
 });
-$(document).ready(function () {
-    let csrfToken = getCSRFToken(); // Get CSRF token
 
+$(document).ready(function () {
+    const csrfToken = getCSRFToken();
+
+    // ذخیره فرم حساب جدید
     $('.create-account-form').on('submit', function (e) {
         e.preventDefault();
         const $form = $(this);
+        const $submit = $form.find('button[type=submit]');
+        $submit.prop('disabled', true).text('در حال ذخیره...');
 
         $.ajax({
             url: "{% url 'create_accounts' %}",
             method: "POST",
-            data: $(this).serialize(),
+            data: $form.serialize(),
             headers: { "X-CSRFToken": csrfToken },
             success: function (data) {
                 if (data.success) {
+                    $form.trigger('reset');
                     addAccountToTree(data.id, data.name, data.parent_id, $form);
-                    $form.closest('.modal').modal('hide');
-
-                    const $wrapper   = $form.closest('.form-wrapper');
-                    const $select = $wrapper.find('[id$="-balance-account"]').first();
-                    if ($select.length) {
-                        // اگه گزینه قبلاً نبود، اضافه کن
-                        if (!$select.find(`option[value="${data.id}"]`).length) {
-                            $select.append(`<option value="${data.id}" selected>${data.name}</option>`);
-                        }}
-                    
+                    const $selectParent = $form.find('select[name="parent"]');
+        if (!$selectParent.find(`option[value="${data.id}"]`).length) {
+            $selectParent.append(`<option value="${data.id}">${data.name}</option>`);
+        }
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'ثبت شد',
+                        text: 'حساب با موفقیت ثبت شد',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                 } else {
-                    alert("خطا: " + JSON.stringify(data.errors));
+                    Swal.fire('خطا', JSON.stringify(data.errors), 'error');
+                }
+            },
+            complete: function () {
+                $submit.prop('disabled', false).text('ذخیره و انتخاب حساب');
+            }
+        });
+    });
+
+    // افزودن نود جدید به درخت
+    function addAccountToTree(id, name, parentId, $formContext) {
+        const $newLi = $(`
+            <li>
+                <input class="form-check-input" type="radio" name="names" value="${id}" checked>
+                <span class="account-name" data-id="${id}">${name}</span>
+                <button type="button" class="btn-edit-account btn btn-sm btn-outline-primary" data-id="${id}">ویرایش</button>
+                <button type="button" class="btn-delete-account btn btn-sm btn-outline-danger" data-id="${id}">حذف</button>
+                <ul class="children" style="display: none;"></ul>
+            </li>
+        `);
+
+        if (parentId) {
+            const $parentRadio = $(`input[name="names"][value="${parentId}"]`);
+            const $parentLi = $parentRadio.closest('li');
+
+            let $childrenContainer = $parentLi.children('ul.children');
+            if (!$childrenContainer.length) {
+                $childrenContainer = $('<ul class="children" style="display: none;"></ul>');
+                $parentLi.append($childrenContainer);
+            }
+
+            if ($parentLi.find('> .toggle').length === 0) {
+                const $toggle = $('<span class="toggle">▶</span>');
+                $parentLi.prepend($toggle);
+            }
+
+            $childrenContainer.append($newLi).slideDown();
+        } else {
+            const $treeContainer = $formContext.closest('.collapse, .modal').find('ul').first();
+            $treeContainer.append($newLi);
+        }
+
+        $newLi.find('input[type=radio]').prop('checked', true);
+    }
+
+    // بستن حالت ویرایش
+    function closeEditMode($li, id) {
+        $li.find('.edit-account-input, .btn-save-edit, .btn-cancel-edit').remove();
+        $li.find(`.account-name[data-id="${id}"]`).show();
+        $li.find(`.btn-edit-account[data-id="${id}"], .btn-delete-account[data-id="${id}"]`).show();
+    }
+
+    // شروع ویرایش
+    $(document).on('click', '.btn-edit-account', function () {
+        const id = $(this).data('id');
+        const $li = $(this).closest('li');
+        const $span = $li.find(`.account-name[data-id="${id}"]`);
+        const name = $span.text().trim();
+
+        $('.edit-account-input').each(function () {
+            const $input = $(this);
+            const $li = $input.closest('li');
+            const id = $input.siblings('.btn-save-edit').data('id');
+            closeEditMode($li, id);
+        });
+
+        const $input = $(`<input type="text" class="edit-account-input form-control d-inline w-auto me-2" value="${name}">`);
+        const $save = $(`<button class="btn-save-edit btn btn-sm btn-success me-1" data-id="${id}">ذخیره</button>`);
+        const $cancel = $(`<button class="btn-cancel-edit btn btn-sm btn-secondary" data-id="${id}">لغو</button>`);
+
+        $span.hide().after($input).after($save).after($cancel);
+        $(this).hide();
+        $li.find(`.btn-delete-account[data-id="${id}"]`).hide();
+    });
+
+    // ذخیره ویرایش
+    $(document).on('click', '.btn-save-edit', function () {
+        const id = $(this).data('id');
+        const $li = $(this).closest('li');
+        const $input = $li.find('.edit-account-input');
+        const newName = $input.val().trim();
+        const $span = $li.find(`.account-name[data-id="${id}"]`);
+
+        if (!newName) return Swal.fire('خطا', 'نام حساب نمی‌تواند خالی باشد', 'warning');
+
+        $.ajax({
+            url: "{% url 'edit_account' 0 %}".replace('0', id),
+            method: 'POST',
+            data: { name: newName },
+            headers: { 'X-CSRFToken': getCSRFToken() },
+            success: function (data) {
+                if (data.success) {
+                    $span.text(newName);
+                    closeEditMode($li, id);
+                } else {
+                    Swal.fire('خطا', 'ویرایش ناموفق بود.', 'error');
                 }
             }
         });
     });
 
-function addAccountToTree(id, name, parentId, $formContext) {
-    const $newLi = $(`
-        <li>
-            <span class="toggle">▶</span>
-            <input class="form-check-input" type="radio" name="names" value="${id}" checked>
-            <span class="account-name" data-id="${id}">${name}</span>
-
-
-
-            <ul class="children" style="display: none;"></ul>
-        </li>
-    `);
-
-    // اضافه کردن قابلیت باز/بستن درخت به toggle
-    $newLi.find('.toggle').on('click', function () {
-        const $children = $(this).siblings('.children');
-        $children.slideToggle();
+    // لغو ویرایش
+    $(document).on('click', '.btn-cancel-edit', function () {
+        const id = $(this).data('id');
+        closeEditMode($(this).closest('li'), id);
     });
 
-    // اگر parentId وجود داشته باشه (نود فرزند باشه)
-    if (parentId) {
-        const $parentRadio = $(`input[name="names"][value="${parentId}"]`);
-        const $parentLi = $parentRadio.closest('li');
+    // حذف حساب
+    $(document).on('click', '.btn-delete-account', function () {
+        const id = $(this).data('id');
+        const $li = $(this).closest('li');
 
-        // بررسی وجود children
-        let $childrenContainer = $parentLi.children('ul.children');
-        if ($childrenContainer.length === 0) {
-            $childrenContainer = $('<ul class="children" style="display: none;"></ul>');
-            $parentLi.append($childrenContainer);
-        }
-
-        // اضافه کردن toggle اگر وجود نداشته باشه
-        if ($parentLi.find('> .toggle').length === 0) {
-            const $toggle = $('<span class="toggle">▶</span>');
-            $parentLi.prepend($toggle);
-            $toggle.on('click', function () {
-                $parentLi.children('ul.children').slideToggle();
-            });
-        }
-
-        $childrenContainer.append($newLi).slideDown();
-    }
-
-    // اگر parentId نداشته باشه (یعنی نود ریشه باشه)
-    else {
-        const $treeContainer = $formContext.closest('.modal, .collapse, .address-check-block')
-                                           .find('ul').first();
-
-        // بررسی کن که اگر toggle برای نود ریشه نیاز نیست، حذفش کن (چون فرزند نداره)
-        $newLi.find('.children').remove(); // حذف ul خالی
-        $newLi.find('.toggle').remove(); // حذف دکمه باز/بسته
-
-        $treeContainer.append($newLi);
-    }
-
-    // انتخاب خودکار نود جدید
-    $newLi.find('input[type=radio]').prop('checked', true);
-}
-
-});
-
-function closeEditMode($li, id) {
-    $li.find('.edit-account-input').remove();
-    $li.find('.btn-save-edit, .btn-cancel-edit').remove();
-    $li.find(`.account-name[data-id="${id}"]`).show();
-    $li.find(`.btn-edit-account[data-id="${id}"]`).show();
-    $li.find(`.btn-delete-account[data-id="${id}"]`).show();
-}
-
-$(document).on('click', '.btn-edit-account', function () {
-    const $btn = $(this);
-    const id = $btn.data('id');
-    const $li = $btn.closest('li');
-    const $span = $li.find(`.account-name[data-id="${id}"]`);
-    const currentName = $span.text().trim();
-    const $deleteBtn = $li.find(`.btn-delete-account[data-id="${id}"]`);
-
-    // بستن ویرایش‌های باز دیگر
-    $('.edit-account-input').each(function () {
-        const $input = $(this);
-        const $li = $input.closest('li');
-        const id = $input.siblings('.btn-save-edit').data('id');
-        closeEditMode($li, id);
-    });
-
-    // آماده‌سازی input و دکمه‌ها
-    $span.hide();
-    const $input = $(`<input type="text" class="edit-account-input form-control d-inline w-auto" value="${currentName}">`);
-    const $saveBtn = $(`<button type="button" class="btn-save-edit btn btn-sm btn-success me-1" data-id="${id}">ذخیره</button>`);
-    const $cancelBtn = $(`<button type="button" class="btn-cancel-edit btn btn-sm btn-secondary" data-id="${id}">لغو</button>`);
-
-    $input.insertAfter($span);
-    $saveBtn.insertAfter($input);
-    $cancelBtn.insertAfter($input);
-    $btn.hide();
-    $deleteBtn.hide();
-});
-
-$(document).on('click', '.btn-save-edit', function () {
-    const $btn = $(this);
-    const id = $btn.data('id');
-    const $li = $btn.closest('li');
-    const $input = $li.find('.edit-account-input');
-    const newName = $input.val().trim();
-    const $span = $li.find(`.account-name[data-id="${id}"]`);
-    const $editBtn = $li.find(`.btn-edit-account[data-id="${id}"]`);
-
-    if (!newName) {
-        alert("نام حساب نمی‌تواند خالی باشد.");
-        return;
-    }
-
-    $.ajax({
-        url: "{% url 'edit_account' 0 %}".replace("0", id),
-        method: 'POST',
-        data: { name: newName },
-        headers: { "X-CSRFToken": getCSRFToken() },
-        success: function (data) {
-            if (data.success) {
-                $span.text(newName);
-                closeEditMode($li, id);
-            } else {
-                alert("خطا در ذخیره تغییرات");
-            }
-        }
-    });
-});
-
-$(document).on('click', '.btn-cancel-edit', function () {
-    const $btn = $(this);
-    const id = $btn.data('id');
-    const $li = $btn.closest('li');
-    closeEditMode($li, id);
-});
-
-
-$(document).on('click', '.btn-delete-account', function () {
-    const $btn = $(this);
-    const id = $btn.data('id');
-    const $li = $btn.closest('li');
-
-    Swal.fire({
-        title: "آیا مطمئن هستید؟",
-        text: "این عملیات قابل بازگشت نیست!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "بله، حذف کن!",
-        cancelButtonText: "لغو"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: "{% url 'delete_account' 0 %}".replace("0", id),
-                method: "POST",
-                headers: { "X-CSRFToken": getCSRFToken() },
-                success: function (data) {
-                    if (data.success) {
-                        const $parentUl = $li.parent('ul.children');
-                        $li.remove();
-
-                        // اگه لیست فرزند خالی شد، toggle پدر رو هم حذف کن
-                        if ($parentUl && $parentUl.children('li').length === 0) {
-                            const $parentLi = $parentUl.closest('li');
-                            $parentUl.remove();
-                            $parentLi.children('.toggle').remove();
+        Swal.fire({
+            title: "حذف حساب؟",
+            text: "این عملیات قابل بازگشت نیست!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "بله، حذف کن",
+            cancelButtonText: "لغو"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{% url 'delete_account' 0 %}".replace('0', id),
+                    method: "POST",
+                    headers: { "X-CSRFToken": getCSRFToken() },
+                    success: function (data) {
+                        if (data.success) {
+                            const $parentUl = $li.parent('ul.children');
+                             const deletedId = id;
+                            $li.slideUp(300, function () {
+                                $(this).remove();
+                                if ($parentUl && !$parentUl.children().length) {
+                                    const $parentLi = $parentUl.closest('li');
+                                    $parentUl.remove();
+                                    $parentLi.children('.toggle').remove();
+                                }
+                            });
+                            $('select[name="parent"] option[value="' + deletedId + '"]').remove();
+                            Swal.fire('حذف شد', 'حساب حذف شد.', 'success');
+                        } else {
+                            Swal.fire('خطا', data.error || 'مشکلی در حذف حساب وجود دارد.', 'error');
                         }
-
-                        Swal.fire({
-                            title: "حذف شد!",
-                            text: "حساب با موفقیت حذف شد.",
-                            icon: "success"
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'خطا',
-                            text: data.error || 'مشکلی در حذف حساب وجود دارد.'
-                        });
+                    },
+                    error: function () {
+                        Swal.fire('خطا', 'ارتباط با سرور برقرار نشد.', 'error');
                     }
-                },
-                error: function () {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'خطا',
-                        text: 'ارتباط با سرور برقرار نشد.'
-                    });
-                }
-            });
-        }
+                });
+            }
+        });
     });
 });
-
+    
 </script>
-  
