@@ -466,7 +466,7 @@ document.addEventListener('click', function (e) {
         if (children) {
             const isOpen = children.style.display === 'block';
             children.style.display = isOpen ? 'none' : 'block';
-            e.target.textContent = isOpen ? '▶' : '▼';
+            e.target.textContent = isOpen ? '➕ باز کردن' : '➖ بستن';
         }
     }
 });

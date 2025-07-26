@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="account ui in document fixed">
+    <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="account ui in document fixed v2">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/accounts.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/accounts.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/accounts_node.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/accounts_node.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -236,7 +232,7 @@
       <workItem from="1753459267582" duration="3277000" />
       <workItem from="1753478382508" duration="784000" />
       <workItem from="1753519231376" duration="13931000" />
-      <workItem from="1753557221870" duration="648000" />
+      <workItem from="1753557221870" duration="3379000" />
     </task>
     <task id="LOCAL-00001" summary="login, register and verify models and views and templates">
       <option name="closed" value="true" />
@@ -406,7 +402,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753478473363</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="account ui in document fixed v2">
+      <option name="closed" value="true" />
+      <created>1753558212132</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1753558212132</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -447,6 +451,7 @@
     <MESSAGE value="improve ui" />
     <MESSAGE value="improve ui create-document.html" />
     <MESSAGE value="account ui in document fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="account ui in document fixed" />
+    <MESSAGE value="account ui in document fixed v2" />
+    <option name="LAST_COMMIT_MESSAGE" value="account ui in document fixed v2" />
   </component>
 </project>
