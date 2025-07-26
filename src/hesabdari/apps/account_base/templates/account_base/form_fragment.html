@@ -65,13 +65,9 @@ function getCSRFToken() {
 
 $(document).ready(function () {
     $('[id$="-accounts-list"]').click(function () {
-        let csrfToken = getCSRFToken(); // Get CSRF token
-
 		$.ajax({
 			url: "{% url 'get_accounts_list' %}",
 			type: "GET",
-			{#headers: { "X-CSRFToken": csrfToken }, // Send CSRF token in headers#}
-			data: {csrfmiddlewaretoken: csrfToken },
 			success: function (response) {
                 const $newForm = $(response.form_html);
                 $('.modal-body').html($newForm);
@@ -105,5 +101,7 @@ $(document).ready(function () {
         $select.val(accId).trigger('change');
     });
 });
+
+
 </script>
 <script type="text/javascript" src="{% static 'js/chrome-cancell-input.js' %}"></script>

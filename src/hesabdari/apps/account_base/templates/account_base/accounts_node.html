@@ -7,8 +7,10 @@
     {% endif %}
     <input class="form-check-input" type="radio" name="names" value="{{ node.id }}">
     <span class="account-name" data-id="{{ node.id }}">{{ node.name }}</span>
-    <button type="button" class="btn-edit-account btn btn-sm btn-outline-primary" data-id="{{ node.id }}">ویرایش</button>
-    <button type="button" class="btn-delete-account btn btn-sm btn-outline-danger" data-id="{{ node.id }}">حذف</button>
+
+    <button type="button" class="btn-edit-account btn btn-sm" data-id="{{ node.id }}">📝</button>
+    <button type="button" class="btn-delete-account btn btn-sm" data-id="{{ node.id }}">➖ </button>
+    <button type="button" class="btn-add-child btn btn-sm" data-parent-id="{{ node.id }}">➕</button>
     {% if node.get_children %}
         <ul class="children">
             {% for child in node.get_children %}

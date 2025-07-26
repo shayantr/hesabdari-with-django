@@ -459,6 +459,231 @@ $(document).ready(function() {
 });
 
 
+// باز و بسته کردن درخت
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('toggle')) {
+        const children = e.target.closest('li').querySelector('.children');
+        if (children) {
+            const isOpen = children.style.display === 'block';
+            children.style.display = isOpen ? 'none' : 'block';
+            e.target.textContent = isOpen ? '▶' : '▼';
+        }
+    }
+});
+
+$(document).ready(function () {
+    // add node to tree
+    function addAccountToTree(id, name, parentId, $formContext) {
+        const $newLi = $(`
+            <li>
+                <input class="form-check-input" type="radio" name="names" value="${id}" checked>
+                <span class="account-name" data-id="${id}">${name}</span>
+                <button type="button" class="btn-edit-account btn btn-sm" data-id="${id}">📝</button>
+                <button type="button" class="btn-delete-account btn btn-sm" data-id="${id}">➖ </button>
+                <button type="button" class="btn-add-child btn btn-sm" data-parent-id="${id}">➕</button>
+
+                <ul class="children" style="display: none;"></ul>
+            </li>
+        `);
+
+        if (parentId) {
+            const $parentRadio = $(`input[name="names"][value="${parentId}"]`);
+            const $parentLi = $parentRadio.closest('li');
+
+            let $childrenContainer = $parentLi.children('ul.children');
+            if (!$childrenContainer.length) {
+                $childrenContainer = $('<ul class="children" style="display: none;"></ul>');
+                $parentLi.append($childrenContainer);
+            }
+
+            if ($parentLi.find('> .toggle').length === 0) {
+                const $toggle = $('<span class="toggle">▶</span>');
+                $parentLi.prepend($toggle);
+            }
+
+            $childrenContainer.append($newLi).slideDown();
+        } else {
+            const $treeContainer = $formContext.closest('.collapse, .modal').find('ul').first();
+            $treeContainer.append($newLi);
+        }
+
+        $newLi.find('input[type=radio]').prop('checked', true);
+    }
+
+    // cancell edit button
+    function closeEditMode($li, id) {
+        $li.find('.edit-account-input, .btn-save-edit, .btn-cancel-edit').remove();
+        $li.find(`.account-name[data-id="${id}"]`).show();
+        $li.find(`.btn-edit-account[data-id="${id}"], .btn-delete-account[data-id="${id}"]`).show();
+    }
+
+    // edit button
+    $(document).on('click', '.btn-edit-account', function () {
+        const id = $(this).data('id');
+        const $li = $(this).closest('li');
+        const $span = $li.find(`.account-name[data-id="${id}"]`);
+        const name = $span.text().trim();
+
+        $('.edit-account-input').each(function () {
+            const $input = $(this);
+            const $li = $input.closest('li');
+            const id = $input.siblings('.btn-save-edit').data('id');
+            closeEditMode($li, id);
+        });
+
+        const $input = $(`<input type="text" class="edit-account-input form-control d-inline w-auto me-2" value="${name}">`);
+        const $save = $(`<button type="button" class="btn-save-edit btn btn-sm btn-success me-1" data-id="${id}">ذخیره</button>`);
+        const $cancel = $(`<button class="btn-cancel-edit btn btn-sm btn-secondary" data-id="${id}">لغو</button>`);
+
+        $span.hide().after($input).after($save).after($cancel);
+        $(this).hide();
+        $li.find(`.btn-delete-account[data-id="${id}"]`).hide();
+    });
+
+    // save edit button
+    $(document).on('click', '.btn-save-edit', function () {
+        const id = $(this).data('id');
+        const $li = $(this).closest('li');
+        const $input = $li.find('.edit-account-input');
+        const newName = $input.val().trim();
+        const $span = $li.find(`.account-name[data-id="${id}"]`);
+
+        if (!newName) return Swal.fire('خطا', 'نام حساب نمی‌تواند خالی باشد', 'warning');
+
+        $.ajax({
+            url: "{% url 'edit_account' 0 %}".replace('0', id),
+            method: 'POST',
+            data: { name: newName },
+            headers: { 'X-CSRFToken': getCSRFToken() },
+            success: function (data) {
+                if (data.success) {
+                    $span.text(newName);
+                    closeEditMode($li, id);
+                } else {
+                    Swal.fire('خطا', 'ویرایش ناموفق بود.', 'error');
+                }
+            }
+        });
+    });
+
+    // cancel edit button
+    $(document).on('click', '.btn-cancel-edit', function () {
+        const id = $(this).data('id');
+        closeEditMode($(this).closest('li'), id);
+    });
+
+    // delete account button
+    $(document).on('click', '.btn-delete-account', function () {
+        const id = $(this).data('id');
+        const $li = $(this).closest('li');
+
+        Swal.fire({
+            title: "حذف حساب؟",
+            text: "این عملیات قابل بازگشت نیست!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "بله، حذف کن",
+            cancelButtonText: "لغو"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{% url 'delete_account' 0 %}".replace('0', id),
+                    method: "POST",
+                    headers: { "X-CSRFToken": getCSRFToken() },
+                    success: function (data) {
+                        if (data.success) {
+                            const $parentUl = $li.parent('ul.children');
+                             const deletedId = id;
+                            $li.slideUp(300, function () {
+                                $(this).remove();
+                                if ($parentUl && !$parentUl.children().length) {
+                                    const $parentLi = $parentUl.closest('li');
+                                    $parentUl.remove();
+                                    $parentLi.children('.toggle').remove();
+                                }
+                            });
+                            $('select[name="parent"] option[value="' + deletedId + '"]').remove();
+                            Swal.fire('حذف شد', 'حساب حذف شد.', 'success');
+                        } else {
+                            Swal.fire('خطا', data.error || 'مشکلی در حذف حساب وجود دارد.', 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('خطا', 'ارتباط با سرور برقرار نشد.', 'error');
+                    }
+                });
+            }
+        });
+    });
+// creating child account button
+$(document).on('click', '.btn-add-child', function () {
+    const parentId = $(this).data('parent-id');
+    const $li = $(this).closest('li');
+    $('.quick-add-form').remove();  // فقط یکی فعال باشه
+
+    const $form = $(`
+        <div class="quick-add-form mt-2">
+            <input type="text" class="account-name-input form-control form-control-sm d-inline-block w-50 me-2" placeholder="نام حساب">
+            <button type="button" class="btn btn-sm btn-primary btn-save-account">ثبت</button>
+            <button type="button" class="btn btn-sm btn-secondary btn-cancel-add">لغو</button>
+        </div>
+    `);
+
+    $li.append($form);
+});
+
+// cancell creating account button
+$(document).on('click', '.btn-cancel-add', function () {
+    $(this).closest('.quick-add-form').remove();
+});
+
+// save account button
+$(document).on('click', '.btn-save-account', function () {
+    const $form = $(this).closest('.quick-add-form');
+    const name = $form.find('.account-name-input').val().trim();
+    const parentId = $form.closest('li').find('.btn-add-child').data('parent-id') || "";
+
+    if (!name) {
+        Swal.fire('خطا', 'نام حساب نمی‌تواند خالی باشد.', 'warning');
+        return;
+    }
+
+    $.ajax({
+        url: "{% url 'create_accounts' %}",
+        method: "POST",
+        data: { name: name, parent: parentId },
+        headers: { "X-CSRFToken": getCSRFToken() },
+        success: function (data) {
+            if (data.success) {
+                addAccountToTree(data.id, data.name, data.parent_id, $form);
+                $form.remove();
+                $('select[name="parent"]').append(`<option value="${data.id}">${data.name}</option>`);
+            } else {
+                Swal.fire('خطا', JSON.stringify(data.errors), 'error');
+            }
+        }
+    });
+});
+$(document).on('click', '#btn-add-root', function () {
+    $('.quick-add-form').remove();
+
+    const $form = $(`
+        <div class="quick-add-form mb-3">
+            <input type="text" class="account-name-input form-control form-control-sm d-inline-block w-50 me-2" placeholder="نام حساب ریشه">
+            <button type="button" class="btn btn-sm btn-primary btn-save-account">ثبت</button>
+            <button type="button" class="btn btn-sm btn-secondary btn-cancel-add">لغو</button>
+        </div>
+    `);
+
+    $('#account-tree-container > ul').prepend($form);
+});
+});
+    
+
+
+
 </script>
 
 {% endblock %}

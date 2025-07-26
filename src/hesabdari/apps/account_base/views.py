@@ -173,22 +173,10 @@ class AccountsView(generic.View):
             'tree_data': tree_data
         })
 
-# class CreateAccounts(generic.View):
-#     def post(self, request):
-#         accountform = AccountsForm(request.POST or None)
-#         if accountform.is_valid():
-#             account = accountform.save()
-#             parent = AccountsClass.get_parent(account) or None
-#             return JsonResponse({
-#                 'success': True,
-#                 'id': account.id,
-#                 'name': account.name,
-#                 'parent_id': parent.id if parent else None,
-#
-#             })
 
 def create_accounts(request):
     form = AccountsForm(request.POST)
+    print(request.POST)
     if form.is_valid():
         new_account = form.save()
         return JsonResponse({
@@ -201,6 +189,8 @@ def create_accounts(request):
         return JsonResponse({'success': False, 'errors': form.errors})
 
         return JsonResponse({'success': False, 'errors': accountform.errors})
+
+
 def extract_all_update_prefixes(post_data, file_data):
     prefixes = set()
     combined_keys = list(post_data.keys()) + list(file_data.keys())
