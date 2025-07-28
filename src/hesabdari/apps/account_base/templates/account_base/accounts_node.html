@@ -1,5 +1,5 @@
 <li>
-<div style="display: inline-flex;">
+<div class="node-header">
     {% if node.get_children %}
         <button type="button" class="toggle">➕</button>
     {% else %}
@@ -8,9 +8,9 @@
     
     <input  type="radio" name="names" value="{{ node.id }}">
     <span class="account-name" data-id="{{ node.id }}">{{ node.name }}</span>
-    <button type="button" class="btn-edit-account btn btn-sm" data-id="{{ node.id }}">📝</button>
-    <button type="button" class="btn-delete-account btn btn-sm" data-id="{{ node.id }}">➖</button>
-    <button type="button" class="btn-add-child btn btn-sm" data-parent-id="{{ node.id }}">➕</button>
+    <button type="button" class="btn-edit-account btn btn-sm p-1" data-id="{{ node.id }}">📝</button>
+    <button type="button" class="btn-delete-account btn btn-sm p-1" data-id="{{ node.id }}">➖</button>
+    <button type="button" class="btn-add-child btn btn-sm p-1" data-parent-id="{{ node.id }}">➕</button>
 </div>
     {% if node.get_children %}
         <ul class="children">
@@ -47,4 +47,15 @@
     width: 36px;
     height: 36px;
 }
+
+.node-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6px;
+  padding: 4px 0;
+  overflow-x: auto;
+}
+
+
 </style>

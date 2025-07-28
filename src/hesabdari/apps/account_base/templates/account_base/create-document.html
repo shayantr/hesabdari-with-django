@@ -464,8 +464,8 @@ document.addEventListener('click', function (e) {
     if (e.target.classList.contains('toggle')) {
         const children = e.target.closest('li').querySelector('.children');
         if (children) {
-            const isOpen = children.style.display === 'block';
-            children.style.display = isOpen ? 'none' : 'block';
+            const isOpen = children.style.display === 'inline-block';
+            children.style.display = isOpen ? 'none' : 'inline-block';
             e.target.textContent = isOpen ? '➕' : '➖';
         }
     }
@@ -475,19 +475,19 @@ $(document).ready(function () {
     // add node to tree
     function addAccountToTree(id, name, parentId, $formContext) {
         const $newLi = $(`
-            <div style="display: inline-flex;">
+            <div class="node-header">
             <li>
                 <input class="form-check-input" type="radio" name="names" value="${id}" checked>
                 <span class="account-name" data-id="${id}">${name}</span>
-                <button type="button" class="btn-edit-account btn btn-sm" data-id="${id}">📝</button>
-                <button type="button" class="btn-delete-account btn btn-sm" data-id="${id}">➖ </button>
-                <button type="button" class="btn-add-child btn btn-sm" data-parent-id="${id}">➕</button>
+                <button type="button" class="btn-edit-account btn btn-sm p-1" data-id="${id}">📝</button>
+                <button type="button" class="btn-delete-account btn btn-sm p-1" data-id="${id}">➖ </button>
+                <button type="button" class="btn-add-child btn btn-sm p-1" data-parent-id="${id}">➕</button>
 
                 <ul class="children" style="display: none;"></ul>
             </li>
             </div>
         `);
-            
+
         if (parentId) {
             const $parentRadio = $(`input[name="names"][value="${parentId}"]`);
             const $parentLi = $parentRadio.closest('li');
@@ -498,7 +498,7 @@ $(document).ready(function () {
                 $parentLi.append($childrenContainer);
             }
 
-            if ($parentLi.find('> .toggle').length === 0) {
+            if ($parentLi.find('.toggle').length === 0) {
                 const $toggle = $('<button type="button" class="toggle">➕</button>');
 
                 $parentLi.prepend($toggle);
