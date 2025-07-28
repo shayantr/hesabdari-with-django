@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="account ui in document fixed v2">
+    <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="account ui in document fixed v2.16">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/accounts_node.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/accounts_node.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/envs/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/envs/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -232,7 +235,9 @@
       <workItem from="1753459267582" duration="3277000" />
       <workItem from="1753478382508" duration="784000" />
       <workItem from="1753519231376" duration="13931000" />
-      <workItem from="1753557221870" duration="3379000" />
+      <workItem from="1753557221870" duration="5236000" />
+      <workItem from="1753616370918" duration="4844000" />
+      <workItem from="1753647945267" duration="1822000" />
     </task>
     <task id="LOCAL-00001" summary="login, register and verify models and views and templates">
       <option name="closed" value="true" />
@@ -410,7 +415,47 @@
       <option name="project" value="LOCAL" />
       <updated>1753558212132</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="account ui in document fixed v2.1">
+      <option name="closed" value="true" />
+      <created>1753565956356</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1753565956356</updated>
+    </task>
+    <task id="LOCAL-00024" summary="account ui in document fixed v2.12">
+      <option name="closed" value="true" />
+      <created>1753566053005</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1753566053005</updated>
+    </task>
+    <task id="LOCAL-00025" summary="account ui in document fixed v2.13">
+      <option name="closed" value="true" />
+      <created>1753566116356</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1753566116356</updated>
+    </task>
+    <task id="LOCAL-00026" summary="account ui in document fixed v2.15">
+      <option name="closed" value="true" />
+      <created>1753566196486</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1753566196486</updated>
+    </task>
+    <task id="LOCAL-00027" summary="account ui in document fixed v2.16">
+      <option name="closed" value="true" />
+      <created>1753566263219</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1753566263219</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -452,6 +497,11 @@
     <MESSAGE value="improve ui create-document.html" />
     <MESSAGE value="account ui in document fixed" />
     <MESSAGE value="account ui in document fixed v2" />
-    <option name="LAST_COMMIT_MESSAGE" value="account ui in document fixed v2" />
+    <MESSAGE value="account ui in document fixed v2.1" />
+    <MESSAGE value="account ui in document fixed v2.12" />
+    <MESSAGE value="account ui in document fixed v2.13" />
+    <MESSAGE value="account ui in document fixed v2.15" />
+    <MESSAGE value="account ui in document fixed v2.16" />
+    <option name="LAST_COMMIT_MESSAGE" value="account ui in document fixed v2.16" />
   </component>
 </project>

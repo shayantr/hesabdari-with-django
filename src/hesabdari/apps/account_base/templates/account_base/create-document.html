@@ -466,7 +466,7 @@ document.addEventListener('click', function (e) {
         if (children) {
             const isOpen = children.style.display === 'block';
             children.style.display = isOpen ? 'none' : 'block';
-            e.target.textContent = isOpen ? '➕ باز کردن' : '➖ بستن';
+            e.target.textContent = isOpen ? '➕' : '➖';
         }
     }
 });
@@ -475,6 +475,7 @@ $(document).ready(function () {
     // add node to tree
     function addAccountToTree(id, name, parentId, $formContext) {
         const $newLi = $(`
+            <div style="display: inline-flex;">
             <li>
                 <input class="form-check-input" type="radio" name="names" value="${id}" checked>
                 <span class="account-name" data-id="${id}">${name}</span>
@@ -484,8 +485,9 @@ $(document).ready(function () {
 
                 <ul class="children" style="display: none;"></ul>
             </li>
+            </div>
         `);
-
+            
         if (parentId) {
             const $parentRadio = $(`input[name="names"][value="${parentId}"]`);
             const $parentLi = $parentRadio.closest('li');
@@ -497,7 +499,8 @@ $(document).ready(function () {
             }
 
             if ($parentLi.find('> .toggle').length === 0) {
-                const $toggle = $('<span class="toggle">▶</span>');
+                const $toggle = $('<button type="button" class="toggle">➕</button>');
+
                 $parentLi.prepend($toggle);
             }
 
@@ -649,6 +652,7 @@ $(document).on('click', '.btn-save-account', function () {
         Swal.fire('خطا', 'نام حساب نمی‌تواند خالی باشد.', 'warning');
         return;
     }
+    console.log("dooorooste")
 
     $.ajax({
         url: "{% url 'create_accounts' %}",

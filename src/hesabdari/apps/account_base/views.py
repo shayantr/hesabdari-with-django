@@ -188,7 +188,7 @@ def create_accounts(request):
     else:
         return JsonResponse({'success': False, 'errors': form.errors})
 
-        return JsonResponse({'success': False, 'errors': accountform.errors})
+    # return JsonResponse({'success': False, 'errors': accountform.errors})
 
 
 def extract_all_update_prefixes(post_data, file_data):

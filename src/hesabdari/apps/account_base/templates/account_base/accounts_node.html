@@ -1,17 +1,17 @@
 <li>
-<div class="1"></div>
-    <div>
+<div style="display: inline-flex;">
     {% if node.get_children %}
-        <div class="toggle">➕ باز کردن</div>
+        <button type="button" class="toggle">➕</button>
     {% else %}
-        <span style="margin-right: 18px;"></span>
+        <span class="toggle-spacer"></span>
     {% endif %}
-    <input class="form-check-input" type="radio" name="names" value="{{ node.id }}">
+    
+    <input  type="radio" name="names" value="{{ node.id }}">
     <span class="account-name" data-id="{{ node.id }}">{{ node.name }}</span>
     <button type="button" class="btn-edit-account btn btn-sm" data-id="{{ node.id }}">📝</button>
-    <button type="button" class="btn-delete-account btn btn-sm" data-id="{{ node.id }}">➖ </button>
+    <button type="button" class="btn-delete-account btn btn-sm" data-id="{{ node.id }}">➖</button>
     <button type="button" class="btn-add-child btn btn-sm" data-parent-id="{{ node.id }}">➕</button>
-    </div>
+</div>
     {% if node.get_children %}
         <ul class="children">
             {% for child in node.get_children %}
@@ -20,3 +20,31 @@
         </ul>
     {% endif %}
 </li>
+<style>
+    .toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    padding: 4px;
+    user-select: none;
+    transition: background-color 0.2s;
+    border-radius: 6px;
+}
+
+.toggle:hover,
+.toggle:active {
+    background-color: #e6e6e6;
+}
+
+.toggle-spacer {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+}
+</style>
