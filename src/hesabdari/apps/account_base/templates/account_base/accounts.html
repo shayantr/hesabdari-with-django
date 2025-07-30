@@ -1,14 +1,5 @@
-<div class="collapse multi-collapse show">
-  <div class="address-check-block">
-    <div id="account-tree-container" class="mt-3">
-    <button type="button" id="btn-add-root" class="btn btn-success btn-sm mb-2">➕ حساب جدید (ریشه)</button>
-      <ul>
-        {% for node in list_accounts %}
-          {% if node.is_root_node %}
-            {% include 'account_base/accounts_node.html' with node=node %}
-          {% endif %}
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
+<div>
+    <button type="button" class="btn btn-sm btn-outline-primary mb-2" id="add_root_btn">➕ افزودن حساب ریشه‌ای</button>
+    <div id="accounts_tree"></div>
 </div>
+

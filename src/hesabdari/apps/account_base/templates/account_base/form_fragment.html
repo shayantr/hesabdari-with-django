@@ -1,27 +1,27 @@
 {% load jinja_filters %}
 {% load static %}
+
 <div class="form-wrapper" id="{{ uniqueid }}">
     <div class="remove-form" style="color:red; cursor:pointer;">حذف</div>
     <div class="col-sm-6 col-xl-3">
         {{ form_balance.user }}
         <div class="mb-0">
         {{ form_balance.account }}
+
         <button type="button"
-            class="btn btn-sm btn-light-secondary" data-bs-toggle="modal" 
+            class="btn btn-sm btn-light-secondary" data-bs-toggle="modal"
             data-bs-target="#{{ uniqueid }}-accounts-lists"
-            id="{{ uniqueid }}-accounts-list">
+            id="{{ uniqueid }}-accounts-list-btn">
             <i class="ph-duotone ph-pencil-simple-line"></i> تغییر
         </button>
             </div>
         <h5 id="{{ uniqueid }}-accounts-list"></h5>
-        <input type="hidden" id="{{ uniqueid }}-accounts-list">
+        <input type="hidden" id="{{ uniqueid }}-selected-account-id">
         <div class="modal fade" id="{{ uniqueid }}-accounts-lists" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <div class="collapse multi-collapse show">
                             <h5 class="mb-0">انتخاب حساب</h5>
-                        </div>
                     </div>
                     <div class="modal-body">
                     </div>
@@ -34,7 +34,7 @@
                 </div>
             </div>
         </div>
-        
+
     </div>
     {{ form_balance.transaction_type }}
     <div class="cashonly input-group mb-3">
@@ -47,61 +47,250 @@
         <div class="form-control">{{ form_balance.description }}</div>
     </div>
     <div class="mb-3">
-        {{ form_balance.image }}
+        <label class="form-label">{{ i.form_balance.image.label }}</label>
+        {% if i.form_balance.image.value %}
+            <img src="{{ i.form_balance.image.value.url }}" width="150px">
+        {% endif %}
+        {{ i.form_balance.image }}
+
     </div>
     <label>
         <input type="checkbox" class="toggle-cheque-form" />
         اضافه کردن چک
     </label>
-    <div class="cheque-form border rounded p-3 h-100 text-white bg-info" style="display: none; margin-top: 10px;">
+    <div class="cheque-form border rounded p-3 h-100 text-white bg-info" style="display: {% if i.form_cheque.name.value == None %}none{% else %}block{% endif %}; margin-top: 10px;">
         {{ form_cheque }}
     </div>
 </div>
-
 <script>
 function getCSRFToken() {
     return document.querySelector('[name=csrfmiddlewaretoken]').value;
 }
-
 $(document).ready(function () {
-    $('[id$="-accounts-list"]').click(function () {
-		$.ajax({
-			url: "{% url 'get_accounts_list' %}",
-			type: "GET",
-			success: function (response) {
-                const $newForm = $(response.form_html);
-                $('.modal-body').html($newForm);
 
-			}
-		});
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    let currentAction = null;
+    let currentNodeId = null;
+
+    function loadTree() {
+        $.getJSON("{% url 'get_accounts_list' %}", function (response) {
+            const tree = $('#accounts_tree').jstree(true);
+            if (tree) {
+                tree.settings.core.data = response.data;
+                tree.refresh(true);
+            } else {
+                createTree(response.data);
+            }
+        });
+    }
+
+    function createTree(data) {
+        $('#accounts_tree').jstree({
+            core: {
+                data: data,
+                check_callback: true,
+                themes: { stripes: true }
+            },
+            plugins: ['wholerow']
+        }).on('ready.jstree refresh.jstree open_node.jstree', function () {
+            addControlsToNodes();
+        });
+    }
+
+    function addControlsToNodes() {
+        const tree = $('#accounts_tree').jstree(true);
+        const nodes = tree.get_json('#', { flat: true });
+
+        nodes.forEach(node => {
+            const nodeId = node.id;
+            const realId = node.original?.real_id || node.id;
+            const $anchor = $(`#${nodeId}_anchor`);
+
+            if ($anchor.find('input[type="radio"]').length === 0 && !$anchor.hasClass('editing')) {
+                const $radio = $('<input>', {
+                    type: 'radio',
+                    name: 'names',
+                    class: 'me-2',
+                    value: realId
+                });
+
+                const $buttons = $('<span class="ms-auto">')
+    .append(`<button type="button" class="btn btn-sm  btn-edit" data-id="${realId}">📝</button>`)
+    .append(`<button type="button" class="btn btn-sm  btn-delete" data-id="${realId}">🗑</button>`)
+    .append(`<button type="button" class="btn btn-sm  btn-add-child" data-id="${realId}">➕</button>`);
+
+
+                $anchor.prepend($radio);
+                $anchor.append($buttons);
+            }
+        });
+    }
+
+$(document).on('click', '.btn-edit, .btn-add-child', function () {
+    const $btn = $(this);
+    const isEdit = $btn.hasClass('btn-edit');
+    const nodeId = $btn.data('id');
+    const $node = $(`#${nodeId}`);
+    
+    // اگه فرم قبلاً ساخته شده، دیگه تکرار نکن
+    if ($node.find('.node-form-container').length) return;
+
+    // متن فعلی گره
+    const $anchor = $(`#${nodeId}_anchor`);
+    const currentText = isEdit ? $anchor.clone().children().remove().end().text().trim() : '';
+
+    // فرم رو بساز
+    const $input = $('<input>', {
+        type: 'text',
+        class: 'form-control form-control-sm me-2 d-inline-block',
+        value: currentText,
+        style: 'width: 60%; max-width: 250px;'
     });
 
-    $('#select-account-{{ uniqueid }}').click(function () {
-    const $form = $(this);
+    const $save = $('<button>', {
+        type: 'button',
+        class: 'btn btn-sm btn-success me-1',
+        html: '💾'
+    });
 
-        const $context = $(this).closest('.modal');
-        // 2. حسابِ انتخاب‑شده در همان درخت
-        const $checked = $context.find('input[name="names"]:checked');
+    const $cancel = $('<button>', {
+        type: 'button',
+        class: 'btn btn-sm btn-outline-secondary',
+        html: '❌'
+    });
 
-        if ($checked.length === 0) {
-            alert('لطفاً یک حساب را از درخت انتخاب کنید.');
-            return;
+    const $form = $('<div class="node-form-container mt-1 d-flex align-items-center">')
+        .append($input, $save, $cancel);
+
+    $node.append($form);
+
+    $cancel.click(() => $form.remove());
+
+    $save.click(function () {
+        const name = $input.val().trim();
+        if (!name) return alert('نام نباید خالی باشد!');
+        const csrf = getCSRFToken();
+
+        if (isEdit) {
+            $.post("{% url 'edit_account' pk=0 %}".replace('0', nodeId), {
+                name,
+                csrfmiddlewaretoken: csrf
+            }, function (res) {
+                if (res.success) loadTree();
+                else alert(res.error || 'خطا در ویرایش');
+            });
+        } else {
+            $.post("{% url 'create_accounts' %}", {
+                name,
+                parent: nodeId,
+                csrfmiddlewaretoken: csrf
+            }, function (res) {
+                if (res.success) loadTree();
+                else alert('خطا در افزودن حساب');
+            });
         }
-        const accId   = $checked.val();
-        const accName = $.trim($checked[0].nextSibling.nodeValue);
-        const $wrapper   = $form.closest('.form-wrapper');
-        const $select = $wrapper.find('[id$="-balance-account"]').first();
-
-        // اگر گزینه هنوز وجود ندارد، بساز
-        if (!$select.find(`option[value="${accId}"]`).length) {
-            $select.append(`<option value="${accId}">${accName}</option>`);
-        }
-
-        // 4. انتخاب و اعلام تغییر
-        $select.val(accId).trigger('change');
     });
 });
 
+
+
+$(document).on('click', '.btn-delete', function () {
+    const nodeId = $(this).data('id');
+
+    Swal.fire({
+        title: 'حذف حساب؟',
+        text: 'آیا مطمئن هستید؟ این عملیات قابل بازگشت نیست!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'بله، حذف کن',
+        cancelButtonText: 'انصراف'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post("{% url 'delete_account' pk=0 %}".replace('0', nodeId), {
+                csrfmiddlewaretoken: getCSRFToken()
+            }, function (res) {
+                if (res.success) {
+                    loadTree();
+                    Swal.fire('حذف شد!', 'حساب با موفقیت حذف شد.', 'success');
+                } else {
+                    Swal.fire('خطا', res.error || 'خطا در حذف حساب', 'error');
+                }
+            });
+        }
+    });
+});
+
+
+$(document).on('click', '#add_root_btn', function () {
+    // بررسی وجود فرم قبلی
+    if ($('#new_root_input_row').length) return;
+
+    const $input = $('<input>', {
+        type: 'text',
+        id: 'new_root_input',
+        class: 'form-control form-control-sm me-2 d-inline-block',
+        placeholder: 'نام حساب ریشه‌ای',
+        style: 'width: 60%; max-width: 250px;'
+    });
+
+    const $save = $('<button>', {
+        type: 'button',
+        class: 'btn btn-sm btn-success me-1',
+        html: '💾'
+    });
+
+    const $cancel = $('<button>', {
+        type: 'button',
+        class: 'btn btn-sm btn-outline-secondary',
+        html: '❌'
+    });
+
+    const $row = $('<div id="new_root_input_row" class="mb-2 d-flex align-items-center">')
+        .append($input, $save, $cancel);
+
+    // فرم رو بعد از دکمه قرار بده
+    $('#add_root_btn').after($row);
+
+    // بستن فرم
+    $cancel.click(() => $row.remove());
+
+    // ذخیره
+    $save.click(function () {
+        const name = $input.val().trim();
+        if (!name) return alert('نام نباید خالی باشد!');
+
+        $.post("{% url 'create_accounts' %}", {
+            name,
+            csrfmiddlewaretoken: getCSRFToken()
+        }, function (res) {
+            if (res.success) {
+                $row.remove();
+                loadTree();
+            } else {
+                alert('خطا در افزودن حساب');
+            }
+        });
+    });
+});
+
+    $('#{{ uniqueid }}-accounts-list-btn').click(function () {
+        $.ajax({
+            url: "{% url 'get_accounts_list' %}",
+            type: "GET",
+            success: function (response) {
+                $('#{{ uniqueid }}-accounts-lists .modal-body').html(response.form_html);
+                createTree(response.data);
+            }
+        });
+
+        const modal = new bootstrap.Modal(document.getElementById('{{ uniqueid }}-accounts-lists'));
+        modal.show();
+    });
+
+});
 
 </script>
 <script type="text/javascript" src="{% static 'js/chrome-cancell-input.js' %}"></script>

@@ -1,3 +1,4 @@
+import json
 from collections import namedtuple
 from itertools import zip_longest
 from lib2to3.fixes.fix_input import context
@@ -140,45 +141,39 @@ class GetFormFragmentView(generic.View):
 #         }
 #         return JsonResponse({'list_accounts': list_accounts })
 
-def build_tree(node):
-    return {
-        'id': node.id,
-        'name': node.name,
-        'children': [build_tree(child) for child in node.get_children()]
-    }
+# def build_tree(node):
+#     return {
+#         'id': node.id,
+#         'name': node.name,
+#         'children': [build_tree(child) for child in node.get_children()]
+#     }
 
 class AccountsView(generic.View):
     def get(self, request):
-        # ترتیب نمایش درخت با استفاده از lft (برای MPTT)
-        list_accounts = AccountsClass.objects.all().order_by('tree_id', 'lft')
+        def serialize_node(node):
+            return {
+                'id': str(node.id),
+                'text': node.name,
+                'parent': str(node.parent.id) if node.parent else '#'
+            }
 
-        # فرم جدید
-        accountform = AccountsForm()
+        accounts = AccountsClass.objects.all()
+        data = [serialize_node(acc) for acc in accounts]
+        form_html = render_to_string('account_base/accounts.html', {})  # فقط ساختار HTML بدون jsTree
 
-        # ساختار درختی برای ارسال به JS یا نمایش پویا
-        tree_data = [build_tree(root) for root in AccountsClass.objects.root_nodes()]
-
-        # رندر HTML فرم و لیست درخت
-        form_html = render_to_string(
-            'account_base/accounts.html',
-            {
-                'list_accounts': list_accounts,
-                'accountform': accountform
-            },
-            request=request
-        )
-
-        return JsonResponse({
-            'form_html': form_html,
-            'tree_data': tree_data
-        })
+        return JsonResponse({'form_html': form_html, 'data': data})
 
 
 def create_accounts(request):
+    parent_id = request.POST.get('parent')
     form = AccountsForm(request.POST)
-    print(request.POST)
     if form.is_valid():
-        new_account = form.save()
+        new_account = form.save(commit=False)
+        if parent_id:
+            new_account.parent_id = parent_id
+        else:
+            new_account.parent = None
+        new_account.save()
         return JsonResponse({
             'success': True,
             'id': new_account.id,
@@ -187,6 +182,18 @@ def create_accounts(request):
         })
     else:
         return JsonResponse({'success': False, 'errors': form.errors})
+# def create_accounts(request):
+#     form = AccountsForm(request.POST)
+#     if form.is_valid():
+#         new_account = form.save()
+#         return JsonResponse({
+#             'success': True,
+#             'id': new_account.id,
+#             'name': new_account.name,
+#             'parent_id': new_account.parent.id if new_account.parent else None
+#         })
+#     else:
+#         return JsonResponse({'success': False, 'errors': form.errors})
 
     # return JsonResponse({'success': False, 'errors': accountform.errors})
 
