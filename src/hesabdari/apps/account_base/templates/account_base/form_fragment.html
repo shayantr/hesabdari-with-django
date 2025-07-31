@@ -109,26 +109,23 @@ $(document).ready(function () {
             const realId = node.original?.real_id || node.id;
             const $anchor = $(`#${nodeId}_anchor`);
 
-            if ($anchor.find('input[type="radio"]').length === 0 && !$anchor.hasClass('editing')) {
-                const $radio = $('<input>', {
-                    type: 'radio',
-                    name: 'names',
-                    class: 'me-2',
-                    value: realId
-                });
+            if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
+            const $buttons = $('<span class="ms-auto">')
+                .append(`<button type="button" class="btn btn-sm btn-edit" data-id="${realId}">📝</button>`)
+                .append(`<button type="button" class="btn btn-sm btn-delete" data-id="${realId}">🗑</button>`)
+                .append(`<button type="button" class="btn btn-sm btn-add-child" data-id="${realId}">➕</button>`);
 
-                const $buttons = $('<span class="ms-auto">')
-    .append(`<button type="button" class="btn btn-sm  btn-edit" data-id="${realId}">📝</button>`)
-    .append(`<button type="button" class="btn btn-sm  btn-delete" data-id="${realId}">🗑</button>`)
-    .append(`<button type="button" class="btn btn-sm  btn-add-child" data-id="${realId}">➕</button>`);
-
-
-                $anchor.prepend($radio);
-                $anchor.append($buttons);
+            $anchor.append($buttons);
+            
             }
         });
     }
+function renameAccountNode(nodeId, newText) {
 
+       $("select[id*='balance-account']").each(function () {
+        $(this).find(`option[value='${nodeId}']`).text(newText);
+    });
+}
 $(document).on('click', '.btn-edit, .btn-add-child', function () {
     const $btn = $(this);
     const isEdit = $btn.hasClass('btn-edit');
@@ -179,7 +176,10 @@ $(document).on('click', '.btn-edit, .btn-add-child', function () {
                 name,
                 csrfmiddlewaretoken: csrf
             }, function (res) {
-                if (res.success) loadTree();
+                if (res.success){ 
+                    loadTree();
+                    renameAccountNode(nodeId ,name);
+                }
                 else alert(res.error || 'خطا در ویرایش');
             });
         } else {
@@ -195,7 +195,11 @@ $(document).on('click', '.btn-edit, .btn-add-child', function () {
     });
 });
 
-
+function deleteAccountNode(nodeIdToDelete) {
+        $("select[id*='balance-account']").each(function () {
+        $(this).find(`option[value='${nodeIdToDelete}']`).remove();
+    });
+}
 
 $(document).on('click', '.btn-delete', function () {
     const nodeId = $(this).data('id');
@@ -213,6 +217,7 @@ $(document).on('click', '.btn-delete', function () {
                 csrfmiddlewaretoken: getCSRFToken()
             }, function (res) {
                 if (res.success) {
+                    deleteAccountNode(nodeId);
                     loadTree();
                     Swal.fire('حذف شد!', 'حساب با موفقیت حذف شد.', 'success');
                 } else {
@@ -286,11 +291,55 @@ $(document).on('click', '#add_root_btn', function () {
             }
         });
 
-        const modal = new bootstrap.Modal(document.getElementById('{{ uniqueid }}-accounts-lists'));
-        modal.show();
+        {#const modal = new bootstrap.Modal(document.getElementById('{{ uniqueid }}-accounts-lists'));#}
+        {#modal.show();#}
     });
 
 });
+function handleAccountSelection(uniqueid) {
+    const tree = $('#accounts_tree').jstree(true);
+    const selectedIds = tree.get_selected();
+    
+
+    if (!selectedIds.length) {
+        alert('لطفاً یک حساب انتخاب کنید.');
+        return;
+    }
+
+    const selectedNode = tree.get_node(selectedIds[0]);
+    const nodeId = selectedNode.original.real_id || selectedNode.id;
+    const nodeText = selectedNode.text;
+
+    // نمایش مقدار انتخاب شده در کنار دکمه
+    $(`#${uniqueid}-selected-account-id`).val(nodeId);
+    $(`#${uniqueid}-accounts-list`).text(nodeText);
+
+    // فقط select هایی که آیدی‌شون شبیه balance-account هست
+    const $accountSelect = $(`#id_${uniqueid}-new-balance-account, #id_${uniqueid}-update-balance-account`);
+
+    if ($accountSelect.length && $accountSelect.is('select')) {
+        let $existingOption = $accountSelect.find(`option[value="${nodeId}"]`);
+
+        if ($existingOption.length > 0) {
+            // اگر گزینه وجود دارد فقط متنش را به‌روزرسانی کن
+            $existingOption.text(nodeText);
+        } else {
+            // در غیر این صورت گزینه را اضافه کن
+            $accountSelect.append(`<option value="${nodeId}">${nodeText}</option>`);
+        }
+
+        // مقدار را ست کن
+        $accountSelect.val(nodeId).trigger('change');
+    }
+}
+
+// دکمه select-account- را وصل کن
+$(document).on('click', "[id^='select-account-']", function () {
+    const uniqueid = this.id.replace('select-account-', '');
+    handleAccountSelection(uniqueid);
+});
+
+
 
 </script>
 <script type="text/javascript" src="{% static 'js/chrome-cancell-input.js' %}"></script>
