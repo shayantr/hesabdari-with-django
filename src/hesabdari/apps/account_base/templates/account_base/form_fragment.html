@@ -75,51 +75,53 @@ $(document).ready(function () {
     let currentAction = null;
     let currentNodeId = null;
 
-    function loadTree() {
-        $.getJSON("{% url 'get_accounts_list' %}", function (response) {
-            const tree = $('#accounts_tree').jstree(true);
-            if (tree) {
-                tree.settings.core.data = response.data;
-                tree.refresh(true);
-            } else {
-                createTree(response.data);
-            }
-        });
-    }
+    function loadTree(uniqueid) {
+    $.getJSON("{% url 'get_accounts_list' %}", function (response) {
+        const treeElement = $(`#${uniqueid}-accounts_tree`);
+        const tree = treeElement.jstree(true);
+        if (tree) {
+            tree.settings.core.data = response.data;
+            tree.refresh(true);
+        } else {
+            createTree(uniqueid, response.data);
+        }
+    });
+}
 
-    function createTree(data) {
-        $('#accounts_tree').jstree({
-            core: {
-                data: data,
-                check_callback: true,
-                themes: { stripes: true }
-            },
-            plugins: ['wholerow']
-        }).on('ready.jstree refresh.jstree open_node.jstree', function () {
-            addControlsToNodes();
-        });
-    }
+function createTree(uniqueid, data) {
+    const treeElement = $(`#${uniqueid}-accounts_tree`);
+    treeElement.jstree("destroy"); // از بین بردن درخت قبلی اگر وجود دارد
+    treeElement.jstree({
+        core: {
+            data: data,
+            check_callback: true,
+            themes: { stripes: true }
+        },
+        plugins: ['wholerow']
+    }).on('ready.jstree refresh.jstree open_node.jstree', function () {
+        addControlsToNodes(uniqueid);
+    });
+}
 
-    function addControlsToNodes() {
-        const tree = $('#accounts_tree').jstree(true);
-        const nodes = tree.get_json('#', { flat: true });
+function addControlsToNodes(uniqueid) {
+    const tree = $(`#${uniqueid}-accounts_tree`).jstree(true);
+    const nodes = tree.get_json('#', { flat: true });
 
-        nodes.forEach(node => {
-            const nodeId = node.id;
-            const realId = node.original?.real_id || node.id;
-            const $anchor = $(`#${nodeId}_anchor`);
+    nodes.forEach(node => {
+        const nodeId = node.id;
+        const realId = node.original?.real_id || node.id;
+        const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
 
-            if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
+        if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
             const $buttons = $('<span class="ms-auto">')
                 .append(`<button type="button" class="btn btn-sm btn-edit" data-id="${realId}">📝</button>`)
                 .append(`<button type="button" class="btn btn-sm btn-delete" data-id="${realId}">🗑</button>`)
                 .append(`<button type="button" class="btn btn-sm btn-add-child" data-id="${realId}">➕</button>`);
 
             $anchor.append($buttons);
-            
-            }
-        });
-    }
+        }
+    });
+}
 function renameAccountNode(nodeId, newText) {
 
        $("select[id*='balance-account']").each(function () {
@@ -282,23 +284,24 @@ $(document).on('click', '#add_root_btn', function () {
 });
 
     $('#{{ uniqueid }}-accounts-list-btn').click(function () {
-        $.ajax({
-            url: "{% url 'get_accounts_list' %}",
-            type: "GET",
-            success: function (response) {
-                $('#{{ uniqueid }}-accounts-lists .modal-body').html(response.form_html);
-                createTree(response.data);
-            }
-        });
-
-        {#const modal = new bootstrap.Modal(document.getElementById('{{ uniqueid }}-accounts-lists'));#}
-        {#modal.show();#}
+    const uid = "{{ uniqueid }}";
+    $.ajax({
+        url: "{% url 'get_accounts_list' %}",
+        type: "GET",
+        success: function (response) {
+            $('#{{ uniqueid }}-accounts-lists .modal-body').html(`
+                <div id="${uid}-accounts_tree"></div>
+            `);
+            createTree(uid, response.data);
+        }
     });
+});
+
 
 });
 function handleAccountSelection(uniqueid) {
-    const tree = $('#accounts_tree').jstree(true);
-    const selectedIds = tree.get_selected();
+    const tree = $(`#${uniqueid}-accounts_tree`).jstree(true);
+        const selectedIds = tree.get_selected();
     
 
     if (!selectedIds.length) {

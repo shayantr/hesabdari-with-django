@@ -159,8 +159,9 @@ class AccountsView(generic.View):
 
         accounts = AccountsClass.objects.all()
         data = [serialize_node(acc) for acc in accounts]
-        form_html = render_to_string('account_base/accounts.html', {})  # فقط ساختار HTML بدون jsTree
-
+        form_html = render_to_string('account_base/accounts.html', {
+            'uniqueid': request.GET.get('uniqueid', 'default')
+        })
         return JsonResponse({'form_html': form_html, 'data': data})
 
 

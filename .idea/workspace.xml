@@ -6,7 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="account ui in document fixed and balance form update combined with create form">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/accounts.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/accounts.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -240,7 +241,9 @@
       <workItem from="1753862528156" duration="625000" />
       <workItem from="1753863432197" duration="10536000" />
       <workItem from="1753881647580" duration="6082000" />
-      <workItem from="1753912604760" duration="6986000" />
+      <workItem from="1753912604760" duration="7129000" />
+      <workItem from="1753920459668" duration="1242000" />
+      <workItem from="1754041521444" duration="7106000" />
     </task>
     <task id="LOCAL-00001" summary="login, register and verify models and views and templates">
       <option name="closed" value="true" />
@@ -482,7 +485,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753889899128</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="account ui in document fixed and balance form update combined with create form">
+      <option name="closed" value="true" />
+      <created>1753920189647</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1753920189647</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
