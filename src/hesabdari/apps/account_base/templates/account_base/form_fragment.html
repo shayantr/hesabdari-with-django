@@ -16,7 +16,7 @@
         </button>
             </div>
         <h5 id="{{ uniqueid }}-accounts-list"></h5>
-        <input type="hidden" id="{{ uniqueid }}-selected-account-id">
+        <input type="hidden" id="{{ uniqueid }}-selected-account-id" {% if form_balance.account.value %}value="{{ form_balance.account.value}}"{% endif %}>
         <div class="modal fade" id="{{ uniqueid }}-accounts-lists" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
@@ -59,185 +59,199 @@
         اضافه کردن چک
     </label>
     <div class="cheque-form border rounded p-3 h-100 text-white bg-info" style="display: {% if i.form_cheque.name.value == None %}none{% else %}block{% endif %}; margin-top: 10px;">
+            <button type="button"
+            class="btn btn-sm btn-light-secondary"
+            data-bs-toggle="modal"
+            data-bs-target="#{{ uniqueid }}-accounts-lists"
+            id="{{ uniqueid }}-cheque-accounts-list-btn">
+            <i class="ph-duotone ph-pencil-simple-line"></i> انتخاب حساب چک
+        </button>
+        <input type="hidden" id="{{ uniqueid }}-selected-cheque-account-id" {% if form_cheque.account.value %}value="{{ form_cheque.account.value}}"{% endif %}>
+
         {{ form_cheque }}
     </div>
 </div>
 <script>
-function getCSRFToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
-}
+
 $(document).ready(function () {
+window.currentAccountTarget = 'balance';
+
 
     function getCSRFToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]').value;
     }
 
-    let currentAction = null;
-    let currentNodeId = null;
-
     function loadTree(uniqueid) {
-    $.getJSON("{% url 'get_accounts_list' %}", function (response) {
-        const treeElement = $(`#${uniqueid}-accounts_tree`);
-        const tree = treeElement.jstree(true);
-        if (tree) {
-            tree.settings.core.data = response.data;
-            tree.refresh(true);
-        } else {
-            createTree(uniqueid, response.data);
-        }
-    });
-}
+        $.getJSON("{% url 'get_accounts_list' %}", function (response) {
+            const treeElement = $(`#${uniqueid}-accounts_tree`);
+            if (!treeElement.length) return;
 
-function createTree(uniqueid, data) {
+            const tree = treeElement.jstree(true);
+            if (tree) {
+                tree.settings.core.data = response.data;
+                tree.refresh(true);
+            } else {
+                createTree(uniqueid, response.data);
+            }
+        });
+    }
+
+function createTree(uniqueid, data, selectedId = null) {
     const treeElement = $(`#${uniqueid}-accounts_tree`);
-    treeElement.jstree("destroy"); // از بین بردن درخت قبلی اگر وجود دارد
+    if (!treeElement.length) return;
+
+    treeElement.jstree("destroy");
     treeElement.jstree({
         core: {
             data: data,
             check_callback: true,
             themes: { stripes: true }
         },
-        plugins: ['wholerow']
+        plugins: ['wholerow'],
+        ...(selectedId ? { selected: [selectedId] } : {})
     }).on('ready.jstree refresh.jstree open_node.jstree', function () {
         addControlsToNodes(uniqueid);
-    });
-}
-
-function addControlsToNodes(uniqueid) {
-    const tree = $(`#${uniqueid}-accounts_tree`).jstree(true);
-    const nodes = tree.get_json('#', { flat: true });
-
-    nodes.forEach(node => {
-        const nodeId = node.id;
-        const realId = node.original?.real_id || node.id;
-        const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
-
-        if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
-            const $buttons = $('<span class="ms-auto">')
-                .append(`<button type="button" class="btn btn-sm btn-edit" data-id="${realId}">📝</button>`)
-                .append(`<button type="button" class="btn btn-sm btn-delete" data-id="${realId}">🗑</button>`)
-                .append(`<button type="button" class="btn btn-sm btn-add-child" data-id="${realId}">➕</button>`);
-
-            $anchor.append($buttons);
+        if (selectedId) {
+            treeElement.jstree(true).select_node(selectedId);
         }
     });
 }
-function renameAccountNode(nodeId, newText) {
 
-       $("select[id*='balance-account']").each(function () {
-        $(this).find(`option[value='${nodeId}']`).text(newText);
-    });
-}
-$(document).on('click', '.btn-edit, .btn-add-child', function () {
-    const $btn = $(this);
-    const isEdit = $btn.hasClass('btn-edit');
-    const nodeId = $btn.data('id');
-    const $node = $(`#${nodeId}`);
-    
-    // اگه فرم قبلاً ساخته شده، دیگه تکرار نکن
-    if ($node.find('.node-form-container').length) return;
+    function addControlsToNodes(uniqueid) {
+        const tree = $(`#${uniqueid}-accounts_tree`).jstree(true);
+        const nodes = tree.get_json('#', { flat: true });
 
-    // متن فعلی گره
-    const $anchor = $(`#${nodeId}_anchor`);
-    const currentText = isEdit ? $anchor.clone().children().remove().end().text().trim() : '';
+        nodes.forEach(node => {
+            const nodeId = node.id;
+            const realId = node.original?.real_id || node.id;
+            const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
 
-    // فرم رو بساز
-    const $input = $('<input>', {
-        type: 'text',
-        class: 'form-control form-control-sm me-2 d-inline-block',
-        value: currentText,
-        style: 'width: 60%; max-width: 250px;'
-    });
+            if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
+                const $buttons = $('<span class="ms-auto">')
+                    .append(`<button type="button" class="btn btn-sm btn-edit" data-uid="${uniqueid}" data-id="${realId}">📝</button>`)
+                    .append(`<button type="button" class="btn btn-sm btn-delete" data-uid="${uniqueid}" data-id="${realId}">🗑</button>`)
+                    .append(`<button type="button" class="btn btn-sm btn-add-child" data-uid="${uniqueid}" data-id="${realId}">➕</button>`);
 
-    const $save = $('<button>', {
-        type: 'button',
-        class: 'btn btn-sm btn-success me-1',
-        html: '💾'
-    });
+                $anchor.append($buttons);
+            }
+        });
+    }
 
-    const $cancel = $('<button>', {
-        type: 'button',
-        class: 'btn btn-sm btn-outline-secondary',
-        html: '❌'
-    });
-
-    const $form = $('<div class="node-form-container mt-1 d-flex align-items-center">')
-        .append($input, $save, $cancel);
-
-    $node.append($form);
-
-    $cancel.click(() => $form.remove());
-
-    $save.click(function () {
-        const name = $input.val().trim();
-        if (!name) return alert('نام نباید خالی باشد!');
-        const csrf = getCSRFToken();
-
-        if (isEdit) {
-            $.post("{% url 'edit_account' pk=0 %}".replace('0', nodeId), {
-                name,
-                csrfmiddlewaretoken: csrf
-            }, function (res) {
-                if (res.success){ 
-                    loadTree();
-                    renameAccountNode(nodeId ,name);
-                }
-                else alert(res.error || 'خطا در ویرایش');
-            });
-        } else {
-            $.post("{% url 'create_accounts' %}", {
-                name,
-                parent: nodeId,
-                csrfmiddlewaretoken: csrf
-            }, function (res) {
-                if (res.success) loadTree();
-                else alert('خطا در افزودن حساب');
-            });
-        }
-    });
-});
-
-function deleteAccountNode(nodeIdToDelete) {
+    function renameAccountNode(nodeId, newText) {
         $("select[id*='balance-account']").each(function () {
-        $(this).find(`option[value='${nodeIdToDelete}']`).remove();
+            $(this).find(`option[value='${nodeId}']`).text(newText);
+        });
+    }
+
+    function deleteAccountNode(nodeIdToDelete) {
+        $("select[id*='balance-account']").each(function () {
+            $(this).find(`option[value='${nodeIdToDelete}']`).remove();
+        });
+    }
+
+    $(document).on('click', '.btn-edit, .btn-add-child', function () {
+        const $btn = $(this);
+        const isEdit = $btn.hasClass('btn-edit');
+        const nodeId = $btn.data('id');
+        const uniqueid = $btn.data('uid');
+        const $node = $(`#${uniqueid}-accounts_tree #${nodeId}`);
+
+        if ($node.find('.node-form-container').length) return;
+
+        const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
+        const currentText = isEdit ? $anchor.clone().children().remove().end().text().trim() : '';
+
+        const $input = $('<input>', {
+            type: 'text',
+            class: 'form-control form-control-sm me-2 d-inline-block',
+            value: currentText,
+            style: 'width: 60%; max-width: 250px;'
+        });
+
+        const $save = $('<button>', {
+            type: 'button',
+            class: 'btn btn-sm btn-success me-1',
+            html: '💾'
+        });
+
+        const $cancel = $('<button>', {
+            type: 'button',
+            class: 'btn btn-sm btn-outline-secondary',
+            html: '❌'
+        });
+
+        const $form = $('<div class="node-form-container mt-1 d-flex align-items-center">')
+            .append($input, $save, $cancel);
+
+        $node.append($form);
+
+        $cancel.click(() => $form.remove());
+
+        $save.click(function () {
+            const name = $input.val().trim();
+            if (!name) return alert('نام نباید خالی باشد!');
+            const csrf = getCSRFToken();
+
+            if (isEdit) {
+                $.post("{% url 'edit_account' pk=0 %}".replace('0', nodeId), {
+                    name,
+                    csrfmiddlewaretoken: csrf
+                }, function (res) {
+                    if (res.success) {
+                        loadTree(uniqueid);
+                        renameAccountNode(nodeId, name);
+                    } else alert(res.error || 'خطا در ویرایش');
+                });
+            } else {
+                $.post("{% url 'create_accounts' %}", {
+                    name,
+                    parent: nodeId,
+                    csrfmiddlewaretoken: csrf
+                }, function (res) {
+                    if (res.success) loadTree(uniqueid);
+                    else alert('خطا در افزودن حساب');
+                });
+            }
+        });
     });
-}
 
-$(document).on('click', '.btn-delete', function () {
-    const nodeId = $(this).data('id');
+    $(document).on('click', '.btn-delete', function () {
+        const nodeId = $(this).data('id');
+        const uniqueid = $(this).data('uid');
 
-    Swal.fire({
-        title: 'حذف حساب؟',
-        text: 'آیا مطمئن هستید؟ این عملیات قابل بازگشت نیست!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'بله، حذف کن',
-        cancelButtonText: 'انصراف'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post("{% url 'delete_account' pk=0 %}".replace('0', nodeId), {
-                csrfmiddlewaretoken: getCSRFToken()
-            }, function (res) {
-                if (res.success) {
-                    deleteAccountNode(nodeId);
-                    loadTree();
-                    Swal.fire('حذف شد!', 'حساب با موفقیت حذف شد.', 'success');
-                } else {
-                    Swal.fire('خطا', res.error || 'خطا در حذف حساب', 'error');
-                }
-            });
-        }
+        Swal.fire({
+            title: 'حذف حساب؟',
+            text: 'آیا مطمئن هستید؟ این عملیات قابل بازگشت نیست!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'بله، حذف کن',
+            cancelButtonText: 'انصراف'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post("{% url 'delete_account' pk=0 %}".replace('0', nodeId), {
+                    csrfmiddlewaretoken: getCSRFToken()
+                }, function (res) {
+                    if (res.success) {
+                        deleteAccountNode(nodeId);
+                        loadTree(uniqueid);
+                        Swal.fire('حذف شد!', 'حساب با موفقیت حذف شد.', 'success');
+                    } else {
+                        Swal.fire('خطا', res.error || 'خطا در حذف حساب', 'error');
+                    }
+                });
+            }
+        });
     });
-});
 
+    $(document).on('click', '.add-root-btn', function () {
+    const uniqueid = $(this).data('uid');
 
-$(document).on('click', '#add_root_btn', function () {
-    // بررسی وجود فرم قبلی
-    if ($('#new_root_input_row').length) return;
+    // بررسی وجود فرم قبلی فقط در همین بخش
+    if ($(`#${uniqueid}-new_root_input_row`).length) return;
 
     const $input = $('<input>', {
         type: 'text',
-        id: 'new_root_input',
+        id: `${uniqueid}-new_root_input`,
         class: 'form-control form-control-sm me-2 d-inline-block',
         placeholder: 'نام حساب ریشه‌ای',
         style: 'width: 60%; max-width: 250px;'
@@ -255,16 +269,13 @@ $(document).on('click', '#add_root_btn', function () {
         html: '❌'
     });
 
-    const $row = $('<div id="new_root_input_row" class="mb-2 d-flex align-items-center">')
+    const $row = $(`<div id="${uniqueid}-new_root_input_row" class="mb-2 d-flex align-items-center"></div>`)
         .append($input, $save, $cancel);
 
-    // فرم رو بعد از دکمه قرار بده
-    $('#add_root_btn').after($row);
+    $(this).after($row);
 
-    // بستن فرم
     $cancel.click(() => $row.remove());
 
-    // ذخیره
     $save.click(function () {
         const name = $input.val().trim();
         if (!name) return alert('نام نباید خالی باشد!');
@@ -275,34 +286,55 @@ $(document).on('click', '#add_root_btn', function () {
         }, function (res) {
             if (res.success) {
                 $row.remove();
-                loadTree();
+                loadTree(uniqueid);
             } else {
                 alert('خطا در افزودن حساب');
             }
         });
     });
 });
+$(`#{{ uniqueid }}-accounts-list-btn`).click(function () {
+    window.currentAccountTarget = 'balance';
 
-    $('#{{ uniqueid }}-accounts-list-btn').click(function () {
     const uid = "{{ uniqueid }}";
     $.ajax({
         url: "{% url 'get_accounts_list' %}",
         type: "GET",
+        data: { uid },
         success: function (response) {
-            $('#{{ uniqueid }}-accounts-lists .modal-body').html(`
-                <div id="${uid}-accounts_tree"></div>
-            `);
-            createTree(uid, response.data);
+            $('#{{ uniqueid }}-accounts-lists .modal-body').html(response.form_html);
+
+            const selectedId = $(`#${uid}-selected-account-id`).val();  // 👈 گرفتن آی‌دی انتخاب شده قبلی
+            createTree(uid, response.data, selectedId);  // 👈 ارسال آن به createTree
         }
     });
 });
 
+$(`#{{ uniqueid }}-cheque-accounts-list-btn`).click(function () {
+    window.currentAccountTarget = 'cheque';
 
+    const uid = "{{ uniqueid }}";
+    $.ajax({
+        url: "{% url 'get_accounts_list' %}",
+        type: "GET",
+        data: { uid },
+        success: function (response) {
+            $('#{{ uniqueid }}-accounts-lists .modal-body').html(response.form_html);
+
+            const selectedId = $(`#${uid}-selected-cheque-account-id`).val();  // 👈 آی‌دی چک
+            createTree(uid, response.data, selectedId);
+        }
+    });
 });
+
+    $(document).on('click', "[id^='select-account-']", function () {
+        const uniqueid = this.id.replace('select-account-', '');
+        handleAccountSelection(uniqueid);
+    });
+
 function handleAccountSelection(uniqueid) {
     const tree = $(`#${uniqueid}-accounts_tree`).jstree(true);
-        const selectedIds = tree.get_selected();
-    
+    const selectedIds = tree.get_selected();
 
     if (!selectedIds.length) {
         alert('لطفاً یک حساب انتخاب کنید.');
@@ -313,36 +345,40 @@ function handleAccountSelection(uniqueid) {
     const nodeId = selectedNode.original.real_id || selectedNode.id;
     const nodeText = selectedNode.text;
 
-    // نمایش مقدار انتخاب شده در کنار دکمه
-    $(`#${uniqueid}-selected-account-id`).val(nodeId);
-    $(`#${uniqueid}-accounts-list`).text(nodeText);
+    if (window.currentAccountTarget === 'balance') {
+        // فرم اصلی
+        $(`#${uniqueid}-selected-account-id`).val(nodeId);
+        $(`#${uniqueid}-accounts-list`).text(nodeText);
 
-    // فقط select هایی که آیدی‌شون شبیه balance-account هست
-    const $accountSelect = $(`#id_${uniqueid}-new-balance-account, #id_${uniqueid}-update-balance-account`);
-
-    if ($accountSelect.length && $accountSelect.is('select')) {
-        let $existingOption = $accountSelect.find(`option[value="${nodeId}"]`);
-
-        if ($existingOption.length > 0) {
-            // اگر گزینه وجود دارد فقط متنش را به‌روزرسانی کن
-            $existingOption.text(nodeText);
-        } else {
-            // در غیر این صورت گزینه را اضافه کن
-            $accountSelect.append(`<option value="${nodeId}">${nodeText}</option>`);
+        const $accountSelect = $(`#id_${uniqueid}-new-balance-account, #id_${uniqueid}-update-balance-account`);
+        if ($accountSelect.length && $accountSelect.is('select')) {
+            let $existingOption = $accountSelect.find(`option[value="${nodeId}"]`);
+            if ($existingOption.length > 0) {
+                $existingOption.text(nodeText);
+            } else {
+                $accountSelect.append(`<option value="${nodeId}">${nodeText}</option>`);
+            }
+            $accountSelect.val(nodeId).trigger('change');
         }
+    } else if (window.currentAccountTarget === 'cheque') {
+        // فرم چک
+        $(`#${uniqueid}-selected-cheque-account-id`).val(nodeId);
+        $(`#${uniqueid}-cheque-accounts-list`).text(nodeText);
 
-        // مقدار را ست کن
-        $accountSelect.val(nodeId).trigger('change');
+        const $accountSelect = $(`#id_${uniqueid}-new-cheque-account, #id_${uniqueid}-update-cheque-account`);
+        if ($accountSelect.length && $accountSelect.is('select')) {
+            let $existingOption = $accountSelect.find(`option[value="${nodeId}"]`);
+            if ($existingOption.length > 0) {
+                $existingOption.text(nodeText);
+            } else {
+                $accountSelect.append(`<option value="${nodeId}">${nodeText}</option>`);
+            }
+            $accountSelect.val(nodeId).trigger('change');
+        }
     }
 }
 
-// دکمه select-account- را وصل کن
-$(document).on('click', "[id^='select-account-']", function () {
-    const uniqueid = this.id.replace('select-account-', '');
-    handleAccountSelection(uniqueid);
+
 });
-
-
-
 </script>
 <script type="text/javascript" src="{% static 'js/chrome-cancell-input.js' %}"></script>

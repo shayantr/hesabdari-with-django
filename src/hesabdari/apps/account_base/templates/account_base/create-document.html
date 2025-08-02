@@ -212,6 +212,7 @@ $(document).ready(function () {
         let transaction_type = 'debt'
         const lastForm = $('#forms-container .debt .form-wrapper').last();
         const Cheque_numbder = parseInt(lastForm.find('[name$="-Cheque_numbder"]').val());
+        const Cheque_account = lastForm.find('[name$="-cheque-account"]').val();
         const maturity_date = lastForm.find('[name$="-maturity_date"]').val();
         const balance_account = lastForm.find('[name$="-balance-account"]').val();
         const amount = lastForm.find('[name$="-balance-amount"]').val();
@@ -233,6 +234,7 @@ $(document).ready(function () {
                         $newForm.find('.toggle-cheque-form').prop('checked', true); // تیک زدن
                         $newForm.find('.cheque-form').show(); // نمایش فرم چک
                         $newForm.find(`[name$="-Cheque_numbder"]`).val(Cheque_numbder+1);
+                        $newForm.find(`[name$="-cheque-account"]`).val(Cheque_account);
                         $newForm.find(`[name$="-maturity_date"]`).val(datease);
                         const chequeFields = ['name', 'bank_name'];
                         chequeFields.forEach(field => {
@@ -252,6 +254,7 @@ $(document).ready(function () {
         let transaction_type = 'credit'
         const lastForm = $('#forms-container .credit .form-wrapper').last();
         const Cheque_numbder = parseInt(lastForm.find('[name$="-Cheque_numbder"]').val());
+        const Cheque_account = lastForm.find('[name$="-cheque-account"]').val();
         const maturity_date = lastForm.find('[name$="-maturity_date"]').val();
         const balance_account = lastForm.find('[name$="-balance-account"]').val();
         const amount = lastForm.find('[name$="-balance-amount"]').val();
@@ -274,6 +277,7 @@ $(document).ready(function () {
                         $newForm.find('.toggle-cheque-form').prop('checked', true); // تیک زدن
                         $newForm.find('.cheque-form').show(); // نمایش فرم چک
                         $newForm.find(`[name$="-Cheque_numbder"]`).val(Cheque_numbder+1);
+                        $newForm.find(`[name$="-cheque-account"]`).val(Cheque_account);
                         $newForm.find(`[name$="-maturity_date"]`).val(datease);
                         const chequeFields = ['name', 'bank_name'];
                         chequeFields.forEach(field => {
@@ -312,24 +316,6 @@ $(document).ready(function () {
 
 });
 
-$(document).ready(function () {
-
-    $('[id$="-accounts-list"]').click(function () {
-        let csrfToken = getCSRFToken(); // Get CSRF token
-
-		$.ajax({
-			url: "{% url 'get_accounts_list' %}",
-			type: "GET",
-			{#headers: { "X-CSRFToken": csrfToken }, // Send CSRF token in headers#}
-			data: {csrfmiddlewaretoken: csrfToken },
-			success: function (response) {
-                const $newForm = $(response.form_html);
-                $('.modal-body').html($newForm);
-
-			}
-		});
-    });
-});
 
 
 $(document).ready(function() {

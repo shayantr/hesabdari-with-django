@@ -122,32 +122,6 @@ class GetFormFragmentView(generic.View):
 
 
 
-# class AccountsView(generic.View):
-#     def get(self, request):
-#         list_accounts = AccountsClass.objects.all().order_by('tree_id', 'lft')
-#         accountform = AccountsForm()
-#         tree_data = [build_tree(root) for root in AccountsClass.get_root_nodes()]
-#
-#
-#         form_html = render_to_string('account_base/accounts.html',
-#                                      {'list_accounts': list_accounts, "accountform":accountform})
-#         return JsonResponse({'form_html': form_html, 'tree_data':tree_data})
-#
-#     def post(self, request):
-#         list_accounts = AccountsClass.objects.all()
-#         print(list_accounts)
-#         context = {
-#             'list_accounts': list_accounts
-#         }
-#         return JsonResponse({'list_accounts': list_accounts })
-
-# def build_tree(node):
-#     return {
-#         'id': node.id,
-#         'name': node.name,
-#         'children': [build_tree(child) for child in node.get_children()]
-#     }
-
 class AccountsView(generic.View):
     def get(self, request):
         def serialize_node(node):
@@ -160,7 +134,7 @@ class AccountsView(generic.View):
         accounts = AccountsClass.objects.all()
         data = [serialize_node(acc) for acc in accounts]
         form_html = render_to_string('account_base/accounts.html', {
-            'uniqueid': request.GET.get('uniqueid', 'default')
+            'uniqueid': request.GET.get('uid', 'default')
         })
         return JsonResponse({'form_html': form_html, 'data': data})
 
@@ -183,20 +157,7 @@ def create_accounts(request):
         })
     else:
         return JsonResponse({'success': False, 'errors': form.errors})
-# def create_accounts(request):
-#     form = AccountsForm(request.POST)
-#     if form.is_valid():
-#         new_account = form.save()
-#         return JsonResponse({
-#             'success': True,
-#             'id': new_account.id,
-#             'name': new_account.name,
-#             'parent_id': new_account.parent.id if new_account.parent else None
-#         })
-#     else:
-#         return JsonResponse({'success': False, 'errors': form.errors})
 
-    # return JsonResponse({'success': False, 'errors': accountform.errors})
 
 
 def extract_all_update_prefixes(post_data, file_data):

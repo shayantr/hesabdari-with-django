@@ -68,6 +68,7 @@ class CashierCheque(models.Model):
         RETURN_CH = 'عودتی', 'عودتی'
         ESCROW = 'امانی', 'امانی'
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cashiercheque', blank=True, null=True)
+    account = models.ForeignKey(AccountsClass, on_delete=models.CASCADE, related_name='Bank_cheque', null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     Cheque_numbder = models.IntegerField(null=True, blank=True)
     created_at = jmodels.jDateField(auto_now_add=True, editable=True)
