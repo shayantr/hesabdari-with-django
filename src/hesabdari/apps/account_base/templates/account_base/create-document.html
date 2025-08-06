@@ -113,7 +113,7 @@
         <div class="debt">
             {% for i in combined_forms %}
                 {% if i.form_balance.transaction_type.value == "debt" %}
-                    {% include "account_base/form_fragment.html" with uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="debt" %}
+                    {% include "account_base/form_fragment.html" with bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="debt" %}
                 {% endif %}
             {% endfor %}
             <p>---------بدهی ها--------</p>
@@ -124,7 +124,7 @@
             <div class="credit">
                             {% for i in combined_forms %}
                 {% if i.form_balance.transaction_type.value == "credit" %}
-                    {% include "account_base/form_fragment.html" with uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="credit" %}
+                    {% include "account_base/form_fragment.html" with bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="credit" %}
 
                     {% endif %}
             {% endfor %}
@@ -215,6 +215,7 @@ $(document).ready(function () {
         const Cheque_account = lastForm.find('[name$="-cheque-account"]').val();
         const maturity_date = lastForm.find('[name$="-maturity_date"]').val();
         const balance_account = lastForm.find('[name$="-balance-account"]').val();
+        const balance_account_new = lastForm.find('[id$="-accounts-list"]').text();
         const amount = lastForm.find('[name$="-balance-amount"]').val();
 		$.ajax({
 			url: "{% url 'get_form_fragment' %}",
@@ -226,7 +227,9 @@ $(document).ready(function () {
                 const datease = response.datease;
                 const $lastForm = $('#forms-container .debt .form-wrapper').last();
                 $newForm.find(`[name$="-balance-account"]`).val(balance_account);
+                $newForm.find(`[id$="-accounts-list"]`).html(`<option selected>${balance_account_new}</option>`);
                 $newForm.find(`[name$="-balance-amount"]`).val(amount);
+                
                 
                 if ($lastForm.length) {
                     const wasChecked = $lastForm.find('.toggle-cheque-form').is(':checked');
@@ -236,10 +239,14 @@ $(document).ready(function () {
                         $newForm.find(`[name$="-Cheque_numbder"]`).val(Cheque_numbder+1);
                         $newForm.find(`[name$="-cheque-account"]`).val(Cheque_account);
                         $newForm.find(`[name$="-maturity_date"]`).val(datease);
+                        const bank_account_new = lastForm.find('[id$="-bank-list"]').text();
+
+
                         const chequeFields = ['name', 'bank_name'];
                         chequeFields.forEach(field => {
                             const val = lastForm.find(`[name$="-${field}"]`).val();
                             $newForm.find(`[name$="-${field}"]`).val(val);
+                            $newForm.find(`[id$="-bank-list"]`).html(`<option selected>${bank_account_new}</option>`);
                         });
                     }
                 }
@@ -257,6 +264,7 @@ $(document).ready(function () {
         const Cheque_account = lastForm.find('[name$="-cheque-account"]').val();
         const maturity_date = lastForm.find('[name$="-maturity_date"]').val();
         const balance_account = lastForm.find('[name$="-balance-account"]').val();
+        const balance_account_new = lastForm.find('[id$="-accounts-list"]').text();
         const amount = lastForm.find('[name$="-balance-amount"]').val();
 
 		$.ajax({
@@ -268,6 +276,7 @@ $(document).ready(function () {
                 const $newForm = $(response.form_html);
                 const $lastForm = $('#forms-container .credit .form-wrapper').last();
                 $newForm.find(`[name$="-balance-account"]`).val(balance_account);
+                $newForm.find(`[id$="-accounts-list"]`).html(`<option selected>${balance_account_new}</option>`);
                 $newForm.find(`[name$="-balance-amount"]`).val(amount);
 
                 const datease = response.datease;
@@ -279,9 +288,11 @@ $(document).ready(function () {
                         $newForm.find(`[name$="-Cheque_numbder"]`).val(Cheque_numbder+1);
                         $newForm.find(`[name$="-cheque-account"]`).val(Cheque_account);
                         $newForm.find(`[name$="-maturity_date"]`).val(datease);
+                        const bank_account_new = lastForm.find('[id$="-bank-list"]').text();
                         const chequeFields = ['name', 'bank_name'];
                         chequeFields.forEach(field => {
                             const val = lastForm.find(`[name$="-${field}"]`).val();
+                            $newForm.find(`[id$="-bank-list"]`).html(`<option selected>${bank_account_new}</option>`);
                             $newForm.find(`[name$="-${field}"]`).val(val);
                         });
                     }
@@ -337,6 +348,7 @@ $(document).ready(function() {
                     alert('چک با موفقیت حذف شد');
                     button.remove();
                     formWrapper.find('.toggle-cheque-form').prop('checked', false);
+                    formWrapper.find('.toggle-cheque-form').prop('disabled', false);
                     chequeForm.hide();
                     chequeForm.find('input, textarea, select').val('');
                     chequeForm.find('select').prop('selectedIndex', 0); // برای select‌ها
@@ -349,8 +361,5 @@ $(document).ready(function() {
         });
     });
 });
-</script>
-<script>
-
 </script>
 {% endblock %}

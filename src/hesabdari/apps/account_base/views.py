@@ -176,16 +176,19 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
         document = get_object_or_404(Document, pk=pk)
         balancesheet = BalanceSheet.objects.filter(document=document)
         combined_forms = []
-        combined_form = namedtuple('combined_form', ['uniqueid', 'form_balance', 'form_cheque', 'chequeid'])
+        combined_form = namedtuple('combined_form', ['uniqueid', 'form_balance', 'form_cheque', 'chequeid', 'account_str', 'bank_str'])
         for i in balancesheet:
             balance_forms = BalanceSheetForm(prefix=f"{i.id}-update-balance", instance=i)
+            account_str = i.account.__str__()
+            bank_str = "----"
             chequeid= None
             if i.cheque:
                 cheque_forms = CashierChequeForm(prefix=f"{i.id}-update-cheque", instance=i.cheque)
                 chequeid = i.cheque.id
+                bank_str=i.cheque.account.__str__()
             else:
                 cheque_forms = CashierChequeForm(prefix=f"{i.id}-update-cheque")
-            combined_forms.append(combined_form(i.id, balance_forms, cheque_forms, chequeid))
+            combined_forms.append(combined_form(i.id, balance_forms, cheque_forms, chequeid, account_str, bank_str))
         context = {
             'combined_forms': combined_forms
         }
@@ -206,7 +209,6 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
             combined_forms.append(combinedform(i.id, balanceform, chequeform))
             if not balanceform.is_valid() or not chequeform.is_valid():
                 all_valid = False
-                print("false")
             if balanceform.cleaned_data.get('transaction_type') == "debt":
                 all_debt += balanceform.cleaned_data.get('amount') or 0
             elif balanceform.cleaned_data.get('transaction_type') == "credit":
@@ -384,15 +386,6 @@ class BalanceListView(LoginRequiredMixin, generic.View):
         }
         return render(request, 'account_base/balance_list.html', context)
 
-# def edit_account(request, pk):
-#     if request.method == 'POST':
-#         try:
-#             account = AccountsClass.objects.get(pk=pk)
-#             account.name = request.POST.get('name')
-#             account.save()
-#             return JsonResponse({'success': True})
-#         except AccountsClass.DoesNotExist:
-#             return JsonResponse({'success': False, 'error': 'حساب یافت نشد'})
 
 def edit_account(request, pk):
     account = get_object_or_404(AccountsClass, pk=pk)

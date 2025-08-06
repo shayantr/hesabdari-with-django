@@ -22,8 +22,8 @@ class BalanceSheetForm(forms.ModelForm):
         widgets = {
             'user': forms.HiddenInput(),
             'maturityـamount': forms.TextInput(attrs={'class': 'form-control', 'placeholder':'مبلغ', 'id': "floatingInput"}),
-            'account': forms.Select(attrs={'class': 'dropdown form-select form-select-lg' }),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'توضیحات', "cols":20, "rows":1}),
+            'account': forms.Select(attrs={'class': 'dropdown form-select form-select-lg ', 'style': 'display:none;' }),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'توضیحات', "cols":10, "rows":1}),
             'image': forms.FileInput(attrs={'class': 'form-control','accept': 'image/jpeg,application/pdf', 'placeholder': 'بارگزاری عکس'}),
             'transaction_type': forms.HiddenInput(),
             'document': forms.HiddenInput(),
@@ -40,6 +40,8 @@ class CashierChequeForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'user': forms.HiddenInput(),
+            'account': forms.Select(attrs={'class': 'dropdown form-select form-select-lg ', 'style': 'display:none;'}),
+
             'maturity_date': forms.TextInput(
                 attrs={'class': 'form-control', 'data-jdp':'data-jdp', 'placeholder':'زمان سررسید'}),
             'name': forms.TextInput(

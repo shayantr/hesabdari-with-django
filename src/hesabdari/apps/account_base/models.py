@@ -33,7 +33,16 @@ class AccountsClass(MPTTModel):
         order_insertion_by = ['name']
 
     def __str__(self):
-        return self.name
+        # Get all ancestors (excluding self) in order from root to parent
+        ancestors = self.get_ancestors()
+
+        # Collect ucode values from ancestors and self
+        name_list = [ancestor.name for ancestor in ancestors if ancestor.name]  # Filter out None values
+        if self.name:
+            name_list.append(self.name)
+        name_list = " > ".join(name_list) if name_list else "خالی"
+
+        return f"{name_list}"
 
 
 
