@@ -96,6 +96,12 @@
             color: red;
             margin-top: 10px;
         }
+        .debt{
+            background-color: #ffe5e5; /* قرمز خیلی ملایم */
+        }
+        .credit{
+            background-color: #e5fbe5; /* سبز خیلی ملایم */
+        }
     </style>
     
    
@@ -229,7 +235,7 @@ $(document).ready(function () {
                 $newForm.find(`[name$="-balance-account"]`).val(balance_account);
                 $newForm.find(`[id$="-accounts-list"]`).html(`<option selected>${balance_account_new}</option>`);
                 $newForm.find(`[name$="-balance-amount"]`).val(amount);
-                
+
                 
                 if ($lastForm.length) {
                     const wasChecked = $lastForm.find('.toggle-cheque-form').is(':checked');

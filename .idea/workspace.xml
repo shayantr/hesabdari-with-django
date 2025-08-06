@@ -6,11 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="account ui in document fixed and balance form update combined with create form">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -249,7 +244,7 @@
       <workItem from="1754041521444" duration="7106000" />
       <workItem from="1754055105135" duration="168000" />
       <workItem from="1754123272569" duration="22514000" />
-      <workItem from="1754404280279" duration="23616000" />
+      <workItem from="1754404280279" duration="25272000" />
     </task>
     <task id="LOCAL-00001" summary="login, register and verify models and views and templates">
       <option name="closed" value="true" />
@@ -515,7 +510,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754166448895</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="account ui in document fixed and balance form update combined with create form">
+      <option name="closed" value="true" />
+      <created>1754484625882</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1754484625882</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
