@@ -121,7 +121,7 @@ function createTree(uniqueid, data, selectedId = null) {
             check_callback: true,
             themes: { stripes: true }
         },
-        plugins: ['wholerow'],
+        plugins: ['wholerow', 'search', 'contextmenu'],
         ...(selectedId ? { selected: [selectedId] } : {})
     }).on('ready.jstree refresh.jstree open_node.jstree', function () {
         addControlsToNodes(uniqueid);
@@ -129,7 +129,9 @@ function createTree(uniqueid, data, selectedId = null) {
             treeElement.jstree(true).select_node(selectedId);
         }
     });
-}
+
+    }
+
 
     function addControlsToNodes(uniqueid) {
         const tree = $(`#${uniqueid}-accounts_tree`).jstree(true);
@@ -320,6 +322,15 @@ $(`#{{ uniqueid }}-accounts-list-btn`).click(function () {
 
             const selectedId = $(`#${uid}-selected-account-id`).val();  // 👈 گرفتن آی‌دی انتخاب شده قبلی
             createTree(uid, response.data, selectedId);  // 👈 ارسال آن به createTree
+            //search account
+            let to = false;
+            $(`#${uid}-jstree-search`).on('keyup', function () {
+                if (to) clearTimeout(to);
+                to = setTimeout(function () {
+                    const query = $(`#${uid}-jstree-search`).val();
+                    $(`#${uid}-accounts_tree`).jstree(true).search(query);
+                }, 250);
+            });
         }
     });
 });
@@ -337,6 +348,15 @@ $(`#{{ uniqueid }}-cheque-accounts-list-btn`).click(function () {
 
             const selectedId = $(`#${uid}-selected-cheque-account-id`).val();  // 👈 آی‌دی چک
             createTree(uid, response.data, selectedId);
+            //search bank
+            let to = false;
+            $(`#${uid}-jstree-search`).on('keyup', function () {
+                if (to) clearTimeout(to);
+                to = setTimeout(function () {
+                    const query = $(`#${uid}-jstree-search`).val();
+                    $(`#${uid}-accounts_tree`).jstree(true).search(query);
+                }, 250);
+            });
         }
     });
 });

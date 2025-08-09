@@ -2,13 +2,15 @@ from django.urls import path, include
 
 from hesabdari.apps.account_base.views import createbalancesheet, \
     GetFormFragmentView, AccountsView, UpdateBalanceView, deletechequeview, ChequeListView, \
-    filter_debit_cheques, filter_credit_cheques, edit_account, delete_account, BalanceListView, filter_credit_balance, \
-    filter_debit_balance, create_accounts
+    filter_debit_cheques, filter_credit_cheques, edit_account, delete_account, BalanceListView, \
+    filter_balance, create_accounts, account_report, AccountReportDetails
 
 urlpatterns = [
     path('create-document/', createbalancesheet, name='create-document'),
     path('items/get-form/', GetFormFragmentView.as_view(), name='get_form_fragment'),
     path('items/accounts-list/', AccountsView.as_view(), name='get_accounts_list'),
+    path('accounts-report/', account_report, name='get_accounts_report'),
+    path('accounts-report-detail/<int:pk>/', AccountReportDetails.as_view(), name='accounts_report_detail'),
     path('items/accounts-list/create', create_accounts, name='create_accounts'),
     path('update/<int:pk>/', UpdateBalanceView.as_view(), name='UpdateBalanceView'),
     path('delete-cheque/', deletechequeview, name='delete-cheque-view'),
@@ -18,6 +20,5 @@ urlpatterns = [
     path('accounts/edit/<int:pk>/', edit_account, name='edit_account'),
     path('accounts/delete/<int:pk>/', delete_account, name='delete_account'),
     path('balance-lists/', BalanceListView.as_view(), name='balance_lists'),
-    path('balance-lists/filter-balance-credits/', filter_credit_balance, name='filter_credit_balance'),
-    path('balance-lists/filter-balance-debits/', filter_debit_balance, name='filter_debit_balance'),
+    path('balance-lists/filter-balance/', filter_balance, name='filter_balance'),
 ]

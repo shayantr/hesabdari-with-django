@@ -2,8 +2,8 @@
 {% load static %}
 {% load jinja_filters %}
 {% block header %}
-   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}"/>
     <script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
 
 
@@ -11,128 +11,65 @@
 {% endblock %}
 
 {% block body %}
-<div>
     <h2>گزارش سند ها</h2>
-    
-    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="pills-debit-tab" data-bs-toggle="pill" data-bs-target="#debits" type="button" role="tab" aria-controls="pills-debit" aria-selected="true">دریافتنی</button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="pills-credit-tab" data-bs-toggle="pill" data-bs-target="#credits" type="button" role="tab" aria-controls="pills-credit" aria-selected="false">پرداختنی</button>
-    </li>
-    </ul>
-    <div class="tab-content" id="pills-tabContent">
-    
-        <div id="debits" class="tab-pane fade show active" id="pills-debit" role="tabpanel" aria-labelledby="pills-debit-tab" tabindex="0">
-            <form id="debit-filter-form">
-                <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;"> 
-                    <div class="col-md-3 mb-2">
-                                <input type="text" name="account_name" placeholder="جستجو نام حساب" class="form-control mb-2">
-                            </div>
-                    <div class="col-md-3 mb-2">
-                                <input type="text" name="description" placeholder="جستجو در توضیحات" class="form-control mb-2">
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <input type="text" name="amount" placeholder="مبلغ" class="form-control mb-2">
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <input type="text" name="balance_id" placeholder="شماره سند" class="form-control mb-2">
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <input type="text" name="document_id" placeholder="شماره روکش" class="form-control mb-2">
-                            </div>
-                </div>
-                                        <!-- بخش اول: تاریخ ثبت -->
-                <div class="row mb-3 p-3 rounded" style="background-color: #e8f0fe;">
-                    <label class="mb-2 fw-bold">تاریخ ثبت:</label>
-                    <div class="col-md-6 mb-2">
-                        <input type="text" class="form-control" name="created_at_from" data-jdp placeholder="تاریخ ثبت از">
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <input type="text" class="form-control" name="created_at_to" data-jdp placeholder="تاریخ ثبت تا">
-                    </div>
-                </div>
 
-            </form>
-            
-        <div id="debit-balance-list">
-                        {% include "partials/debit_balance.html" %}
 
-                        
-        </div>
-                    </div>
-        <div id="credits" class="tab-pane fade show" id="pills-credit" role="tabpanel" aria-labelledby="pills-credit-tab" tabindex="0">
-            <form id="credit-filter-form">
-                <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;"> 
-                    <div class="col-md-3 mb-2">
-                        <input type="text" name="account_name" placeholder="جستجو نام چک" class="form-control mb-2">
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <input type="text" name="description" placeholder="جستجو در توضیحات" class="form-control mb-2">
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <input type="text" name="amount" placeholder="مبلغ" class="form-control mb-2">
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <input type="text" name="balance_id" placeholder="شماره سند" class="form-control mb-2">
-                    </div>
-                   <div class="col-md-3 mb-2">
-                        <input type="text" name="document_id" placeholder="شماره روکش" class="form-control mb-2">
-                    </div>
+        <form id="search-filter-form">
+            <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;">
+                <div class="col-md-3 mb-2">
+                    <input type="text" name="account_name" placeholder="جستجو نام حساب" class="form-control mb-2">
                 </div>
-                                        <!-- بخش اول: تاریخ ثبت -->
-                <div class="row mb-3 p-3 rounded" style="background-color: #e8f0fe;">
-                    <label class="mb-2 fw-bold">تاریخ ثبت:</label>
-                    <div class="col-md-6 mb-2">
-                        <input type="text" class="form-control" name="created_at_from" data-jdp placeholder="تاریخ ثبت از">
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <input type="text" class="form-control" name="created_at_to" data-jdp placeholder="تاریخ ثبت تا">
-                    </div>
+                <div class="col-md-3 mb-2">
+                    <input type="text" name="description" placeholder="جستجو در توضیحات" class="form-control mb-2">
                 </div>
-            </form>
-            <div id="credit-balance-list">
-
-            {% include "partials/credit_balance.html" %}
-
-            
+                <div class="col-md-3 mb-2">
+                    <input type="text" name="amount" placeholder="مبلغ" class="form-control mb-2">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <input type="text" name="balance_id" placeholder="شماره سند" class="form-control mb-2">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <input type="text" name="document_id" placeholder="شماره روکش" class="form-control mb-2">
+                </div>
             </div>
+            <!-- بخش اول: تاریخ ثبت -->
+            <div class="row mb-3 p-3 rounded" style="background-color: #e8f0fe;">
+                <label class="mb-2 fw-bold">تاریخ ثبت:</label>
+                <div class="col-md-6 mb-2">
+                    <input type="text" class="form-control" name="created_at_from" data-jdp placeholder="تاریخ ثبت از">
+                </div>
+                <div class="col-md-6 mb-2">
+                    <input type="text" class="form-control" name="created_at_to" data-jdp placeholder="تاریخ ثبت تا">
+                </div>
+            </div>
+
+        </form>
+
+        <div id="search-balance-list">
+            {% include "partials/search_balance.html" %}
+
+
         </div>
-    </div>
-    </div>
     <script src="{% static 'js/plugins/isotope.pkgd.min.js' %}"></script>
     <script src="{% static 'js/plugins/index.js' %}"></script>
     <script>
-    jalaliDatepicker.startWatch();
+        jalaliDatepicker.startWatch();
 
-    $(document).ready(function () {
-        function filterDebits() {
-            $.ajax({
-                url: "{% url 'filter_debit_balance' %}",
-                data: $('#debit-filter-form').serialize(),
-                success: function (data) {
-                    $('#debit-balance-list').html(data.html);
-                }
+        $(document).ready(function () {
+            function filterbalance() {
+                $.ajax({
+                    url: "{% url 'filter_balance' %}",
+                    data: $('#search-filter-form').serialize(),
+                    success: function (data) {
+                        $('#search-balance-list').html(data.html);
+                    }
+                });
+            }
+
+            $('#search-filter-form input, #search-filter-form select').on('input change keyup', function () {
+                filterbalance();
             });
-        }
-    
-        $('#debit-filter-form input, #debit-filter-form select').on('input change keyup', function () {
-            filterDebits();
+
         });
-        function filtercredits() {
-            $.ajax({
-                url: "{% url 'filter_credit_balance' %}",
-                data: $('#credit-filter-form').serialize(),
-                success: function (data) {
-                    $('#credit-balance-list').html(data.html);
-                }
-            });
-        }
-    
-        $('#credit-filter-form input, #credit-filter-form select').on('input change keyup', function () {
-            filtercredits();
-        });
-    });
     </script>
 {% endblock %}

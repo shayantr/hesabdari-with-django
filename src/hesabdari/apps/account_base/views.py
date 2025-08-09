@@ -8,7 +8,7 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
@@ -121,22 +121,56 @@ class GetFormFragmentView(generic.View):
         return JsonResponse({'form_html': form_html, 'datease':datease })
 
 
-
+def account_report(request):
+    return render(request, 'account_base/accounts-report.html')
 class AccountsView(generic.View):
     def get(self, request):
-        def serialize_node(node):
+        def serialize_node(node, net_total):
             return {
                 'id': str(node.id),
                 'text': node.name,
-                'parent': str(node.parent.id) if node.parent else '#'
+                'parent': str(node.parent.id) if node.parent else '#',
+                'li_attr': {'data-net-total': net_total},
             }
 
-        accounts = AccountsClass.objects.all()
-        data = [serialize_node(acc) for acc in accounts]
+        accounts = AccountsClass.objects.prefetch_related(
+            Prefetch('balance_sheets', queryset=BalanceSheet.objects.all()))
+        data= []
+        for account in accounts:
+            descendants = account.get_descendants(include_self=True)
+            total_debtor = 0
+            total_creditor = 0
+            for descendant in descendants:
+                for bs in descendant.balance_sheets.all():
+                    if bs.amount:
+                        if bs.transaction_type == 'debt':
+                            total_debtor += bs.amount
+                        elif bs.transaction_type == 'credit':
+                            total_creditor += bs.amount
+
+            net_total = total_creditor - total_debtor
+
+            data.append(serialize_node(account, net_total))
+
+        # data = [serialize_node(acc) for acc in accounts]
         form_html = render_to_string('account_base/accounts.html', {
             'uniqueid': request.GET.get('uid', 'default')
         })
         return JsonResponse({'form_html': form_html, 'data': data})
+
+class AccountReportDetails(generic.View):
+    def get(self, request, pk):
+        parent_account = get_object_or_404(AccountsClass, pk=pk)
+        descendants = (parent_account.get_descendants(include_self=True).prefetch_related(Prefetch('balance_sheets', queryset=BalanceSheet.objects.all())))
+        qs = []
+        for descendant in descendants:
+            for balance in descendant.balance_sheets.all():
+                qs.append(balance)
+        context = {
+            'balance_lists':qs,
+        }
+
+        return render(request, 'account_base/balance_list.html', context)
 
 
 def create_accounts(request):
@@ -369,22 +403,9 @@ def filter_credit_cheques(request):
         credits = credits.filter(cheque__user_id=request.user.id, description__contains=description)
     if name:
         credits = credits.filter(cheque__user_id=request.user.id, cheque__name__icontains=name)
-    print(credits)
 
     html = render_to_string('partials/credit_cheques.html', {'credits': credits})
     return JsonResponse({'html': html})
-
-class BalanceListView(LoginRequiredMixin, generic.View):
-    def get(self, request):
-        qs = BalanceSheet.objects.filter(user=request.user.id).select_related('cheque')
-        debits = qs.filter(transaction_type='debt')
-        credits = qs.filter(transaction_type='credit')
-
-        context = {
-            'debits': debits,
-            'credits': credits,
-        }
-        return render(request, 'account_base/balance_list.html', context)
 
 
 def edit_account(request, pk):
@@ -414,20 +435,16 @@ def delete_account(request, pk):
 
 class BalanceListView(LoginRequiredMixin, generic.View):
     def get(self, request):
-        qs = BalanceSheet.objects.filter(user=request.user.id)
-        debits = qs.filter(transaction_type='debt')
-        credits = qs.filter(transaction_type='credit')
-
+        qs = BalanceSheet.objects.filter(user=request.user.id).select_related('cheque')
         context = {
-            'debits': debits,
-            'credits': credits,
+            'balance_lists': qs,
         }
         return render(request, 'account_base/balance_list.html', context)
 
-def filter_credit_balance(request):
-    credits = BalanceSheet.objects.filter(
+
+def filter_balance(request):
+    qs = BalanceSheet.objects.filter(
         Q(user=request.user.id),
-        Q(transaction_type='credit'),
     )
 
     account_name = request.GET.get('account_name')
@@ -439,62 +456,26 @@ def filter_credit_balance(request):
     description = request.GET.get('description')
 
     if balance_id:
-        credits = credits.filter(id = int(balance_id))
+        qs = qs.filter(id = int(balance_id))
     if document_id:
-        credits = credits.filter(document_id = document_id)
-    if created_at_from:
-        credits = credits.filter(date_created__gte=created_at_from)
-    if created_at_to:
-        credits = credits.filter(date_created__lte=created_at_to)
-    if amount:
-        credits = credits.filter(amount=amount)
-    if description:
-        credits = credits.filter(description__contains=description)
-    if account_name:
-        credits = credits.filter(account__name__contains=account_name)
-    print(credits)
-
-    html = render_to_string('partials/credit_balance.html', {'credits': credits})
-    return JsonResponse({'html': html})
-
-
-def filter_debit_balance(request):
-    debits = BalanceSheet.objects.filter(
-        Q(user=request.user.id),
-        Q(transaction_type='debt'),
-    )
-    print(debits)
-
-
-    account_name = request.GET.get('account_name')
-    amount = request.GET.get('amount')
-    balance_id = request.GET.get('balance_id')
-    document_id = request.GET.get('document_id')
-    created_at_from = request.GET.get('created_at_from')
-    created_at_to = request.GET.get('created_at_to')
-    description = request.GET.get('description')
-
-    if balance_id:
-        debits = debits.filter(id = int(balance_id))
-    if document_id:
-        debits = debits.filter(document_id = document_id)
+        qs = qs.filter(document_id = document_id)
     if created_at_from:
         if created_at_from == created_at_to:
-            debits = debits.filter(date_created__exact=created_at_from)
+            qs = qs.filter(date_created__exact=created_at_from)
         else:
-            debits = debits.filter(date_created__gte=created_at_from)
+            qs = qs.filter(date_created__gte=created_at_from)
     if created_at_to:
         if created_at_from == created_at_to:
-            debits = debits.filter(date_created__exact=created_at_to)
+            qs = qs.filter(date_created__exact=created_at_to)
         else:
-            debits = debits.filter(date_created__lte=created_at_to)
+            qs = qs.filter(date_created__lte=created_at_to)
     if amount:
-        debits = debits.filter(mount=amount)
+        qs = qs.filter(mount=amount)
     if description:
-        debits = debits.filter(description__contains=description)
+        qs = qs.filter(description__contains=description)
     if account_name:
-        debits = debits.filter(account__name__contains=account_name)
-    print(debits)
+        qs = qs.filter(account__name__contains=account_name)
 
-    html = render_to_string('partials/debit_balance.html', {'debits': debits})
+    html = render_to_string('partials/search_balance.html', {'balance_lists': qs})
     return JsonResponse({'html': html})
+

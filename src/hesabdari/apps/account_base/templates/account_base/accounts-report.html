@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+
+{% block header %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div id="accounts-report">
+<h1>Accounts Report</h1>
+</div>
+<script>
+$(document).ready(function () {
+
+    function loadTree(uniqueid) {
+        $.getJSON("{% url 'get_accounts_list' %}", function (response) {
+
+            const treeElement = $(`#${uniqueid}-accounts_tree`);
+            if (!treeElement.length) return;
+
+            const tree = treeElement.jstree(true);
+            if (tree) {
+                tree.settings.core.data = response.data;
+                tree.refresh(true);
+            } else {
+                createTree(uniqueid, response.data);
+            }
+        });
+    }
+
+    function createTree(uniqueid, data) {
+        const treeElement = $(`#${uniqueid}-accounts_tree`);
+        if (!treeElement.length) return;
+
+        $(`#${uniqueid}-add_root_btn`).hide()
+        
+        treeElement.jstree("destroy");
+        treeElement.jstree({
+            core: {
+                data: data,
+                check_callback: true,
+                themes: { stripes: true }
+            },
+            plugins: ['wholerow', 'search'],
+                }).on('ready.jstree refresh.jstree open_node.jstree', function () {
+                    addControlsToNodes(uniqueid);
+                    $(`#${uniqueid}-accounts_tree`).off('click', 'a.btn-edit').on('click', 'a.btn-edit', function (e) {
+                        e.stopPropagation(); // جلوی کلیک روی نود رو بگیر
+                        // اینجا اگر میخوای اجازه بدی لینک پیش‌فرض کار کنه، e.preventDefault() نذار
+                        // یا اگر لازم داری دستی ریدایرکت کنی:
+                        // window.location.href = $(this).attr('href');
+                    });
+                });
+    }
+function addControlsToNodes(uniqueid) {
+    const tree = $(`#${uniqueid}-accounts_tree`).jstree(true);
+
+    // کل نودها
+    const fullNodes = tree.get_json('#');
+
+    function flattenNodes(nodes) {
+        let flat = [];
+        nodes.forEach(node => {
+            flat.push(node);
+            if (node.children && node.children.length > 0) {
+                flat = flat.concat(flattenNodes(node.children));
+            }
+        });
+        return flat;
+    }
+
+    const nodes = flattenNodes(fullNodes);
+
+    nodes.forEach(node => {
+        // گرفتن مقدار از li_attr
+        const net_total = node.li_attr?.['data-net-total'] ?? 0;
+
+        const nodeId = node.id;
+        const baseUrl = "{% url 'accounts_report_detail' 0 %}";
+        const url = baseUrl.replace(0, nodeId);
+
+
+        const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
+                // تعیین رنگ
+        let colorClass = "";
+        if (net_total > 0) {
+            colorClass = "text-success"; // سبز
+        } else if (net_total < 0) {
+            colorClass = "text-danger"; // قرمز
+        } else {
+            colorClass = "text-muted"; // خاکستری
+        }
+
+        if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
+            const $buttons = $('<span class="ms-auto">')
+                .append(`<span class="${colorClass}" data-uid="${uniqueid}" data-id="${nodeId}">${net_total}</span>`)
+                .append(`<a href="${url}" class="btn btn-sm btn-edit"><i class="fa fa-eye"> اسناد</i></a>`)
+            $anchor.append($buttons);
+        }
+    });
+}
+
+
+    $.ajax({
+        url: "{% url 'get_accounts_list' %}",
+        type: "GET",
+        success: function (response) {
+            $('#accounts-report').html(response.form_html);
+            
+            createTree('default', response.data);
+            //search bank
+            let to = false;
+            $(`#default-jstree-search`).on('keyup', function () {
+                if (to) clearTimeout(to);
+                to = setTimeout(function () {
+                    const query = $(`#default-jstree-search`).val();
+                    $(`#default-accounts_tree`).jstree(true).search(query);
+                }, 250);
+            });
+            
+        }
+    });
+    loadTree(100000000)
+
+    
+    });
+</script>
+
+{% endblock %}
+
+    
+    
