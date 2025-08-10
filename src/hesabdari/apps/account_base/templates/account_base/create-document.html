@@ -119,7 +119,7 @@
         <div class="debt">
             {% for i in combined_forms %}
                 {% if i.form_balance.transaction_type.value == "debt" %}
-                    {% include "account_base/form_fragment.html" with bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="debt" %}
+                    {% include "account_base/form_fragment.html" with balance_id=i.balance_id bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="debt" %}
                 {% endif %}
             {% endfor %}
             <p>---------بدهی ها--------</p>
@@ -130,7 +130,7 @@
             <div class="credit">
                             {% for i in combined_forms %}
                 {% if i.form_balance.transaction_type.value == "credit" %}
-                    {% include "account_base/form_fragment.html" with bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="credit" %}
+                    {% include "account_base/form_fragment.html" with balance_id=i.balance_id bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="credit" %}
 
                     {% endif %}
             {% endfor %}
@@ -150,6 +150,12 @@
             </div>
             <button class="btn btn-primary me-2" id="saveall" type="submit">ذخیره همه</button>
         </form>
+    <form method="post" action="{% url 'delete_document' document_id %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary me-2" style="margin:2px;">
+        حذف روکش سند
+    </button>
+</form>
 
 <script>
 jalaliDatepicker.startWatch();
@@ -313,10 +319,35 @@ $(document).ready(function () {
     });
 
     $('#forms-container').on('click', '.remove-form', function () {
-        $(this).closest('.form-wrapper').remove();
-        calcDebtTotal();
-        calcCreditTotal();
+        const balance_id = $(this).attr('id');
+        const form = $(this).closest('.form-wrapper');
 
+        console.log(balance_id);
+        if (balance_id){
+            $.ajax({
+                url: "{% url 'delete_balance' %}",
+                type: "POST",
+                data: {
+                    'balance_id': balance_id,
+                    csrfmiddlewaretoken: getCSRFToken(),
+                },
+                success: function(response) {
+                if (response.success) {
+                    alert('سند با موفقیت حذف شد');
+                    form.remove();
+                    calcDebtTotal();
+                    calcCreditTotal();
+                } else {
+                    alert('خطا: ' + response.error);
+                }
+            }
+                
+            });
+        }else {
+            $(this).closest('.form-wrapper').remove();
+            calcDebtTotal();
+            calcCreditTotal();
+        }
     });
     $('#forms-container').on('change', '.toggle-cheque-form', function () {
     const chequeForm = $(this).closest('.form-wrapper').find('.cheque-form');

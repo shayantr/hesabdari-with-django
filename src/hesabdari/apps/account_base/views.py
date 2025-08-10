@@ -163,11 +163,15 @@ class AccountReportDetails(generic.View):
         parent_account = get_object_or_404(AccountsClass, pk=pk)
         descendants = (parent_account.get_descendants(include_self=True).prefetch_related(Prefetch('balance_sheets', queryset=BalanceSheet.objects.all())))
         qs = []
+        id_lists = []
         for descendant in descendants:
             for balance in descendant.balance_sheets.all():
                 qs.append(balance)
+                id_lists.append(balance.id)
+        print(id_lists)
         context = {
             'balance_lists':qs,
+            'id_lists': id_lists
         }
 
         return render(request, 'account_base/balance_list.html', context)
@@ -210,9 +214,10 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
         document = get_object_or_404(Document, pk=pk)
         balancesheet = BalanceSheet.objects.filter(document=document)
         combined_forms = []
-        combined_form = namedtuple('combined_form', ['uniqueid', 'form_balance', 'form_cheque', 'chequeid', 'account_str', 'bank_str'])
+        combined_form = namedtuple('combined_form', ['uniqueid', 'form_balance', 'form_cheque', 'chequeid', 'account_str', 'bank_str', 'balance_id'])
         for i in balancesheet:
             balance_forms = BalanceSheetForm(prefix=f"{i.id}-update-balance", instance=i)
+            balance_id = i.id
             account_str = i.account.__str__()
             bank_str = "----"
             chequeid= None
@@ -222,9 +227,10 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
                 bank_str=i.cheque.account.__str__()
             else:
                 cheque_forms = CashierChequeForm(prefix=f"{i.id}-update-cheque")
-            combined_forms.append(combined_form(i.id, balance_forms, cheque_forms, chequeid, account_str, bank_str))
+            combined_forms.append(combined_form(i.id, balance_forms, cheque_forms, chequeid, account_str, bank_str, balance_id))
         context = {
-            'combined_forms': combined_forms
+            'combined_forms': combined_forms,
+            'document_id': document.id
         }
         return render(request, "account_base/create-document.html", context)
     def post(self, request, pk):
@@ -416,6 +422,32 @@ def edit_account(request, pk):
         account.save()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'نام خالی است'})
+
+
+@login_required
+@require_POST
+def delete_balance(request):
+    try:
+        balance_id = request.POST.get('balance_id')
+        print(balance_id)
+        balance = BalanceSheet.objects.get(user=request.user, pk=balance_id)
+        print(balance)
+        print('balance')
+        balance.delete()
+        return JsonResponse({'success': True})
+    except BalanceSheet.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'سند پیدا نشد'})
+
+@login_required
+@require_POST
+def delete_document(request, pk):
+    try:
+        document = Document.objects.get(pk=pk)
+        document.delete()
+        return redirect(reverse('balance_lists'))
+    except Document.DoesNotExist:
+        return redirect(reverse('delete_document', pk))
+
 
 def delete_account(request, pk):
     if request.method == 'POST':

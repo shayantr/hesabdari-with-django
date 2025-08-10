@@ -96,7 +96,7 @@ function addControlsToNodes(uniqueid) {
         if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
             const $buttons = $('<span class="ms-auto">')
                 .append(`<span class="${colorClass}" data-uid="${uniqueid}" data-id="${nodeId}">${net_total}</span>`)
-                .append(`<a href="${url}" class="btn btn-sm btn-edit"><i class="fa fa-eye"> اسناد</i></a>`)
+                .append(`<a href="${url}" class="btn btn-sm btn-edit"><i class="fa fa-eye"></i></a>`)
             $anchor.append($buttons);
         }
     });
