@@ -150,12 +150,14 @@
             </div>
             <button class="btn btn-primary me-2" id="saveall" type="submit">ذخیره همه</button>
         </form>
+    {% if document_id %}
     <form method="post" action="{% url 'delete_document' document_id %}" style="display:inline;">
     {% csrf_token %}
     <button type="submit" class="btn btn-primary me-2" style="margin:2px;">
         حذف روکش سند
     </button>
 </form>
+    {% endif %}
 
 <script>
 jalaliDatepicker.startWatch();

@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="account report created">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/accounts-report.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/accounts-report.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/balance_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/balance_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" afterDir="false" />
-    </list>
+    <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="document delete feature aded" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -252,7 +244,7 @@
       <workItem from="1754123272569" duration="22514000" />
       <workItem from="1754404280279" duration="26626000" />
       <workItem from="1754560482401" duration="17530000" />
-      <workItem from="1754715009691" duration="26821000" />
+      <workItem from="1754715009691" duration="27124000" />
     </task>
     <task id="LOCAL-00001" summary="login, register and verify models and views and templates">
       <option name="closed" value="true" />
@@ -542,7 +534,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754751211370</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="document delete feature aded">
+      <option name="closed" value="true" />
+      <created>1754839680065</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1754839680065</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -565,7 +565,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="cheque-lists.html added" />
     <MESSAGE value="requirements.txt added to django" />
     <MESSAGE value="comment locale.setlocale(locale.LC_ALL, &quot;fa_IR.UTF-8&quot;) line in settings.py" />
     <MESSAGE value="fixed the sidebar menue" />
@@ -590,6 +589,7 @@
     <MESSAGE value="account ui in document fixed v2.18" />
     <MESSAGE value="account ui in document fixed and balance form update combined with create form" />
     <MESSAGE value="account report created" />
-    <option name="LAST_COMMIT_MESSAGE" value="account report created" />
+    <MESSAGE value="document delete feature aded" />
+    <option name="LAST_COMMIT_MESSAGE" value="document delete feature aded" />
   </component>
 </project>
