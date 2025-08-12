@@ -1,43 +1,52 @@
 {% load jinja_filters %}
 
 {% for balance in balance_lists %}
-    <div class="card">
-    
-      <div class="card-header">
-      <div class="flex-shrink-0">
-            <a href="{% url 'UpdateBalanceView' balance.document.id %}"><button class="btn btn-primary btn-sm">ویرایش</button></a>
-          </div>
-      </div>
-        <div class="d-flex flex-wrap gap-2">
-          <div class="flex-grow">
-              {% if balance.image %}
-                  <div class="grid row g-3">
-                      <div class="col-xl-3 col-md-4 col-sm-6">
+
+    <div class="card" {% if balance.transaction_type == 'debt' %}style="background-color: #ffe5e5;"
+         {% else %}style="background-color: #e5fbe5;"{% endif %}>
+        <div class="card-header">
+<div class="row align-items-center">
+    <div class="col d-flex justify-content-end"><a href="{% url 'UpdateBalanceView' balance.document.id %}">
+
+                <div class="flex-shrink-0">
+                    <h5><i class="fas fa-user-circle"></i>{{ balance.account }}</h5>
+                </div>
+            </a></div>
+    <div class="col d-flex justify-content-start">{% if balance.image %}
+                    <div class="grid g-3">
                         <a class="card-gallery" data-fslightbox="gallery" href="{{ balance.image.url }}">
-                          <img class="img-fluid" src="{{ balance.image.url }}" alt="Card image">
-                          <div class="gallery-hover-data card-body justify-content-end">
-                          </div>
+                            <img class="img-fluid" src="{{ balance.image.url }}" alt="Card image" style="width:50%">
+                            <div class="gallery-hover-data card-body justify-content-end">
+                            </div>
                         </a>
-                      </div>
-                  </div>
-              {% endif %}
-            <h6 class="mb-3"><span class="alert alert-{% if balance.cheque.cheque_status == "جاری"%}primary
-                                                        {% elif balance.cheque.cheque_status == 'عودتی' %}dark
-                                                        {% elif balance.cheque.cheque_status == 'وصولی' %}success
-                                                        {% elif balance.cheque.cheque_status == 'برگشتنی' %}danger
-                                                        {% elif balance.cheque.cheque_status == 'امانی' %}warning
-                                                        {% endif %}"
-                                   role="alert">{{ balance.cheque.cheque_status }}</span></h6>
-          </div>
+                    </div>
+                {% endif %}</div>
+</div>
+            <div class="d-flex flex-wrap gap-2">
+
+            </div>
+
         </div>
-      <div class="card-body">
-        <h5 class="mb1"><i class="fas fa-user-circle"> نام حساب: </i>{{ balance.account }}</h5>
-        <h5 class="mb1"><i class="fas fa-money-check-alt"> مبلغ سند: </i>{{ balance.amount|toman }}</h5>
-        <h5 class="mb1"><i class="fas fa-calendar-day"> تاریخ ایجاد سند: </i>{{ balance.date_created }}</h5>
-        <h5 class="mb1"><i class="ti ti-list-numbers"> شماره روکش سند: </i>{{ balance.document.id }}</h5>
-        <h5 class="mb1"><i class="fas fa-calendar-plus"> شماره سند: </i>{{ balance.id }}</h5>
-        <h5 class="mb1"><i class="fas fa-money-check"> وضعیت چک: </i>{% if balance.cheque %}دارد{% else %}ندارد{% endif %}</h5>
-        <p>توضیحات: {{ balance.description }}</p>
-      </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">سند</th>
+                <th scope="col">تاریخ</th>
+                <th scope="col">مبلغ</th>
+                <th scope="col"> چک</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th scope="row">{{ balance.document.id }}</th>
+                <td>{{ balance.date_created }}</td>
+                <td>{{ balance.amount|toman }}</td>
+                <td>{% if not balance.cheque %}ندارد{% else %}{{ balance.cheque.cheque_status }}{% endif %}</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="row">
+            <p>توضیحات: {{ balance.description }}</p>
+        </div>
     </div>
 {% endfor %}

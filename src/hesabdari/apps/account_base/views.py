@@ -133,8 +133,8 @@ class AccountsView(generic.View):
                 'li_attr': {'data-net-total': net_total},
             }
 
-        accounts = AccountsClass.objects.prefetch_related(
-            Prefetch('balance_sheets', queryset=BalanceSheet.objects.all()))
+        accounts = AccountsClass.objects.filter(user=request.user).prefetch_related(
+            Prefetch('balance_sheets', queryset=BalanceSheet.objects.filter(user=request.user)))
         data= []
         for account in accounts:
             descendants = account.get_descendants(include_self=True)
@@ -160,15 +160,14 @@ class AccountsView(generic.View):
 
 class AccountReportDetails(generic.View):
     def get(self, request, pk):
-        parent_account = get_object_or_404(AccountsClass, pk=pk)
-        descendants = (parent_account.get_descendants(include_self=True).prefetch_related(Prefetch('balance_sheets', queryset=BalanceSheet.objects.all())))
+        parent_account = get_object_or_404(AccountsClass, pk=pk, user=request.user)
+        descendants = (parent_account.get_descendants(include_self=True).prefetch_related(Prefetch('balance_sheets', queryset=BalanceSheet.objects.filter(user=request.user))))
         qs = []
         id_lists = []
         for descendant in descendants:
             for balance in descendant.balance_sheets.all():
                 qs.append(balance)
                 id_lists.append(balance.id)
-        print(id_lists)
         context = {
             'balance_lists':qs,
             'id_lists': id_lists
@@ -182,6 +181,7 @@ def create_accounts(request):
     form = AccountsForm(request.POST)
     if form.is_valid():
         new_account = form.save(commit=False)
+        new_account.user = request.user
         if parent_id:
             new_account.parent_id = parent_id
         else:
@@ -415,7 +415,7 @@ def filter_credit_cheques(request):
 
 
 def edit_account(request, pk):
-    account = get_object_or_404(AccountsClass, pk=pk)
+    account = get_object_or_404(AccountsClass, pk=pk, user=request.user)
     name = request.POST.get('name')
     if name:
         account.name = name
@@ -442,7 +442,7 @@ def delete_balance(request):
 @require_POST
 def delete_document(request, pk):
     try:
-        document = Document.objects.get(pk=pk)
+        document = Document.objects.get(pk=pk, user=request.user)
         document.delete()
         return redirect(reverse('balance_lists'))
     except Document.DoesNotExist:
@@ -452,7 +452,7 @@ def delete_document(request, pk):
 def delete_account(request, pk):
     if request.method == 'POST':
         try:
-            account = AccountsClass.objects.get(pk=pk)
+            account = AccountsClass.objects.get(pk=pk, user=request.user)
             if account.get_children():
                 return JsonResponse({'success': False, 'error': 'این حساب زیرمجموعه دارد'})
             if BalanceSheet.objects.filter(user=request.user.id).filter(account=account).exists():
@@ -475,9 +475,17 @@ class BalanceListView(LoginRequiredMixin, generic.View):
 
 
 def filter_balance(request):
-    qs = BalanceSheet.objects.filter(
-        Q(user=request.user.id),
-    )
+    if request.GET.get('id_lists'):
+        id_lists_json = request.GET.get('id_lists', '[]')
+        id_lists = json.loads(id_lists_json)
+        id_lists = [int(i) for i in id_lists]
+        qs = BalanceSheet.objects.filter(
+            Q(user=request.user.id, id__in=id_lists),
+        )
+    else:
+        qs = BalanceSheet.objects.filter(
+            Q(user=request.user.id),
+        )
 
     account_name = request.GET.get('account_name')
     amount = request.GET.get('amount')
@@ -502,7 +510,7 @@ def filter_balance(request):
         else:
             qs = qs.filter(date_created__lte=created_at_to)
     if amount:
-        qs = qs.filter(mount=amount)
+        qs = qs.filter(amount=amount)
     if description:
         qs = qs.filter(description__contains=description)
     if account_name:

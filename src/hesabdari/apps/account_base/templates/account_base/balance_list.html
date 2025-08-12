@@ -56,9 +56,17 @@
         jalaliDatepicker.startWatch();
         $(document).ready(function () {
             function filterbalance() {
+                const id_lists = {{ id_lists|default:"null" }};
+                let formData = $('#search-filter-form').serializeArray();
+                if (id_lists && Array.isArray(id_lists)) {
+                    formData.push({
+                        name: 'id_lists',
+                        value: JSON.stringify(id_lists)
+                    });
+                }
                 $.ajax({
                     url: "{% url 'filter_balance' %}",
-                    data: $('#search-filter-form').serialize(),
+                    data: formData,
                     success: function (data) {
                         $('#search-balance-list').html(data.html);
                     }
