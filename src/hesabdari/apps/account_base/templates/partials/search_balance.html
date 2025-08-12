@@ -39,7 +39,7 @@
             <tbody>
             <tr>
                 <th scope="row">{{ balance.document.id }}</th>
-                <td>{{ balance.date_created }}</td>
+                <td>{{ balance.document.date_created }}</td>
                 <td>{{ balance.amount|toman }}</td>
                 <td>{% if not balance.cheque %}ندارد{% else %}{{ balance.cheque.cheque_status }}{% endif %}</td>
             </tr>

@@ -85,7 +85,6 @@ def createbalancesheet(request):
             if all_credit != all_debt:
                 return JsonResponse({'success': False, 'errors': 'مجموع بدهکاری و بستانکاری برابر نیست.'},)
             else:
-                print(document_instance)
                 d.save()
                 document_instance.save()
                 for balance, cheque in zip(all_balanceforms, all_chequeforms):
@@ -516,14 +515,14 @@ def filter_balance(request):
         qs = qs.filter(document_id = document_id)
     if created_at_from:
         if created_at_from == created_at_to:
-            qs = qs.filter(date_created__exact=created_at_from)
+            qs = qs.filter(document__date_created__exact=created_at_from)
         else:
-            qs = qs.filter(date_created__gte=created_at_from)
+            qs = qs.filter(document__date_created__gte=created_at_from)
     if created_at_to:
         if created_at_from == created_at_to:
-            qs = qs.filter(date_created__exact=created_at_to)
+            qs = qs.filter(document__date_created__exact=created_at_to)
         else:
-            qs = qs.filter(date_created__lte=created_at_to)
+            qs = qs.filter(document__date_created__lte=created_at_to)
     if amount:
         qs = qs.filter(amount=amount)
     if description:
