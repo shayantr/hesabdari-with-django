@@ -13,7 +13,13 @@ class AccountsForm(forms.ModelForm):
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = '__all__'
+        fields = "__all__"
+        widgets={
+            'user': forms.HiddenInput(),
+            'date_created': forms.TextInput(
+            attrs={'class': 'form-control', 'data-jdp': 'data-jdp', 'placeholder': 'تاریخ ثبت'}),
+        }
+
 
 class BalanceSheetForm(forms.ModelForm):
     class Meta:

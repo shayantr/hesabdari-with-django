@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Prefetch
+from django.db.transaction import commit
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
@@ -56,8 +57,8 @@ def extract_all_prefixes(post_data, file_data):
 @login_required
 def createbalancesheet(request):
     all_prefixes = extract_all_prefixes(request.POST, request.FILES) if request.method == "POST" else set()
-    # document = DocumentForm(request.POST or None)
-    document_instance = Document(user=request.user)
+    document_instance = DocumentForm(request.POST or None, initial={'user':request.user})
+    # document_instance = Document(user=request.user)
     all_balanceforms = [BalanceSheetForm(request.POST, request.FILES or None, prefix=f'{i}-new-balance') for i in all_prefixes]
     all_chequeforms = [CashierChequeForm(request.POST or None, prefix=f'{i}-new-cheque') for i in all_prefixes]
     if request.method == "POST":
@@ -70,8 +71,11 @@ def createbalancesheet(request):
         for balance, cheque in zip(all_balanceforms, all_chequeforms):
             if not balance.is_valid() or not cheque.is_valid():
                 all_forms_valid = False
+        if not document_instance.is_valid():
+            all_forms_valid = False
 
         if all_forms_valid:
+            d=document_instance.save(commit=False)
             for balance in all_balanceforms:
                 if balance.cleaned_data.get('transaction_type') == "debt":
                     all_debt += balance.cleaned_data.get('amount') or 0
@@ -81,19 +85,22 @@ def createbalancesheet(request):
             if all_credit != all_debt:
                 return JsonResponse({'success': False, 'errors': 'مجموع بدهکاری و بستانکاری برابر نیست.'},)
             else:
+                print(document_instance)
+                d.save()
                 document_instance.save()
                 for balance, cheque in zip(all_balanceforms, all_chequeforms):
                     b = balance.save(commit=False)
                     if cheque.cleaned_data.get('name'):
                         c = cheque.save()
                         b.cheque = c
-                    b.document = document_instance
+                    b.document = d
                     b.save()
                 return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")},)
 
     context = {
         'all_balanceforms': all_balanceforms,
         'all_chequeforms': all_chequeforms,
+        'document_instance': document_instance
     }
 
     return render(request, 'account_base/create-document.html', context)
@@ -212,6 +219,7 @@ def extract_all_update_prefixes(post_data, file_data):
 class UpdateBalanceView(LoginRequiredMixin, generic.View):
     def get(self, request, pk):
         document = get_object_or_404(Document, pk=pk)
+        document_instance = DocumentForm(request.POST or None, instance=document)
         balancesheet = BalanceSheet.objects.filter(document=document)
         combined_forms = []
         combined_form = namedtuple('combined_form', ['uniqueid', 'form_balance', 'form_cheque', 'chequeid', 'account_str', 'bank_str', 'balance_id'])
@@ -230,11 +238,13 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
             combined_forms.append(combined_form(i.id, balance_forms, cheque_forms, chequeid, account_str, bank_str, balance_id))
         context = {
             'combined_forms': combined_forms,
-            'document_id': document.id
+            'document_id': document.id,
+            'document_instance': document_instance,
         }
         return render(request, "account_base/create-document.html", context)
     def post(self, request, pk):
         document = get_object_or_404(Document, pk=pk)
+        document_instance = DocumentForm(request.POST or None, instance=document)
         all_credit = 0
         all_debt = 0
         user = request.user
@@ -263,6 +273,8 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
         for balance, cheque in zip(all_new_balanceforms, all_new_chequeforms):
             if not balance.is_valid() or not cheque.is_valid():
                 all_valid = False
+        if not document_instance.is_valid():
+            all_valid = False
         if all_valid:
             for balance in all_new_balanceforms:
                 if balance.cleaned_data.get('transaction_type') == "debt":
@@ -283,6 +295,7 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
                         b.cheque = c
                     b.document = document
                     b.save()
+                    document_instance.save()
                 #save new balance and cheque forms
                 for balance, cheque in zip(all_new_balanceforms, all_new_chequeforms):
                     b = balance.save(commit=False)
@@ -294,6 +307,8 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
                         b.cheque = c
                     b.document = document
                     b.save()
+                    document_instance.save()
+
                 return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")}, )
 
         context = {
@@ -518,4 +533,95 @@ def filter_balance(request):
 
     html = render_to_string('partials/search_balance.html', {'balance_lists': qs})
     return JsonResponse({'html': html})
+
+class ChangeStatusCheque(generic.View):
+    def get(self, request, pk):
+        balancesheet = BalanceSheet.objects.get(id=pk, user=request.user)
+        combined_forms = []
+        combined_form = namedtuple('combined_form',
+                                   ['uniqueid', 'form_balance', 'form_cheque', 'chequeid', 'bank_str',
+                                    'balance_id'])
+        if balancesheet.transaction_type == 'debt':
+            balance_forms = BalanceSheetForm(prefix=f"change-cheque-balance", initial={"transaction_type":'credit', 'amount':balancesheet.amount})
+        else:
+            balance_forms = BalanceSheetForm(prefix=f"change-cheque-balance", initial={"transaction_type": 'debt', 'amount':balancesheet.amount})
+        balance_id = 'old-update-balance'
+        cheque_forms = CashierChequeForm(prefix=f"change-cheque", instance=balancesheet.cheque)
+        chequeid = balancesheet.cheque.id
+        bank_str = balancesheet.cheque.account.__str__()
+        combined_forms.append(
+                combined_form("old-update-cheque", balance_forms, cheque_forms, chequeid, bank_str, balance_id))
+        context = {
+            'combined_forms': combined_forms,
+        }
+        return render(request, "account_base/create-document.html", context)
+    def post(self, request, pk):
+        document = Document(user=request.user)
+        balancesheet = BalanceSheet.objects.get(id=pk, user=request.user)
+        all_credit = 0
+        all_debt = 0
+        all_valid = True
+        combined_forms = []
+        user = request.user
+        balanceCheqe = BalanceSheetForm(request.POST, request.FILES, prefix=f"change-cheque-balance")
+        update_Cheqe = CashierChequeForm(request.POST or None, prefix=f"change-cheque-balance", instance=balancesheet.cheque)
+        if not balanceCheqe.is_valid() or not update_Cheqe.is_valid():
+            all_valid = False
+        if balanceCheqe.cleaned_data.get('transaction_type') == "debt":
+            all_debt += balanceCheqe.cleaned_data.get('amount') or 0
+        elif balanceCheqe.cleaned_data.get('transaction_type') == "credit":
+            all_credit += balanceCheqe.cleaned_data.get('amount') or 0
+        all_prefixes = extract_all_prefixes(request.POST, request.FILES) if request.method == "POST" else set()
+        all_new_balanceforms = [BalanceSheetForm(request.POST, request.FILES or None, prefix=f'{i}-new-balance') for i
+                                in
+                                all_prefixes]
+        all_new_chequeforms = [CashierChequeForm(request.POST or None, prefix=f'{i}-new-cheque') for i in all_prefixes]
+
+        for balance, cheque in zip(all_new_balanceforms, all_new_chequeforms):
+            if not balance.is_valid() or not cheque.is_valid():
+                all_valid = False
+        if all_valid:
+            for balance in all_new_balanceforms:
+                if balance.cleaned_data.get('transaction_type') == "debt":
+                    all_debt += balance.cleaned_data.get('amount') or 0
+                elif balance.cleaned_data.get('transaction_type') == "credit":
+                    all_credit += balance.cleaned_data.get('amount') or 0
+
+            if all_credit != all_debt:
+                return JsonResponse({'success': False, 'errors': 'مجموع بدهکاری و بستانکاری برابر نیست.'}, )
+            else:
+                # save existing balance and cheque forms
+                for item in combined_forms:
+                    b = item.form_balance.save(commit=False)
+                    if item.form_cheque.cleaned_data.get('name'):
+                        c = item.form_cheque.save(commit=False)
+                        c.user = user
+                        c.save()
+                        b.cheque = c
+                    b.document = document
+                    b.save()
+                # save new balance and cheque forms
+                for balance, cheque in zip(all_new_balanceforms, all_new_chequeforms):
+                    b = balance.save(commit=False)
+                    b.user = user
+                    if cheque.cleaned_data.get('name'):
+                        c = cheque.save(commit=False)
+                        c.user = user
+                        c.save()
+                        b.cheque = c
+                    b.document = document
+                    b.save()
+                return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")}, )
+
+        context = {
+            'documentform': document,
+            'all_balanceforms': all_new_balanceforms,
+            'all_chequeforms': all_new_chequeforms,
+            'form_action_url': reverse('UpdateBalanceView', args=[pk])
+        }
+
+        return render(request, 'account_base/create-document.html', context)
+
+
+
 

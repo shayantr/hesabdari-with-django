@@ -4,13 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="document delete feature aded">
+    <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="fixed ui in balance_list.html">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/balance_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/balance_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/partials/search_balance.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/partials/search_balance.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/partials/debit_cheques.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/partials/debit_cheques.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -252,7 +252,7 @@
       <workItem from="1754123272569" duration="22514000" />
       <workItem from="1754404280279" duration="26626000" />
       <workItem from="1754560482401" duration="17530000" />
-      <workItem from="1754715009691" duration="47538000" />
+      <workItem from="1754715009691" duration="60441000" />
     </task>
     <task id="LOCAL-00001" summary="login, register and verify models and views and templates">
       <option name="closed" value="true" />
@@ -558,7 +558,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754840194274</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="fixed ui in balance_list.html">
+      <option name="closed" value="true" />
+      <created>1754988694879</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1754988694879</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -581,7 +589,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="requirements.txt added to django" />
     <MESSAGE value="comment locale.setlocale(locale.LC_ALL, &quot;fa_IR.UTF-8&quot;) line in settings.py" />
     <MESSAGE value="fixed the sidebar menue" />
     <MESSAGE value="edit and delete in modal feature" />
@@ -606,6 +613,7 @@
     <MESSAGE value="account ui in document fixed and balance form update combined with create form" />
     <MESSAGE value="account report created" />
     <MESSAGE value="document delete feature aded" />
-    <option name="LAST_COMMIT_MESSAGE" value="document delete feature aded" />
+    <MESSAGE value="fixed ui in balance_list.html" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed ui in balance_list.html" />
   </component>
 </project>
