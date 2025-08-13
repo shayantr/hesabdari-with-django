@@ -166,7 +166,7 @@ class AccountsView(generic.View):
 
 class AccountReportDetails(generic.View):
     def get(self, request, pk):
-        parent_account = get_object_or_404(AccountsClass, pk=pk, user=request.user)
+        parent_account = AccountsClass.objects.filter(pk=pk, user=request.user)
         descendants = (parent_account.get_descendants(include_self=True).prefetch_related(Prefetch('balance_sheets', queryset=BalanceSheet.objects.filter(user=request.user))))
         qs = []
         id_lists = []
@@ -174,6 +174,7 @@ class AccountReportDetails(generic.View):
             for balance in descendant.balance_sheets.all():
                 qs.append(balance)
                 id_lists.append(balance.id)
+        qs = sorted(qs, key=lambda b: b.document.date_created, reverse=True)
         context = {
             'balance_lists':qs,
             'id_lists': id_lists
@@ -481,7 +482,7 @@ def delete_account(request, pk):
 
 class BalanceListView(LoginRequiredMixin, generic.View):
     def get(self, request):
-        qs = BalanceSheet.objects.filter(user=request.user.id).select_related('cheque')
+        qs = BalanceSheet.objects.filter(user=request.user.id).select_related('cheque').order_by('-document__date_created')
         context = {
             'balance_lists': qs,
         }
@@ -495,11 +496,10 @@ def filter_balance(request):
         id_lists = [int(i) for i in id_lists]
         qs = BalanceSheet.objects.filter(
             Q(user=request.user.id, id__in=id_lists),
-        )
+        ).order_by('-document__date_created')
     else:
         qs = BalanceSheet.objects.filter(
-            Q(user=request.user.id),
-        )
+            Q(user=request.user.id)).order_by('-document__date_created')
 
     account_name = request.GET.get('account_name')
     amount = request.GET.get('amount')
@@ -529,6 +529,7 @@ def filter_balance(request):
         qs = qs.filter(description__contains=description)
     if account_name:
         qs = qs.filter(account__name__contains=account_name)
+
 
     html = render_to_string('partials/search_balance.html', {'balance_lists': qs})
     return JsonResponse({'html': html})
