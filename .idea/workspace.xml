@@ -5,7 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="91ed11d5-e5db-466a-9997-6406eb653f56" name="Changes" comment="fixed ui in balance_list.html">
+      <change afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/partials/errors.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/create-document.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/templates/account_base/form_fragment.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hesabdari/apps/account_base/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -247,7 +252,13 @@
       <workItem from="1754123272569" duration="22514000" />
       <workItem from="1754404280279" duration="26626000" />
       <workItem from="1754560482401" duration="17530000" />
-      <workItem from="1754715009691" duration="64990000" />
+      <workItem from="1754715009691" duration="73384000" />
+      <workItem from="1755107729828" duration="2382000" />
+      <workItem from="1755160336848" duration="9726000" />
+      <workItem from="1755334711634" duration="9763000" />
+      <workItem from="1755615984721" duration="9074000" />
+      <workItem from="1755682600633" duration="923000" />
+      <workItem from="1755693885732" duration="4104000" />
     </task>
     <task id="LOCAL-00001" summary="login, register and verify models and views and templates">
       <option name="closed" value="true" />
@@ -577,7 +588,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755024658748</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="fixed ui in balance_list.html">
+      <option name="closed" value="true" />
+      <created>1755074818512</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1755074818512</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

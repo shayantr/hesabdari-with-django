@@ -31,33 +31,27 @@ class Document(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents')
     date_created = jmodels.jDateField(default=jmodels.timezone.now())
 
+    def delete(self, *args, **kwargs):
+        if self.items.filter(is_active=False).exists():
+            raise ValueError("به دلیل وجود تراکنش غیر فعال، امکان حذف این سند وجود ندارد.")
+        super().delete(*args, **kwargs)
+
 
 class BalanceSheet(models.Model):
     TRANSACTION_TYPE_CHOICES = (
         ('debt', 'بدهی'),
         ('credit', 'بستانکاری'),
     )
-    class ChequeType(models.TextChoices):
-        CURRENT = 'جاری', 'جاری'
-        COLLECTION = 'وصولی', 'وصولی'
-        BOUNCED = 'برگشتنی', 'برگشتنی'
-        RETURN_CH = 'عودتی', 'عودتی'
-        ESCROW = 'امانی', 'امانی'
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='balancesheet')
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='items', blank=True, null=True)
     date_created = jmodels.jDateField(auto_now_add=True, editable=True)
     account = models.ForeignKey(AccountsClass, on_delete=models.CASCADE, related_name='balance_sheets')
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE_CHOICES)
     cheque = models.ForeignKey('CashierCheque', on_delete=models.SET_NULL, null=True, blank=True, related_name='balance_sheet')
-    cheque_status = models.CharField(
-        max_length=255,
-        choices=ChequeType.choices,
-        blank = True,
-        null= True,
-    )
-    amount = models.IntegerField(null=True, blank=True, verbose_name='مبلغ')
+    amount = models.IntegerField( verbose_name='مبلغ')
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='images/', blank=True, null=True)
+    is_active = models.BooleanField(default=True)
 
 
 

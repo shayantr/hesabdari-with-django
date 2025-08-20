@@ -24,7 +24,7 @@ class DocumentForm(forms.ModelForm):
 class BalanceSheetForm(forms.ModelForm):
     class Meta:
         model = BalanceSheet
-        fields = '__all__'
+        exclude = ['is_active']
         widgets = {
             'user': forms.HiddenInput(),
             'maturityـamount': forms.TextInput(attrs={'class': 'form-control', 'placeholder':'مبلغ', 'id': "floatingInput"}),
@@ -39,6 +39,11 @@ class BalanceSheetForm(forms.ModelForm):
         }
         labels = {
             'cash_only': 'مبلغ نقدی',
+        }
+        error_messages = {
+            'amount': {
+                "required": 'poresh kon'
+            }
         }
 
 

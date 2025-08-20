@@ -1,8 +1,8 @@
 {% load jinja_filters %}
 {% load static %}
 
-<div class="form-wrapper" id="{{ uniqueid }}">
-    
+<div class="form-wrapper {% if is_active == False %}notactive{% endif %}" id="{{ uniqueid }}">
+    <div id="form-errors-{{ uniqueid }}"></div>  {# اینجا خطاها با Ajax پر میشن #}
     <div class="remove-form" {% if balance_id %}id="{{ balance_id }}"{% endif %} style="color:red; cursor:pointer;">حذف</div>
     <div class="modal fade" id="{{ uniqueid }}-accounts-lists" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
@@ -23,6 +23,7 @@
     </div>
     <div class="row p-0">
         <div class="col-sm-6 col-xl-3">
+            {{ form_balance.is_active }}
             {{ form_balance.user }}
             <div class="input-group mb-3">
             <select class='dropdown form-select-sm ' disabled id="{{ uniqueid }}-accounts-list">
@@ -93,6 +94,11 @@
     </div>
 </div>
 <script>
+document.querySelectorAll(".notactive").forEach(div => {
+    div.querySelectorAll("input, select, textarea, button").forEach(el => {
+        el.disabled = true;
+    });
+});
 
 $(document).ready(function () {
 window.currentAccountTarget = 'balance';
