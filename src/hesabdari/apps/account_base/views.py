@@ -644,7 +644,7 @@ class ChangeStatusCheque(generic.View):
         combined_forms = []
         combined_form = namedtuple('combined_form',
                                    ['uniqueid', 'form_balance', 'form_cheque', 'chequeid', 'bank_str',
-                                    'balance_id'])
+                                    'balance_id', 'account_str'])
         if balancesheet.transaction_type == 'debt':
             balance_forms = BalanceSheetForm(prefix=f"old-update-cheque-update-balance", initial={"user":request.user, "transaction_type":'credit', 'amount':balancesheet.amount, 'account':balancesheet.account})
         else:
@@ -654,7 +654,7 @@ class ChangeStatusCheque(generic.View):
         chequeid = balancesheet.cheque.id
         bank_str = balancesheet.cheque.account.__str__()
         combined_forms.append(
-                combined_form("old-update-cheque", balance_forms, cheque_forms, chequeid, bank_str, balance_id))
+                combined_form("old-update-cheque", balance_forms, cheque_forms, chequeid, bank_str, balance_id, balancesheet.account))
         context = {
             'document_instance': document,
             'combined_forms': combined_forms,
