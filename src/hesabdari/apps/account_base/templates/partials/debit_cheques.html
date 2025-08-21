@@ -6,8 +6,7 @@
       <div class="card-header">
       <div class="flex-shrink-0">
             <a href="{% url 'UpdateBalanceView' debit.document.id %}"><button class="btn btn-primary btn-sm">ویرایش</button></a>
-            {{ debit.id }}
-            <button class="btn btn-secondary btn-sm ms-1">تغییر وضعیت چک</button>
+            <a href="{% url 'change_status_cheque' debit.id %}" class="btn btn-secondary btn-sm ms-1">تغییر وضعیت چک</a>
           </div>
       </div>
         <div class="d-flex flex-wrap gap-2">

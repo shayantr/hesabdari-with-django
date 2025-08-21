@@ -228,35 +228,66 @@
         }
 
         $(document).ready(function () {
+            // تبدیل اعداد فارسی به انگلیسی
+            function persianToEnglishNumbers(str) {
+                const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                return str.replace(/[۰-۹]/g, function (w) {
+                    return english[persian.indexOf(w)];
+                });
+            }
+
+            // فرمت سه‌رقمی
+            function formatNumber(value) {
+                value = persianToEnglishNumbers(value);
+                value = value.replace(/,/g, "");
+                if (!isNaN(value) && value !== "") {
+                    return Number(value).toLocaleString("en-US");
+                }
+                return value;
+            }
+
+            // پاکسازی عدد برای محاسبه
+            function cleanNumber(val) {
+                val = persianToEnglishNumbers(val || "");
+                val = val.replace(/,/g, "");
+                return parseInt(val) || 0;
+            }
+
+            // محاسبه جمع‌ها
             function calcDebtTotal() {
-                let sum = 0
-                $('.debt :input[id$="-balance-amount"]').each(function () {
-                    sum += parseInt($(this).val()) || 0;
+                let sum = 0;
+                $('.debt :input[name$="-balance-amount"]').each(function () {
+                    sum += cleanNumber($(this).val());
                 });
                 $('#text-debt').text(sum);
             }
 
-            // محاسبهٔ اولیه
-            calcDebtTotal();
-
-            // گوش دادن زنده به رویدادهای input و change روی همان سلکتور
-            $(document).on('input change', '.debt :input[id$="-balance-amount"]', calcDebtTotal);
-
             function calcCreditTotal() {
-                let sum = 0
-                // همهٔ input‌های داخل .debt (در هر عمق) که کلاسشان با -balance-amount تمام می‌شود
-                $('.credit :input[id$="-balance-amount"]').each(function () {
-                    sum += parseInt($(this).val()) || 0;
+                let sum = 0;
+                $('.credit :input[name$="-balance-amount"]').each(function () {
+                    sum += cleanNumber($(this).val());
                 });
                 $('#text-credit').text(sum);
             }
 
-            // محاسبهٔ اولیه
+            // --- 1. فرمت اولیه هنگام load فرم (Update Form) ---
+            $("input[name$='-amount'], input[name$='-amount']").each(function () {
+                if (this.value) {
+                    this.value = formatNumber(this.value);
+                }
+            });
+
+            // --- 2. delegation برای input های -amount (دینامیک هم کار می‌کنه) ---
+            $(document).on('input', "input[name$='-amount'], input[name$='-amount']", function () {
+                this.value = formatNumber(this.value);
+                calcDebtTotal();
+                calcCreditTotal();
+            });
+
+            // --- 4. جمع اولیه هنگام load ---
+            calcDebtTotal();
             calcCreditTotal();
-
-            // گوش دادن زنده به رویدادهای input و change روی همان سلکتور
-            $(document).on('input change', '.credit :input[id$="-balance-amount"]', calcCreditTotal);
-
             $('#add-form-debt').click(function () {
                 let csrfToken = getCSRFToken(); // Get CSRF token
                 let transaction_type = 'debt'
@@ -393,11 +424,15 @@
             });
             $('#mainForm').on('submit', function (e) {
                 e.preventDefault();
+                $(this).find("input[name$='-amount']").each(function () {
+                    this.value = persianToEnglishNumbers(this.value).replace(/,/g, "");
+                });
                 let csrfToken = getCSRFToken(); // Get CSRF token
                 let formData = new FormData(this);
                 if (deleted_balances_id && deleted_balances_id.length > 0) {
                     formData.append('deleted_balances_id', JSON.stringify(deleted_balances_id));
                 }
+
                 let url = "{{ form_action_url }}";
                 $("#form-errors").html("");  // پاک کردن خطاهای قبلی
 
@@ -418,6 +453,7 @@
                             {#alert("خطا: " + JSON.stringify(response.errors_html));#}
                             $("#form-errors").html(response.errors_html);
                             console.log(response.errors_html);
+                            console.log(response.errors);
                         }
                     }
                 });
@@ -460,4 +496,5 @@
             });
         });
     </script>
+
 {% endblock %}
