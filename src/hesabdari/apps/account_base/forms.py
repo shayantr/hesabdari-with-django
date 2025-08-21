@@ -27,7 +27,7 @@ class BalanceSheetForm(forms.ModelForm):
         exclude = ['is_active']
         widgets = {
             'user': forms.HiddenInput(),
-            'maturityـamount': forms.TextInput(attrs={'class': 'form-control', 'placeholder':'مبلغ', 'id': "floatingInput"}),
+            'amount': forms.TextInput(attrs={'class': 'form-control', 'placeholder':'مبلغ', 'id': "floatingInput"}),
             'account': forms.Select(attrs={'class': 'dropdown form-select form-select-lg ', 'style': 'display:none;' }),
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'توضیحات', "cols":10, "rows":1}),
             'image': forms.FileInput(attrs={'class': 'form-control','accept': 'image/jpeg,application/pdf', 'placeholder': 'بارگزاری عکس'}),
