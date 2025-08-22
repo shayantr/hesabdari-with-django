@@ -62,6 +62,9 @@ class CashierCheque(models.Model):
         BOUNCED = 'برگشتنی', 'برگشتنی'
         RETURN_CH = 'عودتی', 'عودتی'
         ESCROW = 'امانی', 'امانی'
+    class ChequeTypeChoices(models.TextChoices):
+        payable = 'پرداختنی', 'پرداختنی'
+        receivable = 'دریافتنی', 'دریافتنی'
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cashiercheque', blank=True, null=True)
     account = models.ForeignKey(AccountsClass, on_delete=models.CASCADE, related_name='Bank_cheque', null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
@@ -73,3 +76,8 @@ class CashierCheque(models.Model):
         choices=ChequeType.choices,
         default=ChequeType.CURRENT,
     )
+    cheque_type = models.CharField(
+        max_length=255,
+        choices=ChequeType.choices,
+        blank=True,
+        null=True,)

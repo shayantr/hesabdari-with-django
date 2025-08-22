@@ -88,7 +88,7 @@
         <input type="hidden" id="{{ uniqueid }}-selected-cheque-account-id" {% if form_cheque.account.value %}value="{{ form_cheque.account.value}}"{% endif %}>
 
         {{ form_cheque }}
-        {% if chequeid %}
+        {% if chequeid and not locked %}
             <button type="button" class="delete-cheque-btn" data-chequeid="{{ chequeid }}">حذف چک</button>
         {% endif %}
     </div>

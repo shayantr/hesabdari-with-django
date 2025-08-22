@@ -3,7 +3,7 @@ from django.urls import path, include
 from hesabdari.apps.account_base.views import createbalancesheet, \
     GetFormFragmentView, AccountsView, UpdateBalanceView, deletechequeview, ChequeListView, \
     filter_debit_cheques, filter_credit_cheques, edit_account, delete_account, BalanceListView, \
-    filter_balance, create_accounts, account_report, AccountReportDetails, delete_balance, delete_document, \
+    filter_balance, create_accounts, account_report, AccountReportDetails, delete_document, \
     ChangeStatusCheque
 
 urlpatterns = [
@@ -22,7 +22,7 @@ urlpatterns = [
     path('accounts/delete/<int:pk>/', delete_account, name='delete_account'),
     path('balance-lists/', BalanceListView.as_view(), name='balance_lists'),
     path('balance-lists/filter-balance/', filter_balance, name='filter_balance'),
-    path('delete-balance/', delete_balance, name='delete_balance'),
+    # path('delete-balance/', delete_balance, name='delete_balance'),
     path('delete-document/<int:pk>/', delete_document, name='delete_document'),
     path('change-cheque-status/<int:pk>/', ChangeStatusCheque.as_view(), name='change_status_cheque'),
 ]

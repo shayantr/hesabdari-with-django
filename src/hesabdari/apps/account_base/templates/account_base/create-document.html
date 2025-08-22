@@ -178,7 +178,7 @@
             <div class="debt">
                 {% for i in combined_forms %}
                     {% if i.form_balance.transaction_type.value == "debt" %}
-                        {% include "account_base/form_fragment.html" with is_active=i.is_active balance_id=i.balance_id bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="debt" %}
+                        {% include "account_base/form_fragment.html" with is_active=i.is_active balance_id=i.balance_id bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="debt" locked=i.locked %}
                     {% endif %}
                 {% endfor %}
                 <p>---------بدهی ها--------</p>
@@ -189,7 +189,7 @@
             <div class="credit">
                 {% for i in combined_forms %}
                     {% if i.form_balance.transaction_type.value == "credit" %}
-                        {% include "account_base/form_fragment.html" with is_active=i.is_active balance_id=i.balance_id bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="credit" %}
+                        {% include "account_base/form_fragment.html" with is_active=i.is_active balance_id=i.balance_id bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="credit" locked=i.locked %}
 
                     {% endif %}
                 {% endfor %}
