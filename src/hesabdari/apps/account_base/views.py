@@ -287,7 +287,7 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
 
         combined_forms = []
         all_credit, all_debt, all_valid = 0, 0, True
-
+        to_delete = []
         for balance in balancesheets:
             if not balance.is_active:
                 if balance.transaction_type == "debt":
@@ -297,7 +297,7 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
                 continue
 
             if balance.id in deleted_ids:
-                self._handle_delete(balance)
+                to_delete.append(balance)
                 continue
 
             balance_form = BalanceSheetForm(
@@ -338,6 +338,9 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
 
             if all_credit != all_debt:
                 return JsonResponse({'success': False, 'errors': 'مجموع بدهکاری و بستانکاری برابر نیست.'})
+
+            for balance in to_delete:
+                self._handle_delete(balance)
 
             # ذخیره همه چیز در یک تراکنش اتمیک
             self._save_existing_forms(combined_forms, document, user, document_form)
