@@ -78,6 +78,6 @@ class CashierCheque(models.Model):
     )
     cheque_type = models.CharField(
         max_length=255,
-        choices=ChequeType.choices,
+        choices=ChequeTypeChoices.choices,
         blank=True,
         null=True,)

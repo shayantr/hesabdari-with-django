@@ -62,5 +62,6 @@ class CashierChequeForm(forms.ModelForm):
             'Cheque_numbder': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'شماره چک', 'id': "floatingInput"}),
             'cheque_status': forms.Select(attrs={'class': 'dropdown form-select form-select-lg'}),
+            # 'cheque_type': forms.HiddenInput(),
 
         }

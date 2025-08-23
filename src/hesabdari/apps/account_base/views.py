@@ -119,13 +119,15 @@ class GetFormFragmentView(generic.View):
             datease = ''
         uniqueid = str(uuid.uuid1())[:4]
         transaction_type = request.POST.get('transaction_type')
-        form_cheque = CashierChequeForm(prefix=f'{uniqueid}-new-cheque', initial={'user':request.user.id})
+
         form_balance = BalanceSheetForm(prefix=f'{uniqueid}-new-balance', initial={'transaction_type': transaction_type, 'user':request.user.id})
         if transaction_type == 'debt':
+            form_cheque = CashierChequeForm(prefix=f'{uniqueid}-new-cheque', initial={'user': request.user.id, 'cheque_type': 'دریافتنی'})
             form_html = render_to_string('account_base/form_fragment.html',
                                          {'form_balance': form_balance,'form_cheque':form_cheque,
                                           'transaction_type':transaction_type, 'uniqueid':uniqueid})
         else:
+            form_cheque = CashierChequeForm(prefix=f'{uniqueid}-new-cheque', initial={'user': request.user.id, 'cheque_type': 'پرداختنی'})
             form_html = render_to_string('account_base/form_fragment.html',
                                          {'form_balance': form_balance, 'form_cheque': form_cheque,
                                           'transaction_type': transaction_type, 'uniqueid':uniqueid})
@@ -246,12 +248,18 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
         combined_forms = []
         for balance in balancesheets:
             balance_form = BalanceSheetForm(prefix=f"{balance.id}-update-balance", instance=balance)
-
-            cheque_form = (
-                CashierChequeForm(prefix=f"{balance.id}-update-cheque", instance=balance.cheque)
-                if balance.cheque else
-                CashierChequeForm(prefix=f"{balance.id}-update-cheque")
-            )
+            if balance.transaction_type == 'debt':
+                cheque_form = (
+                    CashierChequeForm(prefix=f"{balance.id}-update-cheque", instance=balance.cheque)
+                    if balance.cheque else
+                    CashierChequeForm(prefix=f"{balance.id}-update-cheque", initial={'cheque_type': 'دریافتنی'})
+                )
+            else:
+                cheque_form = (
+                    CashierChequeForm(prefix=f"{balance.id}-update-cheque", instance=balance.cheque)
+                    if balance.cheque else
+                    CashierChequeForm(prefix=f"{balance.id}-update-cheque", initial={'cheque_type': 'پرداختنی'})
+                )
 
             combined_forms.append(CombinedForm(
                 uniqueid=balance.id,
@@ -425,8 +433,8 @@ class ChequeListView(LoginRequiredMixin, generic.View):
         qs = BalanceSheet.objects.filter(
             Q(user=request.user.id) & Q(cheque__isnull=False) & Q(is_active=True)
         ).select_related('cheque')
-        debits = qs.filter(transaction_type='debt')
-        credits = qs.filter(transaction_type='credit')
+        debits = qs.filter(cheque__cheque_type='دریافتنی')
+        credits = qs.filter(cheque__cheque_type='پرداختنی')
 
         context = {
             'debits': debits,
@@ -437,7 +445,7 @@ class ChequeListView(LoginRequiredMixin, generic.View):
 def filter_debit_cheques(request):
     debits = BalanceSheet.objects.filter(
         Q(user=request.user.id),
-        Q(transaction_type='debt'),
+        Q(cheque_type='دریافتنی'),
         Q(cheque__isnull=False),
         Q(is_active=True)
     ).select_related('cheque').only(
@@ -475,7 +483,7 @@ def filter_debit_cheques(request):
 def filter_credit_cheques(request):
     credits = BalanceSheet.objects.filter(
         Q(user=request.user.id),
-        Q(transaction_type='credit'),
+        Q(cheque_type='پرداختنی'),
         Q(cheque__isnull=False),
         Q(is_active=True)
     ).select_related('cheque').only(
