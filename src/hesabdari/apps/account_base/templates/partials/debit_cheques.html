@@ -36,7 +36,7 @@
         <h5 class="mb1"><i class="fas fa-money-check-alt"> مبلغ سررسید: </i>{{ debit.amount|toman }}</h5>
         <h5 class="mb1"><i class="fas fa-calendar-day"> تاریخ سررسید: </i>{{ debit.cheque.maturity_date }}</h5>
         <h5 class="mb1"><i class="ti ti-list-numbers"> شماره چک: </i>{{ debit.cheque.Cheque_numbder }}</h5>
-        <h5 class="mb1"><i class="fas fa-calendar-plus"> تاریخ ثبت: </i>{{ debit.cheque.created_at }}</h5>
+        <h5 class="mb1"><i class="fas fa-calendar-plus"> تاریخ ثبت: </i>{{ debit.document.date_created }}</h5>
         <p>توضیحات: {{ debit.description }}</p>
       </div>
     </div>

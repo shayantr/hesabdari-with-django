@@ -72,10 +72,17 @@ function addControlsToNodes(uniqueid) {
     }
 
     const nodes = flattenNodes(fullNodes);
+    
 
     nodes.forEach(node => {
         // گرفتن مقدار از li_attr
-        const net_total = node.li_attr?.['data-net-total'] ?? 0;
+        const net_total_raw = node.li_attr?.['data-net-total'] ?? 0;
+const net_total = parseInt(net_total_raw, 10) || 0;
+
+// فرمت سه‌رقمی
+const formatted_total = net_total.toLocaleString("fa-IR")
+        
+        
 
         const nodeId = node.id;
         const baseUrl = "{% url 'accounts_report_detail' 0 %}";
@@ -95,7 +102,7 @@ function addControlsToNodes(uniqueid) {
 
         if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
             const $buttons = $('<span class="ms-auto">')
-                .append(`<span class="${colorClass}" data-uid="${uniqueid}" data-id="${nodeId}">${net_total}</span>`)
+                .append(`<span class="${colorClass}" data-uid="${uniqueid}" data-id="${nodeId}">&nbsp;(${formatted_total})</span>`)
                 .append(`<a href="${url}" class="btn btn-sm btn-edit"><i class="fa fa-eye"></i></a>`)
             $anchor.append($buttons);
         }

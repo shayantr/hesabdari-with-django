@@ -445,11 +445,11 @@ class ChequeListView(LoginRequiredMixin, generic.View):
 def filter_debit_cheques(request):
     debits = BalanceSheet.objects.filter(
         Q(user=request.user.id),
-        Q(cheque_type='دریافتنی'),
+        Q(cheque__cheque_type='دریافتنی'),
         Q(cheque__isnull=False),
         Q(is_active=True)
     ).select_related('cheque').only(
-    'cheque__name', 'cheque__cheque_status', 'cheque__maturity_date', 'amount', 'description'
+    'cheque__name', 'cheque__cheque_status', 'cheque__maturity_date', 'amount', 'description', 'cheque__cheque_type'
 )
 
     name = request.GET.get('cheque_name')
@@ -483,12 +483,12 @@ def filter_debit_cheques(request):
 def filter_credit_cheques(request):
     credits = BalanceSheet.objects.filter(
         Q(user=request.user.id),
-        Q(cheque_type='پرداختنی'),
+        Q(cheque__cheque_type='پرداختنی'),
         Q(cheque__isnull=False),
         Q(is_active=True)
     ).select_related('cheque').only(
     'cheque__name', 'cheque__cheque_status', 'cheque__maturity_date',
-    'cheque__created_at', 'amount', 'description'
+    'cheque__created_at', 'amount', 'description', 'cheque__cheque_type'
 )
 
     name = request.GET.get('cheque_name')
