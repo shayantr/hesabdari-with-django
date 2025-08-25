@@ -391,6 +391,11 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
             if item.form_cheque.cleaned_data.get('name'):
                 cheque = item.form_cheque.save(commit=False)
                 cheque.user = user
+                if cheque.cheque_type is None:
+                    if balance.transaction_type == 'debt':
+                        cheque.cheque_type = 'دریافتنی'
+                    else:
+                        cheque.cheque_type = 'پرداختنی'
                 cheque.save()
                 balance.cheque = cheque
             balance.document = document

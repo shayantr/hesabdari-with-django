@@ -153,8 +153,9 @@
 
 {% endblock %}
 {% block body %}
-    <form id="mainForm" enctype="multipart/form-data" class="form-floating mb-0" novalidate>
-        {{ document_instance }}
+    <form id="mainForm" enctype="multipart/form-data" class="form-floating mb-0">
+        {{ document_instance.date_created }}
+        {{ document_instance.user }}
         {% if messages %}
             <div class="container mt-3">
                 {% for message in messages %}
@@ -181,11 +182,8 @@
                         {% include "account_base/form_fragment.html" with is_active=i.is_active balance_id=i.balance_id bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="debt" locked=i.locked %}
                     {% endif %}
                 {% endfor %}
-                <p>---------بدهی ها--------</p>
             </div>
             <button type="button" id="add-form-debt">افزودن فرم بدهی</button>
-            <p>---------بدهی--------</p>
-            <p>---------بستانکاری------</p>
             <div class="credit">
                 {% for i in combined_forms %}
                     {% if i.form_balance.transaction_type.value == "credit" %}
@@ -195,7 +193,6 @@
                 {% endfor %}
             </div>
             <button type="button" id="add-form-credit">افزودن فرم بستانکاری</button>
-            <p>---------بستانکاری------</p>
         </div>
         <div class="col-12">
             <div class="invoice-total ms-auto">

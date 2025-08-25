@@ -25,7 +25,7 @@
         <div class="col-sm-6 col-xl-3">
             {{ form_balance.is_active }}
             {{ form_balance.user }}
-            <div class="input-group mb-3">
+            <div class="input-group mb-4">
             <select class='dropdown form-select-sm ' disabled id="{{ uniqueid }}-accounts-list">
                 {% if account_str %}<option value="">{{ account_str }}</option>{% endif %}
                 <option value="">حساب خود را انتخاب کنید</option>
@@ -35,34 +35,31 @@
                     class="btn btn-sm btn-light-secondary" data-bs-toggle="modal"
                     data-bs-target="#{{ uniqueid }}-accounts-lists"
                     id="{{ uniqueid }}-accounts-list-btn">
-                    <i class="ph-duotone ph-pencil-simple-line"></i> تغییر
+                    <i class="ph-duotone ph-pencil-simple-line"></i> حساب
                 </button>
             </div>
             
             <input type="hidden" id="{{ uniqueid }}-selected-account-id" {% if form_balance.account.value %}value="{{ form_balance.account.value}}"{% endif %}>
         </div>
-        <div class="cashonly col-sm-3">
+        <div class="cashonly col-sm-4">
             <div class="input-group mb-3">
                 <span class="input-group-text">{{ form_balance.amount.label }}</span>
                 {{ form_balance.amount }}
             </div>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-4">
             <div class="input-group mb-3">
-                
+              {% if form_balance.image.value %}
+            <img src="{{ form_balance.image.value.url }}" width="150px">
+        {% endif %}
+        {{ form_balance.image }}
                 {{ form_balance.date_created }}
             </div>
         </div>
     </div>
     {{ form_balance.transaction_type }}
     <div class="row p-0">
-    <div class="col-md-6">
-        <label class="form-label">{{ form_balance.image.label }}</label>
-        {% if form_balance.image.value %}
-            <img src="{{ form_balance.image.value.url }}" width="150px">
-        {% endif %}
-        {{ form_balance.image }}
-    </div>
+    
     <div class="col-md-6">
         <div class="form-control">{{ form_balance.description }}</div>
     </div>
@@ -83,11 +80,39 @@
             data-bs-toggle="modal"
             data-bs-target="#{{ uniqueid }}-accounts-lists"
             id="{{ uniqueid }}-cheque-accounts-list-btn">
-            <i class="ph-duotone ph-pencil-simple-line"></i> انتخاب
+            <i class="ph-duotone ph-pencil-simple-line"></i> بانک
         </button>
         <input type="hidden" id="{{ uniqueid }}-selected-cheque-account-id" {% if form_cheque.account.value %}value="{{ form_cheque.account.value}}"{% endif %}>
+            <div class="row p-0">
+    <div class="col-md-3">
+        {{ form_cheque.cheque_type }}
+        {{ form_cheque.user }}
+        {{ form_cheque.account }}
+        {{ form_cheque.created_at }}
+        <div class="form-control">{{ form_cheque.name }}</div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-control">{{ form_cheque.Cheque_numbder }}</div>
 
-        {{ form_cheque }}
+     
+       
+    </div>
+    <div class="col-md-3">
+        <div class="form-control">{{ form_cheque.maturity_date }}</div>
+
+        
+       
+    </div>
+    <div class="col-md-3">
+
+                <div class="form-control">{{ form_cheque.cheque_status }}</div>
+
+       
+    </div>
+    </div>
+        
+        
+        
         {% if chequeid and not locked %}
             <button type="button" class="delete-cheque-btn" data-chequeid="{{ chequeid }}">حذف چک</button>
         {% endif %}
