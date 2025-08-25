@@ -1,42 +1,70 @@
 {% load jinja_filters %}
 {% for credit in credits %}
 
-            <div class="card">
-            
-              <div class="card-header">
-              <div class="flex-shrink-0">
-                  <a href="{% url 'UpdateBalanceView' credit.document.id %}"><button class="btn btn-primary btn-sm">ویرایش</button></a>
-                    <a href="{% url 'change_status_cheque' credit.id %}" class="btn btn-secondary btn-sm ms-1">تغییر وضعیت چک</a>
-                  </div>
-              </div>
-                <div class="d-flex flex-wrap gap-2">
-                  <div class="flex-grow">
-                      {% if credit.image %}
-                          <div class="grid row g-3">
-                              <div class="col-xl-3 col-md-4 col-sm-6">
-                                <a class="card-gallery" data-fslightbox="gallery" href="{{ credit.image.url }}">
-                                  <img class="img-fluid" src="{{ credit.image.url }}" alt="Card image" width="50%">
-                                  
-                                </a>
-                              </div>
-                          </div>
-                      {% endif %}
-                    <h6 class="mb-3"><span class="alert alert-{% if credit.cheque.cheque_status == "جاری"%}primary
-                                                                {% elif credit.cheque.cheque_status == 'عودتی' %}dark
-                                                                {% elif credit.cheque.cheque_status == 'وصولی' %}success
-                                                                {% elif credit.cheque.cheque_status == 'برگشتنی' %}danger
-                                                                {% elif credit.cheque.cheque_status == 'امانی' %}warning
-                                                                {% endif %}" 
-                                           role="alert">{{ credit.cheque.cheque_status }}</span></h6>
-                  </div>
-                </div>
-              <div class="card-body">
-                <p><i class="fas fa-user-circle"> نام: </i><b>{{ credit.cheque.name }}</b></p>
-                <h6 class="mb1"><i class="fas fa-money-check-alt"> مبلغ سررسید: </i>{{ credit.amount|toman }}</h6>
-                <h6 class="mb1"><i class="fas fa-calendar-day"> تاریخ سررسید: </i>{{ credit.cheque.maturity_date }}</h6>
-                <h6 class="mb1"><i class="ti ti-list-numbers"> شماره چک: </i>{{ credit.cheque.Cheque_numbder }}</h6>
-                <h6 class="mb1"><i class="fas fa-calendar-plus"> تاریخ ثبت: </i>{{ credit.document.date_created }}</h6>
-                <p>توضیحات: {{ credit.description }}</p>
-              </div>
-            </div>
+<div class="card shadow-sm mb-3 rounded-3">
+  <!-- Header -->
+  <div class="card-header d-flex justify-content-between align-items-center flex-wrap"
+       data-bs-toggle="collapse" data-bs-target="#collapse-{{ credit.id }}" 
+       style="cursor: pointer;">
+    
+    <!-- اطلاعات کلیدی -->
+    <div class="d-flex flex-wrap flex-grow-1 gap-3 align-items-center">
+      <span><i class="fas fa-user-circle text-primary"></i> <b>{{ credit.cheque.name }}</b></span>
+      <span><i class="fas fa-money-check-alt text-success"></i> {{ credit.amount|toman }}</span>
+      <span><i class="fas fa-calendar-day text-danger"></i> {{ credit.cheque.maturity_date }}</span>
+    </div>
+
+    <!-- آیکون فلش -->
+    <i class="fas fa-chevron-down text-muted rotate-icon ms-auto"></i>
+  </div>
+
+  <!-- Collapse -->
+  <div id="collapse-{{ credit.id }}" class="collapse">
+    <div class="card-body">
+      <!-- دکمه‌ها -->
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <a href="{% url 'UpdateBalanceView' credit.document.id %}" class="btn btn-outline-primary btn-sm flex-fill">✏️ ویرایش</a>
+        <a href="{% url 'change_status_cheque' credit.id %}" class="btn btn-outline-secondary btn-sm flex-fill">🔄 تغییر وضعیت چک</a>
+      </div>
+
+      <!-- تصویر -->
+      {% if credit.image %}
+        <div class="text-center mb-3">
+          <a class="card-gallery" data-fslightbox="gallery" href="{{ credit.image.url }}">
+            <img class="img-fluid rounded shadow-sm" src="{{ credit.image.url }}" alt="Card image" style="max-width: 100px;">
+          </a>
+        </div>
+      {% endif %}
+
+      <!-- وضعیت چک -->
+      <h6 class="mb-3">
+        <span class="badge bg-{% if credit.cheque.cheque_status == "جاری"%}primary
+                              {% elif credit.cheque.cheque_status == 'عودتی' %}dark
+                              {% elif credit.cheque.cheque_status == 'وصولی' %}success
+                              {% elif credit.cheque.cheque_status == 'برگشتنی' %}danger
+                              {% elif credit.cheque.cheque_status == 'امانی' %}warning
+                              {% endif %}">
+          {{ credit.cheque.cheque_status }}
+        </span>
+      </h6>
+
+      <!-- جزئیات -->
+      <p><i class="ti ti-list-numbers text-info"></i> شماره چک: <b>{{ credit.cheque.Cheque_numbder }}</b></p>
+      <p><i class="fas fa-calendar-plus text-secondary"></i> تاریخ ثبت: {{ credit.document.date_created }}</p>
+      <p><i class="fas fa-sticky-note text-warning"></i> توضیحات: {{ credit.description }}</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .rotate-icon {
+    transition: transform 0.3s ease;
+  }
+  .collapse.show ~ .card-body .rotate-icon,
+  .card-header[aria-expanded="true"] .rotate-icon {
+    transform: rotate(180deg);
+  }
+</style>
+
+
 {% endfor %}
