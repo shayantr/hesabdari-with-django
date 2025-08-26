@@ -135,33 +135,146 @@
     <script>
     jalaliDatepicker.startWatch();
 
-    $(document).ready(function () {
-        function filterDebits() {
-            $.ajax({
-                url: "{% url 'filter_debit_cheques' %}",
-                data: $('#debit-filter-form').serialize(),
-                success: function (data) {
-                    $('#debit-cheques-list').html(data.html);
-                }
-            });
-        }
+$(document).ready(function () {
 
-        $('#debit-filter-form input, #debit-filter-form select').on('input change keyup', function () {
+    function filterDebits() {
+        let formData = $('#debit-filter-form').serializeArray();
+
+        // حذف همه پارامترهای credit_* از URL
+        const params = new URLSearchParams(window.location.search);
+        [...params.keys()].forEach(k => {
+            if (k.startsWith('credit_')) params.delete(k);
+        });
+
+        // اضافه کردن پارامترهای debit_ جدید
+        formData.forEach(f => params.set('debit_' + f.name, f.value));
+
+        const newUrl = window.location.pathname + '?' + params.toString();
+        window.history.pushState({}, '', newUrl);
+
+        $.ajax({
+            url: "{% url 'filter_debit_cheques' %}",
+            data: $('#debit-filter-form').serialize(),
+            success: function (data) {
+                $('#debit-cheques-list').html(data.html);
+            }
+        });
+    }
+
+    function filterCredits() {
+        let formData = $('#credit-filter-form').serializeArray();
+
+        // حذف همه پارامترهای debit_* از URL
+        const params = new URLSearchParams(window.location.search);
+        [...params.keys()].forEach(k => {
+            if (k.startsWith('debit_')) params.delete(k);
+        });
+
+        // اضافه کردن پارامترهای credit_ جدید
+        formData.forEach(f => params.set('credit_' + f.name, f.value));
+
+        const newUrl = window.location.pathname + '?' + params.toString();
+        window.history.pushState({}, '', newUrl);
+
+        $.ajax({
+            url: "{% url 'filter_credit_cheques' %}",
+            data: $('#credit-filter-form').serialize(),
+            success: function (data) {
+                $('#credit-cheques-list').html(data.html);
+            }
+        });
+    }
+
+    // پر کردن فرم‌ها از روی URL
+    function fillFormsFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        params.forEach(function (value, key) {
+            if (key.startsWith('debit_')) {
+                let field = $(`#debit-filter-form [name="${key.replace('debit_', '')}"]`);
+                if (field.attr('type') === 'checkbox' || field.attr('type') === 'radio') {
+                    field.filter(`[value="${value}"]`).prop('checked', true);
+                } else {
+                    field.val(value).trigger('change');
+                }
+            }
+            if (key.startsWith('credit_')) {
+                let field = $(`#credit-filter-form [name="${key.replace('credit_', '')}"]`);
+                if (field.attr('type') === 'checkbox' || field.attr('type') === 'radio') {
+                    field.filter(`[value="${value}"]`).prop('checked', true);
+                } else {
+                    field.val(value).trigger('change');
+                }
+            }
+        });
+
+        // اجرای اولیه
+        if ([...params.keys()].some(k => k.startsWith('debit_'))) {
             filterDebits();
-        });
-        function filtercredits() {
-            $.ajax({
-                url: "{% url 'filter_credit_cheques' %}",
-                data: $('#credit-filter-form').serialize(),
-                success: function (data) {
-                    $('#credit-cheques-list').html(data.html);
-                }
-            });
+        }
+        if ([...params.keys()].some(k => k.startsWith('credit_'))) {
+            filterCredits();
+        }
+    }
+
+    // بار اول
+    fillFormsFromUrl();
+
+    // هندل تغییرات فرم‌ها
+    $('#debit-filter-form input, #debit-filter-form select').on('input change keyup', filterDebits);
+    $('#credit-filter-form input, #credit-filter-form select').on('input change keyup', filterCredits);
+
+    // back/forward مرورگر
+    window.onpopstate = function () {
+        fillFormsFromUrl();
+    };
+});
+
+$(document).ready(function () {
+
+    // فعال کردن تب بر اساس URL
+    function activateTabFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+
+        if (tab === 'credit') {
+            const creditTab = new bootstrap.Tab($('#pills-credit-tab'));
+            creditTab.show();
+        } else {
+            // پیش‌فرض تب بدهی
+            const debitTab = new bootstrap.Tab($('#pills-debit-tab'));
+            debitTab.show();
+        }
+    }
+
+    // بایند کردن تغییر تب برای آپدیت URL
+    $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
+        const target = $(e.target).attr('data-bs-target'); // #debits یا #credits
+        const params = new URLSearchParams(window.location.search);
+
+        if (target === '#debits') {
+            params.set('tab', 'debit');
+        } else if (target === '#credits') {
+            params.set('tab', 'credit');
         }
 
-        $('#credit-filter-form input, #credit-filter-form select').on('input change keyup', function () {
-            filtercredits();
-        });
+        const newUrl = window.location.pathname + '?' + params.toString();
+        window.history.pushState({}, '', newUrl);
     });
+
+    // هنگام load صفحه
+    activateTabFromUrl();
+
+    // Back/Forward مرورگر
+    window.onpopstate = function () {
+        activateTabFromUrl();
+    };
+});
+
+$('#change-cheque-status').each(function() {
+    const currentUrl = window.location.href;
+    const href = $(this).attr('href');
+    const separator = href.includes('?') ? '&' : '?';
+    $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
+});
     </script>
 {% endblock %}

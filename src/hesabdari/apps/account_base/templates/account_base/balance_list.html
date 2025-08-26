@@ -25,9 +25,7 @@
                 <div class="col-md-3 mb-2">
                     <input type="text" name="amount" placeholder="مبلغ" class="form-control mb-2">
                 </div>
-                <div class="col-md-3 mb-2">
-                    <input type="text" name="balance_id" placeholder="شماره سند" class="form-control mb-2">
-                </div>
+                
                 <div class="col-md-3 mb-2">
                     <input type="text" name="document_id" placeholder="شماره روکش" class="form-control mb-2">
                 </div>
@@ -54,29 +52,51 @@
     <script src="{% static 'js/plugins/index.js' %}"></script>
     <script>
         jalaliDatepicker.startWatch();
-        $(document).ready(function () {
-            function filterbalance() {
-                const id_lists = {{ id_lists|default:"null" }};
-                let formData = $('#search-filter-form').serializeArray();
-                if (id_lists && Array.isArray(id_lists)) {
-                    formData.push({
-                        name: 'id_lists',
-                        value: JSON.stringify(id_lists)
-                    });
-                }
-                $.ajax({
-                    url: "{% url 'filter_balance' %}",
-                    data: formData,
-                    success: function (data) {
-                        $('#search-balance-list').html(data.html);
-                    }
-                });
+$(document).ready(function () {
+    function filterbalance() {
+        let formData = $('#search-filter-form').serializeArray();
+        const queryString = $.param(formData);
+
+        // آپدیت URL بدون رفرش
+        const newUrl = window.location.pathname + "?" + queryString;
+        window.history.pushState({}, '', newUrl);
+
+        $.ajax({
+            url: "{% url 'filter_balance' %}",
+            type: "GET",
+            data: formData,
+            success: function (data) {
+                $('#search-balance-list').html(data.html);
             }
-
-            $('#search-filter-form input, #search-filter-form select').on('input change keyup', function () {
-                filterbalance();
-            });
-
         });
+    }
+
+    // پر کردن فرم از روی URL
+    const params = new URLSearchParams(window.location.search);
+    params.forEach(function (value, key) {
+        let field = $(`[name="${key}"]`);
+
+        if (field.attr('type') === 'checkbox' || field.attr('type') === 'radio') {
+            field.filter(`[value="${value}"]`).prop('checked', true);
+        } else {
+            field.val(value).trigger('change'); // برای select2 و datepicker هم
+        }
+    });
+
+    // اجرای اولیه بر اساس URL
+    if (params.toString()) {
+        filterbalance();
+    }
+
+    // هندل تغییرات فرم
+    $('#search-filter-form input, #search-filter-form select').on('input change keyup', function () {
+        filterbalance();
+    });
+            
+
+});
+
     </script>
+    
+
 {% endblock %}

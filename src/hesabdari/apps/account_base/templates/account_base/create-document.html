@@ -309,16 +309,16 @@
                         const $newForm = $(response.form_html);
                         const datease = response.datease;
                         const $lastForm = $('#forms-container .debt .form-wrapper').last();
-                        $newForm.find(`[name$="-balance-account"]`).val(balance_account);
                         $newForm.find(`[name$="-balance-description"]`).val(description);
-                        $newForm.find(`[id$="-accounts-list"]`).html(`<option selected>${balance_account_new}</option>`);
 
 
                         if ($lastForm.length) {
                             const wasChecked = $lastForm.find('.toggle-cheque-form').is(':checked');
                             if (wasChecked) {
+                                $newForm.find(`[name$="-balance-account"]`).val(balance_account);
                                 $newForm.find('.toggle-cheque-form').prop('checked', true); // تیک زدن
                                 $newForm.find('.cheque-form').show(); // نمایش فرم چک
+                                $newForm.find(`[id$="-accounts-list"]`).html(`<option selected>${balance_account_new}</option>`);
                                 $newForm.find(`[name$="-Cheque_numbder"]`).val(Cheque_numbder + 1);
                                 $newForm.find(`[name$="-cheque-account"]`).val(Cheque_account);
                                 $newForm.find(`[name$="-maturity_date"]`).val(datease);
@@ -366,9 +366,7 @@
                     success: function (response) {
                         const $newForm = $(response.form_html);
                         const $lastForm = $('#forms-container .credit .form-wrapper').last();
-                        $newForm.find(`[name$="-balance-account"]`).val(balance_account);
                         $newForm.find(`[name$="-balance-description"]`).val(description);
-                        $newForm.find(`[id$="-accounts-list"]`).html(`<option selected>${balance_account_new}</option>`);
 
                         const datease = response.datease;
                         if ($lastForm.length) {
@@ -377,6 +375,8 @@
                                 $newForm.find('.toggle-cheque-form').prop('checked', true); // تیک زدن
                                 $newForm.find('.cheque-form').show(); // نمایش فرم چک
                                 $newForm.find(`[name$="-Cheque_numbder"]`).val(Cheque_numbder + 1);
+                                $newForm.find(`[id$="-accounts-list"]`).html(`<option selected>${balance_account_new}</option>`);
+                                $newForm.find(`[name$="-balance-account"]`).val(balance_account);
                                 $newForm.find(`[name$="-cheque-account"]`).val(Cheque_account);
                                 $newForm.find(`[name$="-maturity_date"]`).val(datease);
                                 const bank_account_new = lastForm.find('[id$="-bank-list"]').text();

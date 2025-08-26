@@ -281,6 +281,7 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
 
     @transaction.atomic
     def post(self, request, pk):
+        next_url = request.GET.get('next')
         deleted_ids = json.loads(request.POST.get('deleted_balances_id', '[]'))
         document = get_object_or_404(Document, pk=pk)
         document_form = DocumentForm(request.POST or None, instance=document)
@@ -353,8 +354,10 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
             # ذخیره همه چیز در یک تراکنش اتمیک
             self._save_existing_forms(combined_forms, document, user, document_form)
             self._save_new_forms(new_balance_forms, new_cheque_forms, document, user, document_form)
-
-            return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")})
+            if next_url:
+                return JsonResponse({'success': True, "redirect_url": next_url})
+            else:
+                return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")})
 
         context = {
             'documentform': document,
@@ -680,6 +683,7 @@ class ChangeStatusCheque(generic.View):
     def post(self, request, pk):
         document = DocumentForm(request.POST or None)
         balancesheet = BalanceSheet.objects.filter(id=pk, user=request.user, is_active=True).last()
+        next_url = request.GET.get('next', reverse('cheque-lists-view'))
         print(balancesheet)
         all_credit = 0
         all_debt = 0
@@ -737,7 +741,10 @@ class ChangeStatusCheque(generic.View):
                             b.cheque = c
                         b.document = d
                         b.save()
-                return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")}, )
+                if next_url:
+                    return JsonResponse({'success': True, "redirect_url": next_url}, )
+                else:
+                    return JsonResponse({'success': True, "redirect_url": reverse("cheque-lists-view")}, )
 
         context = {
             'documentform': document,
