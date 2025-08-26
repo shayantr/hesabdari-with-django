@@ -59,11 +59,31 @@ def extract_all_prefixes(post_data, file_data):
 
 @login_required
 def createbalancesheet(request):
+    if request.method == "GET":
+        token = str(uuid.uuid4())
+        request.session['form_token'] = token
+        document_instance = DocumentForm(initial={'user': request.user})
+        context = {
+            'all_balanceforms': [],
+            'all_chequeforms': [],
+            'document_instance': document_instance,
+            'form_token': token,
+        }
+        return render(request, 'account_base/create-document.html', context)
     all_prefixes = extract_all_prefixes(request.POST, request.FILES) if request.method == "POST" else set()
     document_instance = DocumentForm(request.POST or None, initial={'user':request.user})
     all_balanceforms = [BalanceSheetForm(request.POST, request.FILES or None, prefix=f'{i}-new-balance') for i in all_prefixes]
     all_chequeforms = [CashierChequeForm(request.POST or None, prefix=f'{i}-new-cheque') for i in all_prefixes]
     if request.method == "POST":
+        token = request.POST.get("form_token")
+        saved_token = request.session.get("form_token")
+
+        # چک کردن اعتبار توکن
+        if token != saved_token:
+            return JsonResponse({
+                "success": False,
+                "errors": "این فرم قبلاً ارسال شده یا توکن معتبر نیست."
+            }, status=400)
         all_credit = 0
         all_debt = 0
         all_forms_valid = True
@@ -90,16 +110,21 @@ def createbalancesheet(request):
             if all_credit != all_debt:
                 return JsonResponse({'success': False, 'errors': 'مجموع بدهکاری و بستانکاری برابر نیست.'},)
             else:
-                d.save()
-                document_instance.save()
-                for balance, cheque in zip(all_balanceforms, all_chequeforms):
-                    b = balance.save(commit=False)
-                    if cheque.cleaned_data.get('name'):
-                        c = cheque.save()
-                        b.cheque = c
-                    b.document = d
-                    b.save()
-                return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")},)
+                with transaction.atomic():
+                    d.save()
+                    document_instance.save()
+                    for balance, cheque in zip(all_balanceforms, all_chequeforms):
+                        b = balance.save(commit=False)
+                        if cheque.cleaned_data.get('name'):
+                            c = cheque.save()
+                            b.cheque = c
+                        b.document = d
+                        b.save()
+                try:
+                    del request.session['form_token']
+                    return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")},)
+                except KeyError:
+                    pass
 
     context = {
         'all_balanceforms': all_balanceforms,
@@ -538,17 +563,6 @@ def edit_account(request, pk):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'نام خالی است'})
 
-
-# @login_required
-# @require_POST
-# def delete_balance(request):
-#     try:
-#         balance_id = request.POST.get('balance_id')
-#         balance = BalanceSheet.objects.get(user=request.user, pk=balance_id)
-#         balance.delete()
-#         return JsonResponse({'success': True})
-#     except BalanceSheet.DoesNotExist:
-#         return JsonResponse({'success': False, 'error': 'سند پیدا نشد'})
 
 @login_required
 @require_POST

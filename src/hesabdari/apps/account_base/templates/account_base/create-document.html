@@ -154,6 +154,7 @@
 {% endblock %}
 {% block body %}
     <form id="mainForm" enctype="multipart/form-data" class="form-floating mb-0">
+    <input type="hidden" name="form_token" value="{{ form_token }}">
         {{ document_instance.date_created }}
         {{ document_instance.user }}
         {% if messages %}
