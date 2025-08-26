@@ -1,47 +1,55 @@
 {% load jinja_filters %}
 
 {% for balance in balance_lists %}
-<div class="card mb-2 shadow-sm rounded-3"
-     style="border-left: 5px solid {% if balance.transaction_type == 'debt' %}#ff4d4f{% else %}#28a745{% endif %};">
 
-    <!-- بالای کارت: اسم حساب و عکس -->
-    <div class="card-header d-flex justify-content-between align-items-center p-2">
-        <a class="edit-balance text-decoration-none" href="{% url 'UpdateBalanceView' balance.document.id %}">
-            <h6 class="m-0 text-dark">
-                <i class="fas fa-user-circle me-1"></i>{{ balance.account }}
-            </h6>
-        </a>
+    <div class="card" {% if balance.transaction_type == 'debt' %}style="background-color: #ffe5e5;"
+         {% else %}style="background-color: #e5fbe5;"{% endif %}>
+        <div class="card-header">
+<div class="row align-items-center">
+    <div class="col d-flex justify-content-end"><a class="edit-balance" href="{% url 'UpdateBalanceView' balance.document.id %}">
 
-        {% if balance.image %}
-        <a class="card-gallery" data-fslightbox="gallery" href="{{ balance.image.url }}">
-            <img src="{{ balance.image.url }}" alt="Card image"
-                 style="width:40px;height:40px;object-fit:cover;border-radius:5px;">
-        </a>
-        {% endif %}
-    </div>
-
-    <!-- اطلاعات کلیدی در یک خط -->
-    <div class="d-flex justify-content-between align-items-center px-3 py-2 bg-light rounded-bottom">
-        <div><strong>سند:</strong> {{ balance.document.id }}</div>
-        <div><strong>تاریخ:</strong> {{ balance.document.date_created }}</div>
-        <div style="color:{% if balance.transaction_type == 'debt' %}#ff4d4f{% else %}#28a745{% endif %};"><strong>مبلغ:</strong> {{ balance.amount|toman }}</div>
-        <button class="btn btn-sm btn-outline-secondary ms-2" type="button"
-                data-bs-toggle="collapse" data-bs-target="#details-{{ balance.document.id }}"
-                aria-expanded="false" aria-controls="details-{{ balance.document.id }}">
-            جزئیات
-        </button>
-    </div>
-
-    <!-- جزئیات آکاردئونی -->
-    <div class="collapse px-3 pb-2" id="details-{{ balance.document.id }}">
-        <div><strong>چک:</strong> {% if not balance.cheque %}ندارد{% else %}{{ balance.cheque.cheque_status }}{% endif %}</div>
-        {% if balance.description %}
-        <div><strong>توضیحات:</strong> {{ balance.description }}</div>
-        {% endif %}
-    </div>
+                <div class="flex-shrink-0">
+                    <h5><i class="fas fa-user-circle"></i>{{ balance.account }}</h5>
+                </div>
+            </a></div>
+    <div class="col d-flex justify-content-start">{% if balance.image %}
+                    <div class="grid g-3">
+                        <a class="card-gallery" data-fslightbox="gallery" href="{{ balance.image.url }}">
+                            <img class="img-fluid" src="{{ balance.image.url }}" alt="Card image" style="width:50%">
+                            <div class="gallery-hover-data card-body justify-content-end">
+                            </div>
+                        </a>
+                    </div>
+                {% endif %}</div>
 </div>
-{% endfor %}
+            <div class="d-flex flex-wrap gap-2">
 
+            </div>
+
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">سند</th>
+                <th scope="col">تاریخ</th>
+                <th scope="col">مبلغ</th>
+                <th scope="col"> چک</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th scope="row">{{ balance.document.id }}</th>
+                <td>{{ balance.document.date_created }}</td>
+                <td>{{ balance.amount|toman }}</td>
+                <td>{% if not balance.cheque %}ندارد{% else %}{{ balance.cheque.cheque_status }}{% endif %}</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="row">
+            <p>توضیحات: {{ balance.description }}</p>
+        </div>
+    </div>
+{% endfor %}
 
         <script>
         $('.edit-balance').each(function () {
