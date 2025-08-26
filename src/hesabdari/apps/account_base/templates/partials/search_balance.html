@@ -1,108 +1,46 @@
 {% load jinja_filters %}
 
-<div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
-  <table class="table table-sm align-middle text-center">
-    <thead class="table-light sticky-top">
-      <tr>
-        <th scope="col" class="sticky-top bg-light">سند</th>
-        <th scope="col" class="sticky-top bg-light">تاریخ</th>
-        <th scope="col" class="sticky-top bg-light">مبلغ</th>
-        <th scope="col" class="sticky-top bg-light"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for balance in balance_lists %}
-      <tr class="toggle-row cursor-pointer"
-          data-bs-toggle="collapse"
-          data-bs-target="#details-{{ balance.id }}"
-          aria-expanded="false"
-          aria-controls="details-{{ balance.id }}"
-          {% if balance.transaction_type == 'debt' %}
-            style="background-color: #fff5f5;"
-          {% else %}
-            style="background-color: #f5fff7;"
-          {% endif %}>
-        
-        <!-- سند -->
-        <td>
-          <a class="edit-balance text-decoration-none fw-semibold"
-             href="{% url 'UpdateBalanceView' balance.document.id %}">
-             {{ balance.document.id }}
-          </a>
-        </td>
+{% for balance in balance_lists %}
+<div class="card mb-2 shadow-sm rounded-3"
+     style="border-left: 5px solid {% if balance.transaction_type == 'debt' %}#ff4d4f{% else %}#28a745{% endif %};">
 
-        <!-- تاریخ -->
-        <td class="small">{{ balance.document.date_created }}</td>
+    <!-- بالای کارت: اسم حساب و عکس -->
+    <div class="card-header d-flex justify-content-between align-items-center p-2">
+        <a class="edit-balance text-decoration-none" href="{% url 'UpdateBalanceView' balance.document.id %}">
+            <h6 class="m-0 text-dark">
+                <i class="fas fa-user-circle me-1"></i>{{ balance.account }}
+            </h6>
+        </a>
 
-        <!-- مبلغ -->
-        <td class="fw-bold text-success">{{ balance.amount|toman }}</td>
+        {% if balance.image %}
+        <a class="card-gallery" data-fslightbox="gallery" href="{{ balance.image.url }}">
+            <img src="{{ balance.image.url }}" alt="Card image"
+                 style="width:40px;height:40px;object-fit:cover;border-radius:5px;">
+        </a>
+        {% endif %}
+    </div>
 
-        <!-- آیکون -->
-        <td class="toggle-icon text-muted">
-          <i class="fas fa-chevron-down"></i>
-        </td>
-      </tr>
+    <!-- اطلاعات کلیدی در یک خط -->
+    <div class="d-flex justify-content-between align-items-center px-3 py-2 bg-light rounded-bottom">
+        <div><strong>سند:</strong> {{ balance.document.id }}</div>
+        <div><strong>تاریخ:</strong> {{ balance.document.date_created }}</div>
+        <div style="color:{% if balance.transaction_type == 'debt' %}#ff4d4f{% else %}#28a745{% endif %};"><strong>مبلغ:</strong> {{ balance.amount|toman }}</div>
+        <button class="btn btn-sm btn-outline-secondary ms-2" type="button"
+                data-bs-toggle="collapse" data-bs-target="#details-{{ balance.document.id }}"
+                aria-expanded="false" aria-controls="details-{{ balance.document.id }}">
+            جزئیات
+        </button>
+    </div>
 
-      <!-- ردیف جزئیات -->
-      <tr class="collapse bg-light" id="details-{{ balance.id }}">
-        <td colspan="4" class="text-start p-3">
-          <div class="row g-2 small">
-            <div class="col-12">
-              <strong>حساب:</strong>
-              <i class="fas fa-user-circle me-1"></i>{{ balance.account }}
-            </div>
-            
-            <div class="col-12">
-              <strong>چک:</strong>
-              {% if not balance.cheque %}
-                <span class="badge bg-secondary">ندارد</span>
-              {% else %}
-                <span class="badge bg-info">{{ balance.cheque.cheque_status }}</span>
-              {% endif %}
-            </div>
-            
-            {% if balance.image %}
-            <div class="col-12">
-              <strong>تصویر:</strong>
-              <a class="card-gallery" data-fslightbox="gallery" href="{{ balance.image.url }}">
-                <img src="{{ balance.image.url }}" alt="img"
-                     class="rounded mt-1 shadow-sm" style="width:70px;height:70px;object-fit:cover;">
-              </a>
-            </div>
-            {% endif %}
-
-            {% if balance.description %}
-            <div class="col-12">
-              <strong>توضیحات:</strong>
-              <span>{{ balance.description }}</span>
-            </div>
-            {% endif %}
-          </div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+    <!-- جزئیات آکاردئونی -->
+    <div class="collapse px-3 pb-2" id="details-{{ balance.document.id }}">
+        <div><strong>چک:</strong> {% if not balance.cheque %}ندارد{% else %}{{ balance.cheque.cheque_status }}{% endif %}</div>
+        {% if balance.description %}
+        <div><strong>توضیحات:</strong> {{ balance.description }}</div>
+        {% endif %}
+    </div>
 </div>
-
-<script>
-  // تغییر آیکون هنگام باز/بسته شدن جزئیات
-  document.querySelectorAll('.toggle-row').forEach(row => {
-    row.addEventListener('click', function () {
-      const icon = this.querySelector('.toggle-icon i');
-      if (icon.classList.contains('fa-chevron-down')) {
-        icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
-      } else {
-        icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
-      }
-    });
-  });
-</script>
-
-
-
-
-
+{% endfor %}
 
 
         <script>
