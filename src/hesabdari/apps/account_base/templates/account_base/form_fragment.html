@@ -2,7 +2,7 @@
 {% load static %}
 
 <div class="form-wrapper {% if is_active == False %}notactive{% endif %}" id="{{ uniqueid }}">
-    <div id="form-errors-{{ uniqueid }}"></div>  {# اینجا خطاها با Ajax پر میشن #}
+    <div id="form-errors-{{ balance }}"></div>  {# اینجا خطاها با Ajax پر میشن #}
     <div class="remove-form" {% if balance_id %}id="{{ balance_id }}"{% endif %} style="color:red; cursor:pointer;">حذف</div>
     <div class="modal fade" id="{{ uniqueid }}-accounts-lists" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">

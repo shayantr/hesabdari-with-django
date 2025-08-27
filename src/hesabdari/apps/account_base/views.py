@@ -1,4 +1,5 @@
 import json
+import time
 from collections import namedtuple
 from itertools import zip_longest
 from lib2to3.fixes.fix_input import context
@@ -10,8 +11,8 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction
-from django.db.models import Q, Prefetch, Max
+from django.db import transaction, DatabaseError
+from django.db.models import Q, Prefetch, Max, Sum, Case, IntegerField, When
 from django.db.transaction import commit
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
@@ -56,12 +57,29 @@ def extract_all_prefixes(post_data, file_data):
             prefix = key.split('-')[0]
             prefixes.add(prefix)
     return prefixes
+TOKEN_TTL = 30 * 60  # ⏱ مدت اعتبار توکن = ۳۰ دقیقه (ثانیه)
+
+
+def _get_tokens(session):
+    """
+    توکن‌ها رو از session بگیر و منقضی‌ها رو حذف کن
+    خروجی: دیکشنری {token: timestamp}
+    """
+    now = time.time()
+    tokens = session.get("form_tokens", {})
+    # فقط توکن‌هایی رو نگه دار که هنوز منقضی نشدن
+    tokens = {t: ts for t, ts in tokens.items() if now - ts < TOKEN_TTL}
+    session["form_tokens"] = tokens
+    return tokens
+
 
 @login_required
 def createbalancesheet(request):
     if request.method == "GET":
+        tokens = _get_tokens(request.session)
         token = str(uuid.uuid4())
-        request.session['form_token'] = token
+        tokens[token] = time.time()
+        request.session["form_tokens"] = tokens
         document_instance = DocumentForm(initial={'user': request.user})
         context = {
             'all_balanceforms': [],
@@ -75,14 +93,14 @@ def createbalancesheet(request):
     all_balanceforms = [BalanceSheetForm(request.POST, request.FILES or None, prefix=f'{i}-new-balance') for i in all_prefixes]
     all_chequeforms = [CashierChequeForm(request.POST or None, prefix=f'{i}-new-cheque') for i in all_prefixes]
     if request.method == "POST":
+        tokens = _get_tokens(request.session)
         token = request.POST.get("form_token")
-        saved_token = request.session.get("form_token")
 
         # چک کردن اعتبار توکن
-        if token != saved_token:
+        if token not in tokens:
             return JsonResponse({
                 "success": False,
-                "errors": "این فرم قبلاً ارسال شده یا توکن معتبر نیست."
+                "errors": "این فرم قبلاً ارسال شده، نامعتبر یا منقضی شده است."
             }, status=400)
         all_credit = 0
         all_debt = 0
@@ -90,9 +108,10 @@ def createbalancesheet(request):
         for balance, cheque in zip(all_balanceforms, all_chequeforms):
             if not balance.is_valid() or not cheque.is_valid():
                 all_forms_valid = False
+                print(balance.prefix)
                 return JsonResponse({
                     "success": False,
-                    "errors_html": render_to_string("partials/errors.html", {"form": balance}, request=request)
+                    "errors": render_to_string("partials/errors.html", {"form": balance, 'err_id':balance.prefix}, request=request)
                 })
 
         if not document_instance.is_valid():
@@ -110,21 +129,29 @@ def createbalancesheet(request):
             if all_credit != all_debt:
                 return JsonResponse({'success': False, 'errors': 'مجموع بدهکاری و بستانکاری برابر نیست.'},)
             else:
-                with transaction.atomic():
-                    d.save()
-                    document_instance.save()
-                    for balance, cheque in zip(all_balanceforms, all_chequeforms):
-                        b = balance.save(commit=False)
-                        if cheque.cleaned_data.get('name'):
-                            c = cheque.save()
-                            b.cheque = c
-                        b.document = d
-                        b.save()
                 try:
-                    del request.session['form_token']
+                    with transaction.atomic():
+                        d.save()
+                        document_instance.save()
+                        for balance, cheque in zip(all_balanceforms, all_chequeforms):
+                            b = balance.save(commit=False)
+                            if cheque.cleaned_data.get('name'):
+                                c = cheque.save()
+                                b.cheque = c
+                            b.document = d
+                            b.save()
+                except DatabaseError as e:  # یا Exception برای هر خطای غیرمنتظره
+                    return JsonResponse({
+                        "success": False,
+                        "errors": "مشکلی در ذخیره اطلاعات پیش آمد. دوباره تلاش کنید."
+                        # اگر خواستی برای دیباگ:  f"خطا: {str(e)}"
+                    }, status=500)
+                try:
+                    tokens.pop(token, None)
+                    request.session["form_tokens"] = tokens
                     return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")},)
                 except KeyError:
-                    pass
+                    return JsonResponse({'success': False, 'errors': 'testieeee'}, )
 
     context = {
         'all_balanceforms': all_balanceforms,
@@ -464,27 +491,63 @@ def deletechequeview(request):
 class ChequeListView(LoginRequiredMixin, generic.View):
     def get(self, request):
         qs = BalanceSheet.objects.filter(
-            Q(user=request.user.id) & Q(cheque__isnull=False) & Q(is_active=True)
+            user=request.user.id,
+            cheque__isnull=False,
+            is_active=True
         ).select_related('cheque')
-        debits = qs.filter(cheque__cheque_type='دریافتنی')
-        credits = qs.filter(cheque__cheque_type='پرداختنی')
+
+        aggregates = qs.aggregate(
+            receivables_debt=Sum(
+                Case(
+                    When(cheque__cheque_type='دریافتنی', transaction_type='debt', then='amount'),
+                    output_field=IntegerField(),
+                )
+            ),
+            receivables_credit=Sum(
+                Case(
+                    When(cheque__cheque_type='دریافتنی', transaction_type='credit', then='amount'),
+                    output_field=IntegerField(),
+                )
+            ),
+            payables_debt=Sum(
+                Case(
+                    When(cheque__cheque_type='پرداختنی', transaction_type='debt', then='amount'),
+                    output_field=IntegerField(),
+                )
+            ),
+            payables_credit=Sum(
+                Case(
+                    When(cheque__cheque_type='پرداختنی', transaction_type='credit', then='amount'),
+                    output_field=IntegerField(),
+                )
+            ),
+        )
 
         context = {
-            'debits': debits,
-            'credits': credits,
+            'receivables': qs.filter(cheque__cheque_type='دریافتنی'),
+            'payables': qs.filter(cheque__cheque_type='پرداختنی'),
+            'receivables_debt_amount': aggregates['receivables_debt'] or 0,
+            'receivables_credit_amount': aggregates['receivables_credit'] or 0,
+            'payables_debt_amount': aggregates['payables_debt'] or 0,
+            'payables_credit_amount': aggregates['payables_credit'] or 0,
         }
         return render(request, 'account_base/cheque-lists.html', context)
-
-def filter_debit_cheques(request):
-    debits = BalanceSheet.objects.filter(
-        Q(user=request.user.id),
-        Q(cheque__cheque_type='دریافتنی'),
-        Q(cheque__isnull=False),
-        Q(is_active=True)
+def filter_receivable_cheques(request):
+    receivables = BalanceSheet.objects.filter(
+        user=request.user.id,
+        cheque__cheque_type='دریافتنی',
+        cheque__isnull=False,
+        is_active=True
     ).select_related('cheque').only(
-    'cheque__name', 'cheque__cheque_status', 'cheque__maturity_date', 'amount', 'description', 'cheque__cheque_type'
-)
+        'cheque__name',
+        'cheque__cheque_status',
+        'cheque__maturity_date',
+        'amount',
+        'description',
+        'cheque__cheque_type'
+    )
 
+    # فیلترها
     name = request.GET.get('cheque_name')
     status = request.GET.get('cheque_status')
     amount = request.GET.get('amount')
@@ -495,35 +558,67 @@ def filter_debit_cheques(request):
     description = request.GET.get('description')
 
     if due_date_from:
-        debits = debits.filter(cheque__user_id=request.user.id, cheque__maturity_date__gte=due_date_from)
+        receivables = receivables.filter(cheque__maturity_date__gte=due_date_from)
     if due_date_to:
-        debits = debits.filter(cheque__user_id=request.user.id, cheque__maturity_date__lte=due_date_to)
+        receivables = receivables.filter(cheque__maturity_date__lte=due_date_to)
     if created_at_from:
-        debits = debits.filter(cheque__user_id=request.user.id, document__date_created__gte=created_at_from)
+        receivables = receivables.filter(document__date_created__gte=created_at_from)
     if created_at_to:
-        debits = debits.filter(cheque__user_id=request.user.id, document__date_created__lte=created_at_to)
+        receivables = receivables.filter(document__date_created__lte=created_at_to)
     if amount:
-        debits = debits.filter(amount=amount)
+        receivables = receivables.filter(amount=amount)
     if status:
-        debits = debits.filter(cheque__user_id=request.user.id, cheque__cheque_status=status)
+        receivables = receivables.filter(cheque__cheque_status=status)
     if name:
-        debits = debits.filter(cheque__user_id=request.user.id, cheque__name__icontains=name)
+        receivables = receivables.filter(cheque__name__icontains=name)
     if description:
-        debits = debits.filter(description__contains=description)
-    html = render_to_string('partials/debit_cheques.html', {'debits': debits})
-    return JsonResponse({'html': html})
+        receivables = receivables.filter(description__contains=description)
+
+    # محاسبه جمع‌ها
+    aggregates = receivables.aggregate(
+        debt=Sum(
+            Case(
+                When(transaction_type='debt', then='amount'),
+                output_field=IntegerField(),
+            )
+        ),
+        credit=Sum(
+            Case(
+                When(transaction_type='credit', then='amount'),
+                output_field=IntegerField(),
+            )
+        ),
+    )
+
+    receivables_debt_amount = aggregates['debt'] or 0
+    receivables_credit_amount = aggregates['credit'] or 0
+
+    # رندر لیست به html
+    html = render_to_string('partials/receivable_cheques.html', {'receivables': receivables})
+
+    return JsonResponse({
+        'html': html,
+        'receivables_debt_amount': receivables_debt_amount,
+        'receivables_credit_amount': receivables_credit_amount,
+    })
 
 def filter_credit_cheques(request):
-    credits = BalanceSheet.objects.filter(
-        Q(user=request.user.id),
-        Q(cheque__cheque_type='پرداختنی'),
-        Q(cheque__isnull=False),
-        Q(is_active=True)
+    payables = BalanceSheet.objects.filter(
+        user=request.user.id,
+        cheque__cheque_type='پرداختنی',
+        cheque__isnull=False,
+        is_active=True
     ).select_related('cheque').only(
-    'cheque__name', 'cheque__cheque_status', 'cheque__maturity_date',
-    'cheque__created_at', 'amount', 'description', 'cheque__cheque_type'
-)
+        'cheque__name',
+        'cheque__cheque_status',
+        'cheque__maturity_date',
+        'cheque__created_at',
+        'amount',
+        'description',
+        'cheque__cheque_type'
+    )
 
+    # فیلترها
     name = request.GET.get('cheque_name')
     status = request.GET.get('cheque_status')
     amount = request.GET.get('amount')
@@ -534,24 +629,49 @@ def filter_credit_cheques(request):
     description = request.GET.get('description')
 
     if due_date_from:
-        credits = credits.filter(cheque__user_id=request.user.id, cheque__maturity_date__gte=due_date_from)
+        payables = payables.filter(cheque__maturity_date__gte=due_date_from)
     if due_date_to:
-        credits = credits.filter(cheque__user_id=request.user.id, cheque__maturity_date__lte=due_date_to)
+        payables = payables.filter(cheque__maturity_date__lte=due_date_to)
     if created_at_from:
-        credits = credits.filter(cheque__user_id=request.user.id, document__date_created__gte=created_at_from)
+        payables = payables.filter(document__date_created__gte=created_at_from)
     if created_at_to:
-        credits = credits.filter(cheque__user_id=request.user.id, document__date_created__lte=created_at_to)
+        payables = payables.filter(document__date_created__lte=created_at_to)
     if amount:
-        credits = credits.filter(amount=amount)
+        payables = payables.filter(amount=amount)
     if status:
-        credits = credits.filter(cheque__user_id=request.user.id, cheque__cheque_status=status)
-    if description:
-        credits = credits.filter(cheque__user_id=request.user.id, description__contains=description)
+        payables = payables.filter(cheque__cheque_status=status)
     if name:
-        credits = credits.filter(cheque__user_id=request.user.id, cheque__name__icontains=name)
+        payables = payables.filter(cheque__name__icontains=name)
+    if description:
+        payables = payables.filter(description__contains=description)
 
-    html = render_to_string('partials/credit_cheques.html', {'credits': credits})
-    return JsonResponse({'html': html})
+    # محاسبه جمع‌ها
+    aggregates = payables.aggregate(
+        debt=Sum(
+            Case(
+                When(transaction_type='debt', then='amount'),
+                output_field=IntegerField(),
+            )
+        ),
+        credit=Sum(
+            Case(
+                When(transaction_type='credit', then='amount'),
+                output_field=IntegerField(),
+            )
+        ),
+    )
+
+    payables_debt_amount = aggregates['debt'] or 0
+    payables_credit_amount = aggregates['credit'] or 0
+
+    # رندر لیست به html
+    html = render_to_string('partials/payable_cheques.html', {'payables': payables})
+
+    return JsonResponse({
+        'html': html,
+        'payables_debt_amount': payables_debt_amount,
+        'payables_credit_amount': payables_credit_amount,
+    })
 
 
 def edit_account(request, pk):

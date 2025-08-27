@@ -1,17 +1,17 @@
 {% load jinja_filters %}
-{% for credit in credits %}
 
+{% for receivable in receivables %}
     <div class="card shadow-sm mb-3 rounded-3">
         <!-- Header -->
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap"
-             data-bs-toggle="collapse" data-bs-target="#collapse-{{ credit.id }}"
+             data-bs-toggle="collapse" data-bs-target="#collapse-{{ receivable.id }}"
              style="cursor: pointer;">
 
             <!-- اطلاعات کلیدی -->
             <div class="d-flex flex-wrap flex-grow-1 gap-3 align-items-center">
-                <span><i class="fas fa-user-circle text-primary"></i> <b>{{ credit.cheque.name }}</b></span>
-                <span><i class="fas fa-money-check-alt text-success"></i> {{ credit.amount|toman }}</span>
-                <span><i class="fas fa-calendar-day text-danger"></i> {{ credit.cheque.maturity_date }}</span>
+                <span><i class="fas fa-user-circle text-primary"></i> <b>{{ receivable.cheque.name }}</b></span>
+                <span><i class="fas fa-money-check-alt text-success"></i> {{ receivable.amount|toman }}</span>
+                <span><i class="fas fa-calendar-day text-danger"></i> {{ receivable.cheque.maturity_date }}</span>
             </div>
 
             <!-- آیکون فلش -->
@@ -19,21 +19,21 @@
         </div>
 
         <!-- Collapse -->
-        <div id="collapse-{{ credit.id }}" class="collapse">
+        <div id="collapse-{{ receivable.id }}" class="collapse">
             <div class="card-body">
                 <!-- دکمه‌ها -->
                 <div class="d-flex flex-wrap gap-2 mb-3">
-                    <a id="edit-cheque" href="{% url 'UpdateBalanceView' credit.document.id %}"
+                    <a href="{% url 'UpdateBalanceView' receivable.document.id %}"
                        class="btn btn-outline-primary btn-sm flex-fill">✏️ ویرایش</a>
-                    <a id="change-cheque-status" href="{% url 'change_status_cheque' credit.id %}"
+                    <a href="{% url 'change_status_cheque' receivable.id %}"
                        class="btn btn-outline-secondary btn-sm flex-fill">🔄 تغییر وضعیت چک</a>
                 </div>
 
                 <!-- تصویر -->
-                {% if credit.image %}
+                {% if receivable.image %}
                     <div class="text-center mb-3">
-                        <a class="card-gallery" data-fslightbox="gallery" href="{{ credit.image.url }}">
-                            <img class="img-fluid rounded shadow-sm" src="{{ credit.image.url }}" alt="Card image"
+                        <a class="card-gallery" data-fslightbox="gallery" href="{{ receivable.image.url }}">
+                            <img class="img-fluid rounded shadow-sm" src="{{ receivable.image.url }}" alt="Card image"
                                  style="max-width: 100px;">
                         </a>
                     </div>
@@ -41,20 +41,20 @@
 
                 <!-- وضعیت چک -->
                 <h6 class="mb-3">
-        <span class="badge bg-{% if credit.cheque.cheque_status == "جاری" %}primary
-                              {% elif credit.cheque.cheque_status == 'عودتی' %}dark
-                              {% elif credit.cheque.cheque_status == 'وصولی' %}success
-                              {% elif credit.cheque.cheque_status == 'برگشتنی' %}danger
-                              {% elif credit.cheque.cheque_status == 'امانی' %}warning
+        <span class="badge bg-{% if receivable.cheque.cheque_status == "جاری" %}primary
+                              {% elif receivable.cheque.cheque_status == 'عودتی' %}dark
+                              {% elif receivable.cheque.cheque_status == 'وصولی' %}success
+                              {% elif receivable.cheque.cheque_status == 'برگشتنی' %}danger
+                              {% elif receivable.cheque.cheque_status == 'امانی' %}warning
                               {% endif %}">
-          {{ credit.cheque.cheque_status }}
+          {{ receivable.cheque.cheque_status }}
         </span>
                 </h6>
 
                 <!-- جزئیات -->
-                <p><i class="ti ti-list-numbers text-info"></i> شماره چک: <b>{{ credit.cheque.Cheque_numbder }}</b></p>
-                <p><i class="fas fa-calendar-plus text-secondary"></i> تاریخ ثبت: {{ credit.document.date_created }}</p>
-                <p><i class="fas fa-sticky-note text-warning"></i> توضیحات: {{ credit.description }}</p>
+                <p><i class="ti ti-list-numbers text-info"></i> شماره چک: <b>{{ receivable.cheque.Cheque_numbder }}</b></p>
+                <p><i class="fas fa-calendar-plus text-secondary"></i> تاریخ ثبت: {{ receivable.document.date_created }}</p>
+                <p><i class="fas fa-sticky-note text-warning"></i> توضیحات: {{ receivable.description }}</p>
             </div>
         </div>
     </div>
@@ -83,5 +83,4 @@
             $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
         });
     </script>
-
 {% endfor %}

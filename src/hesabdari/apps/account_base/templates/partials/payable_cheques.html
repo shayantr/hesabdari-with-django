@@ -1,17 +1,17 @@
 {% load jinja_filters %}
+{% for payable in payables %}
 
-{% for debit in debits %}
     <div class="card shadow-sm mb-3 rounded-3">
         <!-- Header -->
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap"
-             data-bs-toggle="collapse" data-bs-target="#collapse-{{ debit.id }}"
+             data-bs-toggle="collapse" data-bs-target="#collapse-{{ payable.id }}"
              style="cursor: pointer;">
 
             <!-- اطلاعات کلیدی -->
             <div class="d-flex flex-wrap flex-grow-1 gap-3 align-items-center">
-                <span><i class="fas fa-user-circle text-primary"></i> <b>{{ debit.cheque.name }}</b></span>
-                <span><i class="fas fa-money-check-alt text-success"></i> {{ debit.amount|toman }}</span>
-                <span><i class="fas fa-calendar-day text-danger"></i> {{ debit.cheque.maturity_date }}</span>
+                <span><i class="fas fa-user-circle text-primary"></i> <b>{{ payable.cheque.name }}</b></span>
+                <span><i class="fas fa-money-check-alt text-success"></i> {{ payable.amount|toman }}</span>
+                <span><i class="fas fa-calendar-day text-danger"></i> {{ payable.cheque.maturity_date }}</span>
             </div>
 
             <!-- آیکون فلش -->
@@ -19,21 +19,21 @@
         </div>
 
         <!-- Collapse -->
-        <div id="collapse-{{ debit.id }}" class="collapse">
+        <div id="collapse-{{ payable.id }}" class="collapse">
             <div class="card-body">
                 <!-- دکمه‌ها -->
                 <div class="d-flex flex-wrap gap-2 mb-3">
-                    <a href="{% url 'UpdateBalanceView' debit.document.id %}"
+                    <a id="edit-cheque" href="{% url 'UpdateBalanceView' payable.document.id %}"
                        class="btn btn-outline-primary btn-sm flex-fill">✏️ ویرایش</a>
-                    <a href="{% url 'change_status_cheque' debit.id %}"
+                    <a id="change-cheque-status" href="{% url 'change_status_cheque' payable.id %}"
                        class="btn btn-outline-secondary btn-sm flex-fill">🔄 تغییر وضعیت چک</a>
                 </div>
 
                 <!-- تصویر -->
-                {% if debit.image %}
+                {% if payable.image %}
                     <div class="text-center mb-3">
-                        <a class="card-gallery" data-fslightbox="gallery" href="{{ debit.image.url }}">
-                            <img class="img-fluid rounded shadow-sm" src="{{ debit.image.url }}" alt="Card image"
+                        <a class="card-gallery" data-fslightbox="gallery" href="{{ payable.image.url }}">
+                            <img class="img-fluid rounded shadow-sm" src="{{ payable.image.url }}" alt="Card image"
                                  style="max-width: 100px;">
                         </a>
                     </div>
@@ -41,20 +41,20 @@
 
                 <!-- وضعیت چک -->
                 <h6 class="mb-3">
-        <span class="badge bg-{% if debit.cheque.cheque_status == "جاری" %}primary
-                              {% elif debit.cheque.cheque_status == 'عودتی' %}dark
-                              {% elif debit.cheque.cheque_status == 'وصولی' %}success
-                              {% elif debit.cheque.cheque_status == 'برگشتنی' %}danger
-                              {% elif debit.cheque.cheque_status == 'امانی' %}warning
+        <span class="badge bg-{% if payable.cheque.cheque_status == "جاری" %}primary
+                              {% elif payable.cheque.cheque_status == 'عودتی' %}dark
+                              {% elif payable.cheque.cheque_status == 'وصولی' %}success
+                              {% elif payable.cheque.cheque_status == 'برگشتنی' %}danger
+                              {% elif payable.cheque.cheque_status == 'امانی' %}warning
                               {% endif %}">
-          {{ debit.cheque.cheque_status }}
+          {{ payable.cheque.cheque_status }}
         </span>
                 </h6>
 
                 <!-- جزئیات -->
-                <p><i class="ti ti-list-numbers text-info"></i> شماره چک: <b>{{ debit.cheque.Cheque_numbder }}</b></p>
-                <p><i class="fas fa-calendar-plus text-secondary"></i> تاریخ ثبت: {{ debit.document.date_created }}</p>
-                <p><i class="fas fa-sticky-note text-warning"></i> توضیحات: {{ debit.description }}</p>
+                <p><i class="ti ti-list-numbers text-info"></i> شماره چک: <b>{{ payable.cheque.Cheque_numbder }}</b></p>
+                <p><i class="fas fa-calendar-plus text-secondary"></i> تاریخ ثبت: {{ payable.document.date_created }}</p>
+                <p><i class="fas fa-sticky-note text-warning"></i> توضیحات: {{ payable.description }}</p>
             </div>
         </div>
     </div>
@@ -83,4 +83,5 @@
             $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
         });
     </script>
+
 {% endfor %}

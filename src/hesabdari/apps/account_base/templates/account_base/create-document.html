@@ -455,9 +455,9 @@
                         } else {
 
                             {#alert("خطا: " + JSON.stringify(response.errors_html));#}
-                            $("#form-errors").html(response.errors_html);
-                            console.log(response.errors_html);
+                            $("#form-errors-"+response.err_id).html(response.errors);
                             console.log(response.errors);
+                            
                         }
                     }
                 });

@@ -1,10 +1,9 @@
 from django.urls import path, include
 
 from hesabdari.apps.account_base.views import createbalancesheet, \
-    GetFormFragmentView, AccountsView, UpdateBalanceView, deletechequeview, ChequeListView, \
-    filter_debit_cheques, filter_credit_cheques, edit_account, delete_account, BalanceListView, \
+    GetFormFragmentView, AccountsView, UpdateBalanceView, deletechequeview, ChequeListView, filter_credit_cheques, edit_account, delete_account, BalanceListView, \
     filter_balance, create_accounts, account_report, AccountReportDetails, delete_document, \
-    ChangeStatusCheque
+    ChangeStatusCheque, filter_receivable_cheques
 
 urlpatterns = [
     path('create-document/', createbalancesheet, name='create-document'),
@@ -16,7 +15,7 @@ urlpatterns = [
     path('update/<int:pk>/', UpdateBalanceView.as_view(), name='UpdateBalanceView'),
     path('delete-cheque/', deletechequeview, name='delete-cheque-view'),
     path('cheque-lists/', ChequeListView.as_view(), name='cheque-lists-view'),
-    path('cheque-lists/filter-debits/', filter_debit_cheques, name='filter_debit_cheques'),
+    path('cheque-lists/filter-receivable/', filter_receivable_cheques, name='filter_receivable_cheques'),
     path('cheque-lists/filter-credits/', filter_credit_cheques, name='filter_credit_cheques'),
     path('accounts/edit/<int:pk>/', edit_account, name='edit_account'),
     path('accounts/delete/<int:pk>/', delete_account, name='delete_account'),

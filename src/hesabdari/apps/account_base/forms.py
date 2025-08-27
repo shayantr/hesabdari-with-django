@@ -46,6 +46,11 @@ class BalanceSheetForm(forms.ModelForm):
             }
         }
 
+    def clean_account(self):
+        value = self.cleaned_data.get('account')
+        if not value:
+            raise forms.ValidationError("لطفاً یک حساب انتخاب کنید.")
+        return value
 
 class CashierChequeForm(forms.ModelForm):
     class Meta:
