@@ -5,10 +5,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}"/>
     <script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
-
-
-
-{% endblock %}
+    {% endblock %}
 
 {% block body %}
     <h2>گزارش سند ها</h2>
@@ -45,15 +42,33 @@
 
         <div id="search-balance-list">
             {% include "partials/search_balance.html" %}
-
-
+          
         </div>
+        <div id="balance-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
+                <div class="col-4">
+                    <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
+                    <span id="total-debt" class="font-bold text-red-600">{{ total_debt|toman }}</span>
+                </div>
+                <div class="col-4">
+                    <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
+                    <span id="total-credit" class="font-bold text-green-600">{{ total_credit|toman }}</span>
+                </div>
+                    <div class="col-4">
+                    <span class="font-semibold text-gray-700">مانده:</span>
+                <span id="total-balance" class="font-bold">{{ total_balance|toman }}</span>
+            </div>
+            
+            </div>
     <script src="{% static 'js/plugins/isotope.pkgd.min.js' %}"></script>
     <script src="{% static 'js/plugins/index.js' %}"></script>
     <script>
         jalaliDatepicker.startWatch();
 $(document).ready(function () {
+    let searchtimaout = null;
     function filterbalance() {
+        clearTimeout(searchtimaout);
+        searchtimaout = setTimeout(function () {
+        
         let formData = $('#search-filter-form').serializeArray();
         const queryString = $.param(formData);
 
@@ -67,8 +82,22 @@ $(document).ready(function () {
             data: formData,
             success: function (data) {
                 $('#search-balance-list').html(data.html);
+                $('#total-debt').text(data.total_debt.toLocaleString());
+                $('#total-credit').text(data.total_credit.toLocaleString());
+                let balance = data.total_debt - data.total_credit;
+                let $balanceEl = $('#total-balance');
+                $balanceEl.text(balance.toLocaleString());
+
+                // تغییر رنگ مانده
+                if (balance < 0) {
+                    $balanceEl.removeClass('text-green-600').addClass('text-red-600');
+                } else {
+                    $balanceEl.removeClass('text-red-600').addClass('text-green-600');
+                }
+
             }
         });
+        }, 1000);
     }
 
     // پر کردن فرم از روی URL

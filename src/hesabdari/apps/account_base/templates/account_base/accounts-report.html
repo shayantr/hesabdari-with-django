@@ -1,18 +1,37 @@
 {% extends 'base.html' %}
+{% load static %}
 
 
 {% block header %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+<link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}" />
+<script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
 {% endblock %}
 
 {% block body %}
+<div class="row mb-3">
+  <div class="col">
+    <label for="start-date">از تاریخ:</label>
+    <input type="text" data-jdp id="start-date" class="form-control">
+  </div>
+  <div class="col">
+    <label for="end-date">تا تاریخ:</label>
+    <input type="text" data-jdp id="end-date" class="form-control">
+  </div>
+  <div class="col d-flex align-items-end">
+    <button id="filter-btn" class="btn btn-primary w-100">فیلتر</button>
+  </div>
+</div>
 <div id="accounts-report">
 <h1>Accounts Report</h1>
 </div>
 <script>
+    jalaliDatepicker.startWatch();
+
 $(document).ready(function () {
+    
 
     function loadTree(uniqueid) {
         $.getJSON("{% url 'get_accounts_list' %}", function (response) {

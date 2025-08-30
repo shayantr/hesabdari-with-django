@@ -522,14 +522,20 @@ class ChequeListView(LoginRequiredMixin, generic.View):
                 )
             ),
         )
+        payables_debt_amount = aggregates['payables_debt'] or 0
+        payables_credit_amount = aggregates['payables_credit'] or 0
+        receivables_debt_amount = aggregates['receivables_debt'] or 0
+        receivables_credit_amount = aggregates['receivables_credit'] or 0
 
         context = {
             'receivables': qs.filter(cheque__cheque_type='دریافتنی'),
             'payables': qs.filter(cheque__cheque_type='پرداختنی'),
             'receivables_debt_amount': aggregates['receivables_debt'] or 0,
             'receivables_credit_amount': aggregates['receivables_credit'] or 0,
+            'receivables_balance': receivables_debt_amount - receivables_credit_amount,
             'payables_debt_amount': aggregates['payables_debt'] or 0,
             'payables_credit_amount': aggregates['payables_credit'] or 0,
+            'payables_balance': payables_debt_amount - payables_credit_amount
         }
         return render(request, 'account_base/cheque-lists.html', context)
 def filter_receivable_cheques(request):
@@ -739,8 +745,29 @@ def delete_account(request, pk):
 class BalanceListView(LoginRequiredMixin, generic.View):
     def get(self, request):
         qs = BalanceSheet.objects.filter(user=request.user.id, is_active=True).select_related('cheque').order_by('-document__date_created')
+        aggregates = qs.aggregate(
+            debt=Sum(
+                Case(
+                    When(transaction_type='debt', then='amount'),
+                    output_field=IntegerField(),
+                )
+            ),
+            credit=Sum(
+                Case(
+                    When(transaction_type='credit', then='amount'),
+                    output_field=IntegerField(),
+                )
+            ),
+        )
+
+        total_debt = aggregates['debt'] or 0
+        total_credit = aggregates['credit'] or 0
+        total_balance = total_debt - total_credit
         context = {
             'balance_lists': qs,
+            'total_debt': total_debt,
+            'total_credit': total_credit,
+            'total_balance': total_balance,
         }
         return render(request, 'account_base/balance_list.html', context)
 
@@ -752,7 +779,7 @@ def filter_balance(request):
         id_lists = [int(i) for i in id_lists]
         qs = BalanceSheet.objects.filter(
             Q(user=request.user.id, id__in=id_lists, is_active=True),
-        ).order_by('-document__date_created')
+        ).order_by('-document__date_created').select_related('document')
     else:
         qs = BalanceSheet.objects.filter(
             Q(user=request.user.id)&Q(is_active=True)).order_by('-document__date_created')
@@ -786,9 +813,24 @@ def filter_balance(request):
     if account_name:
         qs = qs.filter(account__name__contains=account_name)
 
-
+    aggregates = qs.aggregate(
+        debt=Sum(
+            Case(
+                When(transaction_type='debt', then='amount'),
+                output_field=IntegerField(),
+            )
+        ),
+        credit=Sum(
+            Case(
+                When(transaction_type='credit', then='amount'),
+                output_field=IntegerField(),
+            )
+        ),
+    )
+    total_debt = aggregates['debt'] or 0
+    total_credit = aggregates['credit'] or 0
     html = render_to_string('partials/search_balance.html', {'balance_lists': qs})
-    return JsonResponse({'html': html})
+    return JsonResponse({'html': html, 'total_debt': total_debt, 'total_credit':total_credit})
 
 class ChangeStatusCheque(generic.View):
     def get(self, request, pk):

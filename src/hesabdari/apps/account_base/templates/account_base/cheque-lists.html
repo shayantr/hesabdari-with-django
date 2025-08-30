@@ -77,17 +77,21 @@
 
                         
         </div>
-                <div id="receivables-summary" class="grid grid-cols-2 gap-4 mt-6">
-          <div class="bg-white shadow-md rounded-2xl p-4 text-center">
-            <h3 class="text-lg font-semibold text-gray-700">جمع بدهکاری</h3>
-            <div id="receivables-debt-amount" class="text-2xl font-bold text-red-600 mt-2">{{ receivables_debt_amount| toman }}</div>
-          </div>
-        
-          <div class="bg-white shadow-md rounded-2xl p-4 text-center">
-            <h3 class="text-lg font-semibold text-gray-700">جمع بستانکاری</h3>
-            <div id="receivables-credit-amount" class="text-2xl font-bold text-green-600 mt-2">{{ receivables_credit_amount| toman }}</div>
-          </div>
-        </div>
+                <div id="receivables-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
+  <div class="col-4">
+    <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
+    <span id="receivables-debt-amount" class="font-bold text-red-600">{{ receivables_debt_amount|toman }}</span>
+  </div>
+  <div class="col-4">
+    <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
+    <span id="receivables-credit-amount" class="font-bold text-green-600">{{ receivables_credit_amount|toman }}</span>
+  </div>
+    <div class="col-4">
+    <span class="font-semibold text-gray-700">مانده:</span>
+    <span id="receivables-balance-amount" class="font-bold">{{ receivables_balance|toman }}</span>
+  </div>
+
+</div>
                     </div>
         <div id="credits" class="tab-pane fade show" id="pills-credit" role="tabpanel" aria-labelledby="pills-credit-tab" tabindex="0">
             <form id="credit-filter-form">
@@ -140,17 +144,23 @@
 
             
             </div>
-                            <div id="payables-summary" class="grid grid-cols-2 gap-4 mt-6">
-          <div class="bg-white shadow-md rounded-2xl p-4 text-center">
-            <h3 class="text-lg font-semibold text-gray-700">جمع بدهکاری</h3>
-            <div id="payables-debt-amount" class="text-2xl font-bold text-red-600 mt-2">{{ payables_debt_amount| toman }}</div>
-          </div>
-        
-          <div class="bg-white shadow-md rounded-2xl p-4 text-center">
-            <h3 class="text-lg font-semibold text-gray-700">جمع بستانکاری</h3>
-            <div id="payables-credit-amount" class="text-2xl font-bold text-green-600 mt-2">{{ payables_credit_amount| toman }}</div>
-          </div>
-        </div>
+<div id="payables-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
+  <div class="col-4">
+    <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
+    <span id="payables-debt-amount" class="font-bold text-red-600">{{ payables_debt_amount|toman }}</span>
+  </div>
+  <div class="col-4">
+    <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
+    <span id="payables-credit-amount" class="font-bold text-green-600">{{ payables_credit_amount|toman }}</span>
+  </div>
+    <div class="col-4">
+    <span class="font-semibold text-gray-700">مانده:</span>
+    <span id="payables-balance-amount" class="font-bold">{{ payables_balance }}</span>
+  </div>
+
+</div>
+
+            
         </div>
     </div>
     </div>
@@ -161,6 +171,15 @@
 
 $(document).ready(function () {
     let receivablesSearchTimeout = null;
+    
+    function formatNumber(value) {
+                value = persianToEnglishNumbers(value);
+                value = value.replace(/,/g, "");
+                if (!isNaN(value) && value !== "") {
+                    return Number(value).toLocaleString("en-US");
+                }
+                return value;
+            }
 
 
     function filterDebits() {
@@ -185,8 +204,18 @@ $(document).ready(function () {
             data: $('#debit-filter-form').serialize(),
             success: function (data) {
                 $('#debit-cheques-list').html(data.html);
-                $('#receivables-debt-amount').text(data.receivables_debt_amount);
-                $('#receivables-credit-amount').text(data.receivables_credit_amount);
+                $('#receivables-debt-amount').text(data.receivables_debt_amount.toLocaleString());
+                $('#receivables-credit-amount').text(data.receivables_credit_amount.toLocaleString());
+                let balance = data.receivables_credit_amount - data.receivables_debt_amount;
+                let $balanceEl = $('#receivables-balance-amount');
+                $balanceEl.text(balance.toLocaleString());
+
+                // تغییر رنگ مانده
+                if (balance < 0) {
+                    $balanceEl.removeClass('text-green-600').addClass('text-red-600');
+                } else {
+                    $balanceEl.removeClass('text-red-600').addClass('text-green-600');
+                }
                 
             }
         });
@@ -218,8 +247,18 @@ function filterCredits() {
             data: $('#credit-filter-form').serialize(),
             success: function (data) {
                 $('#credit-cheques-list').html(data.html);
-                $('#payables-debt-amount').text(data.payables_debt_amount);
-                $('#payables-credit-amount').text(data.payables_credit_amount);
+                $('#payables-debt-amount').text(data.payables_debt_amount.toLocaleString());
+                $('#payables-credit-amount').text(data.payables_credit_amount.toLocaleString());
+                let balance = data.payables_debt_amount - data.payables_credit_amount;
+                let $balanceEl = $('#payables-balance-amount');
+                $balanceEl.text(balance.toLocaleString());
+
+                // تغییر رنگ مانده
+                if (balance < 0) {
+                    $balanceEl.removeClass('text-green-600').addClass('text-red-600');
+                } else {
+                    $balanceEl.removeClass('text-red-600').addClass('text-green-600');
+                }
             }
         });
     }, 1000); // زمان تأخیر (میلی‌ثانیه)

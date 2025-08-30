@@ -5,14 +5,15 @@
     <div class="card" {% if balance.transaction_type == 'debt' %}style="background-color: #ffe5e5;"
          {% else %}style="background-color: #e5fbe5;"{% endif %}>
         <div class="card-header">
-<div class="row align-items-center">
-    <div class="col d-flex justify-content-end"><a class="edit-balance" href="{% url 'UpdateBalanceView' balance.document.id %}">
+            <div class="row align-items-center">
+                <div class="col d-flex justify-content-end"><a class="edit-balance"
+                                                               href="{% url 'UpdateBalanceView' balance.document.id %}">
 
-                <div class="flex-shrink-0">
-                    <h5><i class="fas fa-user-circle"></i>{{ balance.account }}</h5>
-                </div>
-            </a></div>
-    <div class="col d-flex justify-content-start">{% if balance.image %}
+                    <div class="flex-shrink-0">
+                        <h5><i class="fas fa-user-circle"></i>{{ balance.account }}</h5>
+                    </div>
+                </a></div>
+                <div class="col d-flex justify-content-start">{% if balance.image %}
                     <div class="grid g-3">
                         <a class="card-gallery" data-fslightbox="gallery" href="{{ balance.image.url }}">
                             <img class="img-fluid" src="{{ balance.image.url }}" alt="Card image" style="width:50%">
@@ -21,7 +22,7 @@
                         </a>
                     </div>
                 {% endif %}</div>
-</div>
+            </div>
             <div class="d-flex flex-wrap gap-2">
 
             </div>
@@ -51,11 +52,17 @@
     </div>
 {% endfor %}
 
-        <script>
-        $('.edit-balance').each(function () {
-            const currentUrl = window.location.href;
-            const href = $(this).attr('href');
-            const separator = href.includes('?') ? '&' : '?';
-            $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
-        });
-    </script>
+<script>
+    $('.edit-balance').each(function () {
+        const currentUrl = window.location.href;
+        const href = $(this).attr('href');
+        const separator = href.includes('?') ? '&' : '?';
+        $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
+    });
+    
+    function selectCard(element) {
+        // اگر فقط یکی باید فعال باشه:
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('highlight'));
+        element.classList.add('highlight');
+    }
+</script>

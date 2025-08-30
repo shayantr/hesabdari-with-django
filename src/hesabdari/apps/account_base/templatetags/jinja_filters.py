@@ -6,6 +6,6 @@ register = template.Library()
 def toman(value):
     try:
         value = int(value)
-        return f"{value:,} تومن"
+        return f"{value:,}"
     except (ValueError, TypeError):
         return value
