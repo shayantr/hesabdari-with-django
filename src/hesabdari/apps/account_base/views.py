@@ -847,7 +847,7 @@ def filter_balance(request):
         pre_debt=Sum(
             Case(
                 When(transaction_type='debt',
-                     document__date_created__gt= jdatetime.date(current_day.year, 1, 1),
+                     document__date_created__gte= jdatetime.date(current_day.year, 1, 1),
                      then='amount'),
                 output_field=IntegerField(),
             )
@@ -855,7 +855,7 @@ def filter_balance(request):
         pre_credit=Sum(
             Case(
                 When(transaction_type='credit',
-                     document__date_created__gt=jdatetime.date(current_day.year, 1, 1),
+                     document__date_created__gte=jdatetime.date(current_day.year, 1, 1),
                      then='amount'),
                 output_field=IntegerField(),
             )
