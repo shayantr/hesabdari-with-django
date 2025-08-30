@@ -39,12 +39,7 @@
             </div>
 
         </form>
-
-        <div id="search-balance-list">
-            {% include "partials/search_balance.html" %}
-          
-        </div>
-        <div id="balance-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
+                <div id="balance-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
                 <div class="col-4">
                     <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
                     <span id="total-debt" class="font-bold text-red-600">{{ total_debt|toman }}</span>
@@ -56,6 +51,26 @@
                     <div class="col-4">
                     <span class="font-semibold text-gray-700">مانده:</span>
                 <span id="total-balance" class="font-bold">{{ total_balance|toman }}</span>
+            </div>
+            
+            </div>
+
+        <div id="search-balance-list">
+            {% include "partials/search_balance.html" %}
+          
+        </div>
+        <div id="pre-balance-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
+                <div class="col-4">
+                    <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
+                    <span id="pre-total-debt" class="font-bold text-red-600">{{ total_debt|toman }}</span>
+                </div>
+                <div class="col-4">
+                    <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
+                    <span id="pre-total-credit" class="font-bold text-green-600">{{ total_credit|toman }}</span>
+                </div>
+                    <div class="col-4">
+                    <span class="font-semibold text-gray-700">مانده:</span>
+                <span id="pre-total-balance" class="font-bold">{{ total_balance|toman }}</span>
             </div>
             
             </div>
@@ -82,9 +97,21 @@ $(document).ready(function () {
             data: formData,
             success: function (data) {
                 $('#search-balance-list').html(data.html);
+                $('#pre-total-debt').text(data.pre_total_debt.toLocaleString());
+                $('#pre-total-credit').text(data.pre_total_credit.toLocaleString());
+                let pre_balance = data.pre_total_debt - data.pre_total_credit;
+                let $pre_balanceEl = $('#pre-total-balance');
+                $pre_balanceEl.text(pre_balance.toLocaleString());
+
+                // تغییر رنگ مانده
+                if (pre_balance < 0) {
+                    $pre_balanceEl.removeClass('text-green-600').addClass('text-red-600');
+                } else {
+                    $pre_balanceEl.removeClass('text-red-600').addClass('text-green-600');
+                }
                 $('#total-debt').text(data.total_debt.toLocaleString());
                 $('#total-credit').text(data.total_credit.toLocaleString());
-                let balance = data.total_debt - data.total_credit;
+                let balance = data.total_debt - data.total_credit + pre_balance;
                 let $balanceEl = $('#total-balance');
                 $balanceEl.text(balance.toLocaleString());
 

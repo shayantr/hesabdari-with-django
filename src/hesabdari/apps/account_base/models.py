@@ -30,6 +30,7 @@ class AccountsClass(MPTTModel):
 class Document(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents')
     date_created = jmodels.jDateField(default=jmodels.timezone.now())
+    objects = jmodels.jManager()
 
     def delete(self, *args, **kwargs):
         if self.items.filter(is_active=False).exists():
@@ -52,6 +53,8 @@ class BalanceSheet(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='images/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    objects = jmodels.jManager()
+
 
 
 
@@ -81,3 +84,5 @@ class CashierCheque(models.Model):
         choices=ChequeTypeChoices.choices,
         blank=True,
         null=True,)
+    objects = jmodels.jManager()
+

@@ -744,7 +744,7 @@ def delete_account(request, pk):
 
 class BalanceListView(LoginRequiredMixin, generic.View):
     def get(self, request):
-        qs = BalanceSheet.objects.filter(user=request.user.id, is_active=True).select_related('cheque').order_by('-document__date_created')
+        qs = BalanceSheet.objects.select_related('cheque', 'document').filter(user=request.user.id).order_by('-document__date_created')
         aggregates = qs.aggregate(
             debt=Sum(
                 Case(
@@ -758,10 +758,25 @@ class BalanceListView(LoginRequiredMixin, generic.View):
                     output_field=IntegerField(),
                 )
             ),
+
         )
 
+
+        # running_total = 0
+        # running_debt_total = 0
+        # running_credit_total = 0
+        # for obj in qs:
+        #     if obj.transaction_type == 'debt':
+        #         running_debt_total += obj.amount
+        #     else:
+        #         running_credit_total += obj.amount
+        #     running_total = running_debt_total - running_credit_total
+        #     obj.jame_amount = running_total
+        #     # print(running_total)
         total_debt = aggregates['debt'] or 0
         total_credit = aggregates['credit'] or 0
+        print(aggregates['debt'])
+        print(aggregates['credit'])
         total_balance = total_debt - total_credit
         context = {
             'balance_lists': qs,
@@ -773,16 +788,17 @@ class BalanceListView(LoginRequiredMixin, generic.View):
 
 
 def filter_balance(request):
+    current_day = jdatetime.date.today()
     if request.GET.get('id_lists'):
         id_lists_json = request.GET.get('id_lists', '[]')
         id_lists = json.loads(id_lists_json)
         id_lists = [int(i) for i in id_lists]
         qs = BalanceSheet.objects.filter(
-            Q(user=request.user.id, id__in=id_lists, is_active=True),
+            Q(user=request.user.id, id__in=id_lists),
         ).order_by('-document__date_created').select_related('document')
     else:
         qs = BalanceSheet.objects.filter(
-            Q(user=request.user.id)&Q(is_active=True)).order_by('-document__date_created')
+            Q(user=request.user.id)).order_by('-document__date_created')
 
     account_name = request.GET.get('account_name')
     amount = request.GET.get('amount')
@@ -816,21 +832,43 @@ def filter_balance(request):
     aggregates = qs.aggregate(
         debt=Sum(
             Case(
-                When(transaction_type='debt', then='amount'),
+                When(transaction_type='debt',
+                     then='amount'),
                 output_field=IntegerField(),
             )
         ),
         credit=Sum(
             Case(
-                When(transaction_type='credit', then='amount'),
+                When(transaction_type='credit',
+                     then='amount'),
                 output_field=IntegerField(),
             )
         ),
+        pre_debt=Sum(
+            Case(
+                When(transaction_type='debt',
+                     document__date_created__gte= jdatetime.date(current_day.year, 1, 1),
+                     then='amount'),
+                output_field=IntegerField(),
+            )
+        ),
+        pre_credit=Sum(
+            Case(
+                When(transaction_type='credit',
+                     document__date_created__gte=jdatetime.date(current_day.year, 1, 1),
+                     then='amount'),
+                output_field=IntegerField(),
+            )
+        ),
+
     )
-    total_debt = aggregates['debt'] or 0
-    total_credit = aggregates['credit'] or 0
+
+    total_debt = aggregates['pre_debt'] + aggregates['debt'] or 0
+    total_credit = aggregates['pre_credit'] + aggregates['credit'] or 0
+    pre_total_credit = aggregates['pre_credit'] or 0
+    pre_total_debt = aggregates['pre_credit'] or 0
     html = render_to_string('partials/search_balance.html', {'balance_lists': qs})
-    return JsonResponse({'html': html, 'total_debt': total_debt, 'total_credit':total_credit})
+    return JsonResponse({'html': html, 'total_debt': total_debt, 'total_credit':total_credit, 'pre_total_credit':pre_total_credit, 'pre_total_debt':pre_total_debt})
 
 class ChangeStatusCheque(generic.View):
     def get(self, request, pk):

@@ -8,12 +8,14 @@
              style="background-color: #e5fbe5;"
          {% endif %}
          onclick="toggleHighlight(this)">
+        
          
         <div class="card-header">
             <div class="row align-items-center">
                 <div class="col d-flex justify-content-end">
                     <a class="edit-balance" href="{% url 'UpdateBalanceView' balance.document.id %}">
                         <div class="flex-shrink-0">
+                            {{ balance.sum_b }}
                             <h5><i class="fas fa-user-circle"></i>{{ balance.account }}</h5>
                         </div>
                     </a>
