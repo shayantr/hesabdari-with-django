@@ -2,6 +2,7 @@ import json
 import time
 from collections import namedtuple
 from itertools import zip_longest
+from keyword import kwlist
 from lib2to3.fixes.fix_input import context
 
 import jdatetime
@@ -16,6 +17,7 @@ from django.db.models import Q, Prefetch, Max, Sum, Case, IntegerField, When
 from django.db.transaction import commit
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.base import kwarg_re
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import format_html
@@ -762,21 +764,20 @@ class BalanceListView(LoginRequiredMixin, generic.View):
         )
 
 
-        # running_total = 0
-        # running_debt_total = 0
-        # running_credit_total = 0
-        # for obj in qs:
-        #     if obj.transaction_type == 'debt':
-        #         running_debt_total += obj.amount
-        #     else:
-        #         running_credit_total += obj.amount
-        #     running_total = running_debt_total - running_credit_total
-        #     obj.jame_amount = running_total
-        #     # print(running_total)
+
         total_debt = aggregates['debt'] or 0
         total_credit = aggregates['credit'] or 0
-        print(aggregates['debt'])
-        print(aggregates['credit'])
+        running_total = 0
+        running_debt_total = 0
+        running_credit_total = 0
+        for obj in qs:
+            if obj.transaction_type == 'debt':
+                running_debt_total += obj.amount
+            else:
+                running_credit_total += obj.amount
+            running_total = running_debt_total - running_credit_total
+            obj.jame_amount = running_total
+            # print(running_total)
         total_balance = total_debt - total_credit
         context = {
             'balance_lists': qs,
@@ -807,12 +808,22 @@ def filter_balance(request):
     created_at_from = request.GET.get('created_at_from')
     created_at_to = request.GET.get('created_at_to')
     description = request.GET.get('description')
-
+    debt_condition = {'transaction_type':'debt'}
+    credit_condition = {'transaction_type':'credit'}
     if balance_id:
         qs = qs.filter(id = int(balance_id))
     if document_id:
         qs = qs.filter(document_id = document_id)
+    if amount:
+        qs = qs.filter(amount=amount)
+    if description:
+        qs = qs.filter(description__contains=description)
+    if account_name:
+        qs = qs.filter(account__name__contains=account_name)
+    pre_qs = qs
     if created_at_from:
+        debt_condition['document__date_created__lt'] = created_at_from
+        credit_condition['document__date_created__lt'] = created_at_from
         if created_at_from == created_at_to:
             qs = qs.filter(document__date_created__exact=created_at_from)
         else:
@@ -820,14 +831,11 @@ def filter_balance(request):
     if created_at_to:
         if created_at_from == created_at_to:
             qs = qs.filter(document__date_created__exact=created_at_to)
+        elif created_at_from is None:
+            debt_condition['document__date_created__lt'] = created_at_to
+            credit_condition['document__date_created__lt'] = created_at_to
         else:
-            qs = qs.filter(document__date_created__lte=created_at_to)
-    if amount:
-        qs = qs.filter(amount=amount)
-    if description:
-        qs = qs.filter(description__contains=description)
-    if account_name:
-        qs = qs.filter(account__name__contains=account_name)
+            qs = qs.filter(document__date_created__lt=created_at_to)
 
     aggregates = qs.aggregate(
         debt=Sum(
@@ -844,29 +852,33 @@ def filter_balance(request):
                 output_field=IntegerField(),
             )
         ),
+    )
+
+    pre_aggregates = pre_qs.aggregate(
         pre_debt=Sum(
             Case(
-                When(transaction_type='debt',
-                     document__date_created__gte= jdatetime.date(current_day.year, 1, 1),
-                     then='amount'),
+                When(**debt_condition, then='amount'),
                 output_field=IntegerField(),
             )
         ),
         pre_credit=Sum(
             Case(
-                When(transaction_type='credit',
-                     document__date_created__gte=jdatetime.date(current_day.year, 1, 1),
-                     then='amount'),
+                When(**credit_condition, then='amount'),
                 output_field=IntegerField(),
             )
         ),
-
     )
 
-    total_debt = aggregates['pre_debt'] + aggregates['debt'] or 0
-    total_credit = aggregates['pre_credit'] + aggregates['credit'] or 0
-    pre_total_credit = aggregates['pre_credit'] or 0
-    pre_total_debt = aggregates['pre_credit'] or 0
+
+    pre_total_credit = pre_aggregates['pre_credit'] or 0
+    pre_total_debt = pre_aggregates['pre_debt'] or 0
+    total_debt = pre_total_debt + aggregates['debt'] or 0
+    total_credit = pre_total_credit + aggregates['credit'] or 0
+    print('td', total_debt)
+    print('tc', total_credit)
+    print('ptc', pre_total_credit)
+    print('ptd', pre_total_debt)
+
     html = render_to_string('partials/search_balance.html', {'balance_lists': qs})
     return JsonResponse({'html': html, 'total_debt': total_debt, 'total_credit':total_credit, 'pre_total_credit':pre_total_credit, 'pre_total_debt':pre_total_debt})
 
