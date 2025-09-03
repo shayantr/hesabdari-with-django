@@ -872,12 +872,10 @@ def filter_balance(request):
 
     pre_total_credit = pre_aggregates['pre_credit'] or 0
     pre_total_debt = pre_aggregates['pre_debt'] or 0
-    total_debt = pre_total_debt + aggregates['debt'] or 0
-    total_credit = pre_total_credit + aggregates['credit'] or 0
-    print('td', total_debt)
-    print('tc', total_credit)
-    print('ptc', pre_total_credit)
-    print('ptd', pre_total_debt)
+    sum_debt = aggregates['debt'] or 0
+    sum_credit = aggregates['credit'] or 0
+    total_debt = pre_total_debt + sum_debt
+    total_credit = pre_total_credit + sum_credit
 
     html = render_to_string('partials/search_balance.html', {'balance_lists': qs})
     return JsonResponse({'html': html, 'total_debt': total_debt, 'total_credit':total_credit, 'pre_total_credit':pre_total_credit, 'pre_total_debt':pre_total_debt})
