@@ -12,14 +12,18 @@
 
 {% block body %}
 <div class="row mb-3">
+<form id="search-filter-form">
+
   <div class="col">
     <label for="start-date">از تاریخ:</label>
-    <input type="text" data-jdp id="start-date" class="form-control">
+    <input type="text" data-jdp id="start-date" name="start-date" class="form-control">
   </div>
   <div class="col">
     <label for="end-date">تا تاریخ:</label>
-    <input type="text" data-jdp id="end-date" class="form-control">
+    <input type="text" data-jdp id="end-date" name="end-date" class="form-control">
   </div>
+
+  </form>
   <div class="col d-flex align-items-end">
     <button id="filter-btn" class="btn btn-primary w-100">فیلتر</button>
   </div>
@@ -105,7 +109,13 @@ const formatted_total = net_total.toLocaleString("fa-IR")
 
         const nodeId = node.id;
         const baseUrl = "{% url 'accounts_report_detail' 0 %}";
-        const url = baseUrl.replace(0, nodeId);
+        let url = baseUrl.replace(0, nodeId);
+
+        const startDate = $('#start-date').val();
+        const endDate = $('#end-date').val();
+        url += `?created_at_from=${encodeURIComponent(startDate)}&created_at_to=${encodeURIComponent(endDate)}`;
+
+        console.log(url);
 
 
         const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
@@ -149,6 +159,59 @@ const formatted_total = net_total.toLocaleString("fa-IR")
         }
     });
     loadTree(100000000)
+    
+    function filter_form(){
+        var formData = $('#search-filter-form').serialize();
+        var newUrl = "?" + formData;
+        
+
+        // تغییر URL مرورگر بدون رفرش
+        window.history.pushState({}, '', newUrl);
+            
+        $.ajax({
+        url: "{% url 'get_accounts_list' %}",
+        type: "GET",
+        data: formData,
+        success: function(response) {
+            $('#accounts-report').html(response.form_html);
+            createTree('default', response.data);
+        }
+        });
+    }
+    $('#filter-btn').on('click', function() {
+        filter_form();
+    });
+    
+    function fillFormFromQuery() {
+    var params = new URLSearchParams(window.location.search);
+    params.forEach(function(value, key) {
+        var $field = $(`[name="${key}"]`);
+        if ($field.is(':checkbox')) {
+            $field.prop('checked', true);
+        } else if ($field.is(':radio')) {
+            $(`[name="${key}"][value="${value}"]`).prop('checked', true);
+        } else {
+            $field.val(value);
+        }
+    });
+}
+
+// 📌 هنگام refresh یا اولین بار لود
+$(document).ready(function() {
+    if (window.location.search) {
+        fillFormFromQuery();
+        filter_form();
+    }
+});
+
+// 📌 هنگام back/forward
+window.addEventListener('popstate', function() {
+    fillFormFromQuery();
+    filter_form();
+});
+    
+
+    
 
     
     });

@@ -105,9 +105,9 @@ $(document).ready(function () {
 
                 // تغییر رنگ مانده
                 if (pre_balance < 0) {
-                    $pre_balanceEl.removeClass('text-red-600').addClass('text-red-600');
-                } else {
                     $pre_balanceEl.removeClass('text-green-600').addClass('text-green-600');
+                } else {
+                    $pre_balanceEl.removeClass('text-red-600').addClass('text-red-600');
                 }
                 $('#total-debt').text(data.total_debt.toLocaleString());
                 $('#total-credit').text(data.total_credit.toLocaleString());
@@ -117,9 +117,9 @@ $(document).ready(function () {
 
                 // تغییر رنگ مانده
                 if (balance < 0) {
-                    $balanceEl.removeClass('text-red-600').addClass('text-red-600');
-                } else {
                     $balanceEl.removeClass('text-green-600').addClass('text-green-600');
+                } else {
+                    $balanceEl.removeClass('text-red-600').addClass('text-red-600');
                 }
 
             }
