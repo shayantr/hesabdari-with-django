@@ -154,7 +154,7 @@
 {% endblock %}
 {% block body %}
     <form id="mainForm" enctype="multipart/form-data" class="form-floating mb-0">
-    <input type="hidden" name="form_token" value="{{ form_token }}">
+        <input type="hidden" name="form_token" value="{{ form_token }}">
         {{ document_instance.date_created }}
         {{ document_instance.user }}
         {% if messages %}
@@ -209,12 +209,11 @@
         <button class="btn btn-primary me-2" id="saveall" type="submit">ذخیره همه</button>
     </form>
     {% if document_id %}
-        <form method="post" action="{% url 'delete_document' document_id %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-primary me-2" style="margin:2px;">
-                حذف روکش سند
-            </button>
-        </form>
+        {% csrf_token %}
+        <button type="button" data-document-id="{{ document_id }}" id="delete-document-btn" class="btn btn-primary me-2"
+                style="margin:2px;">
+            حذف روکش سند
+        </button>
     {% endif %}
 
     <script>
@@ -413,26 +412,62 @@
             $('#forms-container').on('click', '.remove-form', function () {
                 const balance_id = $(this).attr('id');
                 const form = $(this).closest('.form-wrapper');
-                if (balance_id) {
-                    deleted_balances_id.push(parseInt(balance_id, 10));
-                    alert('سند با موفقیت حذف شد');
-                    form.remove();
-                    calcDebtTotal();
-                    calcCreditTotal();
-                } else {
-                    $(this).closest('.form-wrapper').remove();
-                    calcDebtTotal();
-                    calcCreditTotal();
-                }
 
+                Swal.fire({
+                    title: "آیا مطمئن هستی؟",
+                    text: "این عملیات قابل بازگشت نیست!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "بله، حذف کن",
+                    cancelButtonText: "انصراف"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            if (balance_id) {
+                                deleted_balances_id.push(parseInt(balance_id, 10));
+                            }
+                            form.remove();
+                            calcDebtTotal();
+                            calcCreditTotal();
+
+                            // نوتیف موفقیت
+                            Swal.fire({
+                                toast: true,
+                                position: "top-end",
+                                icon: "success",
+                                title: "با موفقیت حذف شد",
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true
+                            });
+                        } catch (error) {
+                            console.error(error);
+                            // نوتیف خطا
+                            Swal.fire({
+                                toast: true,
+                                position: "top-end",
+                                icon: "error",
+                                title: "خطا در حذف!",
+                                showConfirmButton: false,
+                                timer: 2500,
+                                timerProgressBar: true
+                            });
+                        }
+                    }
+                });
             });
             $('#mainForm').on('submit', function (e) {
                 e.preventDefault();
+
                 $(this).find("input[name$='-amount']").each(function () {
                     this.value = persianToEnglishNumbers(this.value).replace(/,/g, "");
                 });
-                let csrfToken = getCSRFToken(); // Get CSRF token
+
+                let csrfToken = getCSRFToken();
                 let formData = new FormData(this);
+
                 if (deleted_balances_id && deleted_balances_id.length > 0) {
                     formData.append('deleted_balances_id', JSON.stringify(deleted_balances_id));
                 }
@@ -446,19 +481,54 @@
                     data: formData,
                     contentType: false,
                     processData: false,
-                    headers: {"X-CSRFToken": csrfToken}, // Send CSRF token in headers
-                    {#data: $(this).serialize(),#}
+                    headers: {"X-CSRFToken": csrfToken},
+
                     success: function (response) {
                         if (response.success) {
-                            const redirect_page = response.redirect_url || "/";
-                            window.location.href = redirect_page;
-                        } else {
+                            // Toast موفقیت
+                            Swal.fire({
+                                toast: true,
+                                position: "top-end",
+                                icon: "success",
+                                title: "فرم با موفقیت ذخیره شد",
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true
+                            });
 
-                            {#alert("خطا: " + JSON.stringify(response.errors_html));#}
-                            $("#form-errors-"+response.err_id).html(response.errors);
-                            console.log(response.errors);
-                            
+                            // بعد از کمی مکث ری‌دایرکت کن
+                            setTimeout(function () {
+                                const redirect_page = response.redirect_url || "/";
+                                window.location.href = redirect_page;
+                            }, 1200);
+
+                        } else {
+                            // نمایش خطاهای اعتبارسنجی در صفحه
+                            $("#form-errors-" + response.err_id).html(response.errors);
+
+                            // Toast خطا
+                            Swal.fire({
+                                toast: true,
+                                position: "top-end",
+                                icon: "error",
+                                title: "لطفاً خطاهای فرم را بررسی کنید",
+                                showConfirmButton: false,
+                                timer: 2500,
+                                timerProgressBar: true
+                            });
                         }
+                    },
+                    error: function () {
+                        // Toast خطای عمومی
+                        Swal.fire({
+                            toast: true,
+                            position: "top-end",
+                            icon: "error",
+                            title: "خطای شبکه یا سرور!",
+                            showConfirmButton: false,
+                            timer: 2500,
+                            timerProgressBar: true
+                        });
                     }
                 });
             });
@@ -474,31 +544,125 @@
                 var formWrapper = button.closest('.form-wrapper');
                 var chequeForm = button.closest('.cheque-form');
 
-                $.ajax({
-                    url: '{% url "delete-cheque-view" %}',
-                    type: 'POST',
-                    data: {
-                        'cheque_id': chequeId,
-                        'csrfmiddlewaretoken': '{{ csrf_token }}',
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            alert('چک با موفقیت حذف شد');
-                            button.remove();
-                            formWrapper.find('.toggle-cheque-form').prop('checked', false);
-                            formWrapper.find('.toggle-cheque-form').prop('disabled', false);
-                            chequeForm.hide();
-                            chequeForm.find('input, textarea, select').val('');
-                            chequeForm.find('select').prop('selectedIndex', 0); // برای select‌ها
+                Swal.fire({
+                    title: "حذف چک",
+                    text: "آیا از حذف این چک مطمئن هستید؟",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "بله، حذف کن",
+                    cancelButtonText: "انصراف"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '{% url "delete-cheque-view" %}',
+                            type: 'POST',
+                            data: {
+                                'cheque_id': chequeId,
+                                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    button.remove();
+                                    formWrapper.find('.toggle-cheque-form').prop('checked', false);
+                                    formWrapper.find('.toggle-cheque-form').prop('disabled', false);
+                                    chequeForm.hide();
+                                    chequeForm.find('input, textarea, select').val('');
+                                    chequeForm.find('select').prop('selectedIndex', 0); // برای select‌ها
 
-
-                        } else {
-                            alert('خطا: ' + response.error);
-                        }
+                                    // Toast موفقیت
+                                    Swal.fire({
+                                        toast: true,
+                                        position: "top-end",
+                                        icon: "success",
+                                        title: "چک با موفقیت حذف شد",
+                                        showConfirmButton: false,
+                                        timer: 2000,
+                                        timerProgressBar: true
+                                    });
+                                } else {
+                                    // Toast خطا
+                                    Swal.fire({
+                                        toast: true,
+                                        position: "top-end",
+                                        icon: "error",
+                                        title: "خطا: " + response.error,
+                                        showConfirmButton: false,
+                                        timer: 2500,
+                                        timerProgressBar: true
+                                    });
+                                }
+                            },
+                            error: function () {
+                                // Toast خطا برای مشکلات Ajax (مثلاً 500 یا قطع اینترنت)
+                                Swal.fire({
+                                    toast: true,
+                                    position: "top-end",
+                                    icon: "error",
+                                    title: "خطای سرور یا شبکه!",
+                                    showConfirmButton: false,
+                                    timer: 2500,
+                                    timerProgressBar: true
+                                });
+                            }
+                        });
                     }
                 });
             });
+            $('#delete-document-btn').on('click', function () {
+                const button = $(this);
+                const documentId = button.data('document-id');
+                const url = `/delete-document/${documentId}/`; // مسیر view جنگو
+
+                Swal.fire({
+                    title: "حذف روکش سند",
+                    text: "آیا از حذف روکش سند مطمئن هستید؟",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "بله، حذف کن",
+                    cancelButtonText: "انصراف"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+
+                        $.ajax({
+                            url: url,
+                            type: "POST",
+                            headers: {"X-CSRFToken": csrfToken},
+                            success: function (response) {
+                                if (response.success) {
+                                    showToast("success", "روکش سند با موفقیت حذف شد");
+                                    button.remove(); // یا مخفی کردن
+                                } else {
+                                    showToast("error", response.error || "خطا در حذف روکش سند");
+                                }
+                            },
+                            error: function () {
+                                showToast("error", 'ss');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // تابع Toast مشترک
+            function showToast(type, message, timer = 2000) {
+                Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: type,
+                    title: message,
+                    showConfirmButton: false,
+                    timer: timer,
+                    timerProgressBar: true
+                });
+            }
+
         });
+
     </script>
 
 {% endblock %}

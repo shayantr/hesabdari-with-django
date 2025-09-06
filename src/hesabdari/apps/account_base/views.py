@@ -695,17 +695,22 @@ def edit_account(request, pk):
 @login_required
 @require_POST
 def delete_document(request, pk):
-    document = get_object_or_404(
-        Document.objects.prefetch_related('items__cheque__balance_sheet'),
-        pk=pk,
-        user=request.user
-    )
-    #checks if any balance is false
+    # document = get_object_or_404(
+    #     Document.objects.prefetch_related('items__cheque__balance_sheet'),
+    #     pk=pk,
+    #     user=request.user
+    # )
+    document = Document.objects.prefetch_related('items__cheque__balance_sheet').filter(pk=pk,
+        user=request.user)
+    # checks if any balance is false
     if document.items.filter(is_active=False).exists():
-        messages.error(request, "به دلیل وجود تراکنش غیر فعال، امکان حذف این سند وجود ندارد.")
-        return redirect('UpdateBalanceView', pk)
+        return JsonResponse({
+            "success": False,
+            "error": "به دلیل وجود تراکنش غیر فعال، امکان حذف این سند وجود ندارد."
+            # اگر خواستی برای دیباگ:  f"خطا: {str(e)}"
+        })
 
-    #find all cheques in document
+    # find all cheques in document
     cheque_ids = document.items.filter(cheque__isnull=False).values_list('cheque_id', flat=True)
 
     if cheque_ids:
@@ -718,13 +723,13 @@ def delete_document(request, pk):
             .values('cheque_id')
             .annotate(last_id=Max('id'))  # آخرین رکورد برای هر cheque
         )
-        #get latest ids
+        # get latest ids
         last_ids = [item['last_id'] for item in last_inactive]
         if last_ids:
             BalanceSheet.objects.filter(id__in=last_ids).update(is_active=True)
     # delete document
     document.delete()
-    return redirect(reverse('balance_lists'))
+    return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")}, )
 
 
 
@@ -835,7 +840,7 @@ def filter_balance(request):
             debt_condition['document__date_created__lt'] = created_at_to
             credit_condition['document__date_created__lt'] = created_at_to
         else:
-            qs = qs.filter(document__date_created__lt=created_at_to)
+            qs = qs.filter(document__date_created__lte=created_at_to)
 
     aggregates = qs.aggregate(
         debt=Sum(
@@ -853,7 +858,9 @@ def filter_balance(request):
             )
         ),
     )
-
+    if 'document__date_created__lt' not in debt_condition or credit_condition:
+        debt_condition['document__date_created__lt'] = jdatetime.date(current_day.year,1,1)
+        credit_condition['document__date_created__lt'] = jdatetime.date(current_day.year,1,1)
     pre_aggregates = pre_qs.aggregate(
         pre_debt=Sum(
             Case(
