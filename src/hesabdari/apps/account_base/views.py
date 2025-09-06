@@ -858,10 +858,10 @@ def filter_balance(request):
             )
         ),
     )
-    if 'document__date_created__lt' not in debt_condition:
-        debt_condition['document__date_created__lt'] = jdatetime.date(current_day.year,1,1)
-    if 'document__date_created__lt' not in credit_condition:
-        credit_condition['document__date_created__lt'] = jdatetime.date(current_day.year,1,1)
+    default_date = jdatetime.date(current_day.year, 1, 1)
+
+    for cond in (debt_condition, credit_condition):
+        cond.setdefault('document__date_created__lt', default_date)
     pre_aggregates = pre_qs.aggregate(
         pre_debt=Sum(
             Case(
