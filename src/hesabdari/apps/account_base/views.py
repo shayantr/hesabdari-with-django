@@ -836,9 +836,9 @@ def filter_balance(request):
     if created_at_to:
         if created_at_from == created_at_to:
             qs = qs.filter(document__date_created__exact=created_at_to)
-        elif created_at_from is None:
-            debt_condition['document__date_created__lt'] = created_at_to
-            credit_condition['document__date_created__lt'] = created_at_to
+        # elif created_at_from is None:
+        #     debt_condition['document__date_created__lt'] = created_at_to
+        #     credit_condition['document__date_created__lt'] = created_at_to
         else:
             qs = qs.filter(document__date_created__lte=created_at_to)
 
@@ -858,8 +858,9 @@ def filter_balance(request):
             )
         ),
     )
-    if 'document__date_created__lt' not in debt_condition or credit_condition:
+    if 'document__date_created__lt' not in debt_condition:
         debt_condition['document__date_created__lt'] = jdatetime.date(current_day.year,1,1)
+    elif 'document__date_created__lt' not in credit_condition:
         credit_condition['document__date_created__lt'] = jdatetime.date(current_day.year,1,1)
     pre_aggregates = pre_qs.aggregate(
         pre_debt=Sum(
