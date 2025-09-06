@@ -860,7 +860,7 @@ def filter_balance(request):
     )
     if 'document__date_created__lt' not in debt_condition:
         debt_condition['document__date_created__lt'] = jdatetime.date(current_day.year,1,1)
-    elif 'document__date_created__lt' not in credit_condition:
+    if 'document__date_created__lt' not in credit_condition:
         credit_condition['document__date_created__lt'] = jdatetime.date(current_day.year,1,1)
     pre_aggregates = pre_qs.aggregate(
         pre_debt=Sum(
@@ -884,6 +884,9 @@ def filter_balance(request):
     sum_credit = aggregates['credit'] or 0
     total_debt = pre_total_debt + sum_debt
     total_credit = pre_total_credit + sum_credit
+    print(pre_total_credit)
+    print(pre_total_debt)
+
 
     html = render_to_string('partials/search_balance.html', {'balance_lists': qs})
     return JsonResponse({'html': html, 'total_debt': total_debt, 'total_credit':total_credit, 'pre_total_credit':pre_total_credit, 'pre_total_debt':pre_total_debt})
