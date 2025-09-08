@@ -35,7 +35,7 @@
     jalaliDatepicker.startWatch();
 
 $(document).ready(function () {
-    
+
 
     function loadTree(uniqueid) {
         $.getJSON("{% url 'get_accounts_list' %}", function (response) {
@@ -58,7 +58,7 @@ $(document).ready(function () {
         if (!treeElement.length) return;
 
         $(`#${uniqueid}-add_root_btn`).hide()
-        
+
         treeElement.jstree("destroy");
         treeElement.jstree({
             core: {
@@ -95,7 +95,7 @@ function addControlsToNodes(uniqueid) {
     }
 
     const nodes = flattenNodes(fullNodes);
-    
+
 
     nodes.forEach(node => {
         // گرفتن مقدار از li_attr
@@ -104,20 +104,17 @@ const net_total = parseInt(net_total_raw, 10) || 0;
 
 // فرمت سه‌رقمی
 const formatted_total = net_total.toLocaleString("fa-IR")
-        
-        
+
+
 
         const nodeId = node.id;
+        const nodeName = node.text;
         const baseUrl = "{% url 'accounts_report_detail' 0 %}";
         let url = baseUrl.replace(0, nodeId);
 
         const startDate = $('#start-date').val();
         const endDate = $('#end-date').val();
-        url += `?created_at_from=${encodeURIComponent(startDate)}&created_at_to=${encodeURIComponent(endDate)}`;
-
-        console.log(url);
-
-
+        url += `?created_at_from=${encodeURIComponent(startDate)}&created_at_to=${encodeURIComponent(endDate)}&account_name=${encodeURIComponent(nodeName)}&account_id=${encodeURIComponent(nodeId)}`;
         const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
                 // تعیین رنگ
         let colorClass = "";
@@ -144,7 +141,7 @@ const formatted_total = net_total.toLocaleString("fa-IR")
         type: "GET",
         success: function (response) {
             $('#accounts-report').html(response.form_html);
-            
+
             createTree('default', response.data);
             //search bank
             let to = false;
@@ -155,19 +152,19 @@ const formatted_total = net_total.toLocaleString("fa-IR")
                     $(`#default-accounts_tree`).jstree(true).search(query);
                 }, 250);
             });
-            
+
         }
     });
     loadTree(100000000)
-    
+
     function filter_form(){
         var formData = $('#search-filter-form').serialize();
         var newUrl = "?" + formData;
-        
+
 
         // تغییر URL مرورگر بدون رفرش
         window.history.pushState({}, '', newUrl);
-            
+
         $.ajax({
         url: "{% url 'get_accounts_list' %}",
         type: "GET",
@@ -181,7 +178,7 @@ const formatted_total = net_total.toLocaleString("fa-IR")
     $('#filter-btn').on('click', function() {
         filter_form();
     });
-    
+
     function fillFormFromQuery() {
     var params = new URLSearchParams(window.location.search);
     params.forEach(function(value, key) {
@@ -209,15 +206,15 @@ window.addEventListener('popstate', function() {
     fillFormFromQuery();
     filter_form();
 });
-    
 
-    
 
-    
+
+
+
     });
 </script>
 
 {% endblock %}
 
-    
-    
+
+

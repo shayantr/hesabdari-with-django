@@ -37,6 +37,23 @@ class Document(models.Model):
             raise ValueError("به دلیل وجود تراکنش غیر فعال، امکان حذف این سند وجود ندارد.")
         super().delete(*args, **kwargs)
 
+class BalanceSheetQuerySet(models.QuerySet):
+    def for_account_with_children(self, account):
+        """
+        فیلتر کردن رکوردها بر اساس یک حساب و تمام زیرمجموعه‌هاش
+        """
+        return self.filter(
+            account__tree_id=account.tree_id,
+            account__lft__gte=account.lft,
+            account__rght__lte=account.rght
+        )
+
+class BalanceSheetManager(models.Manager):
+    def get_queryset(self):
+        return BalanceSheetQuerySet(self.model, using=self._db)
+
+    def for_account_with_children(self, account):
+        return self.get_queryset().for_account_with_children(account)
 
 class BalanceSheet(models.Model):
     TRANSACTION_TYPE_CHOICES = (
@@ -54,6 +71,7 @@ class BalanceSheet(models.Model):
     image = models.ImageField(upload_to='images/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     objects = jmodels.jManager()
+    with_children = BalanceSheetManager()
 
 
 

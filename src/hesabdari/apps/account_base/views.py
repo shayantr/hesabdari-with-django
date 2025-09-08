@@ -876,7 +876,7 @@ def filter_balance(request):
         qs = BalanceSheet.objects.filter(
             Q(user=request.user.id)).order_by('-document__date_created')
 
-    account_name = request.GET.get('account_name')
+    account_id = request.GET.get('account_id')
     amount = request.GET.get('amount')
     balance_id = request.GET.get('balance_id')
     document_id = request.GET.get('document_id')
@@ -893,9 +893,13 @@ def filter_balance(request):
         qs = qs.filter(amount=amount)
     if description:
         qs = qs.filter(description__contains=description)
-    if account_name:
-        qs = qs.filter(account__name__contains=account_name)
+    if account_id:
+        accounts = AccountsClass.objects.get(id=account_id)
+        accounts = accounts.get_descendants(include_self=True)
+        qs = qs.filter(account__in=accounts)
+        #qs = qs.filter(account__name__contains=account_name)
     pre_qs = qs
+
     if created_at_from:
         debt_condition['document__date_created__lt'] = created_at_from
         credit_condition['document__date_created__lt'] = created_at_from
@@ -952,7 +956,6 @@ def filter_balance(request):
     sum_credit = aggregates['credit'] or 0
     total_debt = pre_total_debt + sum_debt
     total_credit = pre_total_credit + sum_credit
-
     html = render_to_string('partials/search_balance.html', {'balance_lists': qs})
     return JsonResponse({'html': html, 'total_debt': total_debt, 'total_credit':total_credit, 'pre_total_credit':pre_total_credit, 'pre_total_debt':pre_total_debt})
 
