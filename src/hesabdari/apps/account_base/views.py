@@ -765,41 +765,47 @@ def edit_account(request, pk):
 @login_required
 @require_POST
 def delete_document(request, pk):
-    # document = get_object_or_404(
-    #     Document.objects.prefetch_related('items__cheque__balance_sheet'),
-    #     pk=pk,
-    #     user=request.user
-    # )
-    document = Document.objects.prefetch_related('items__cheque__balance_sheet').filter(pk=pk,
-        user=request.user)
+    try:
+        document = get_object_or_404(Document.objects.prefetch_related(
+            'items__cheque__balance_sheet'
+        ), pk=pk, user=request.user)
+    except Document.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "error": "سند مورد نظر یافت نشد یا به شما تعلق ندارد."
+        }, status=404)
+
     # checks if any balance is false
     if document.items.filter(is_active=False).exists():
         return JsonResponse({
             "success": False,
             "error": "به دلیل وجود تراکنش غیر فعال، امکان حذف این سند وجود ندارد."
-            # اگر خواستی برای دیباگ:  f"خطا: {str(e)}"
-        })
+        }, status=400)
 
     # find all cheques in document
-    cheque_ids = document.items.filter(cheque__isnull=False).values_list('cheque_id', flat=True)
+    cheque_ids = document.items.filter(
+        cheque__isnull=False
+    ).values_list('cheque_id', flat=True)
 
     if cheque_ids:
-        # 3) آپدیت مستقیم balance_sheet های غیرفعال آخرین چک‌ها
-        #    اینجا فرض می‌کنیم هر cheque فقط یک balance_sheet غیرفعال نیاز به فعال‌سازی داره
-
         last_inactive = (
             BalanceSheet.objects
             .filter(cheque_id__in=cheque_ids, is_active=False)
             .values('cheque_id')
-            .annotate(last_id=Max('id'))  # آخرین رکورد برای هر cheque
+            .annotate(last_id=Max('id'))
         )
-        # get latest ids
         last_ids = [item['last_id'] for item in last_inactive]
         if last_ids:
             BalanceSheet.objects.filter(id__in=last_ids).update(is_active=True)
+    next_url = request.GET.get('next')
+    print(next_url)
     # delete document
-    document.delete()
-    return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")}, )
+    # document.delete()
+    if next_url:
+        return JsonResponse({'success': True, "redirect_url": next_url})
+    else:
+        return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")})
+
 
 
 

@@ -613,7 +613,9 @@
             $('#delete-document-btn').on('click', function () {
                 const button = $(this);
                 const documentId = button.data('document-id');
-                const url = `/delete-document/${documentId}/`; // مسیر view جنگو
+                console.log(documentId)
+                const url = `/accounts/delete-document/${documentId}/`; // مسیر view جنگو
+                {#const url = `{% url 'delete_account' pk=0 %}".replace('0', documentId)`; // مسیر view جنگو#}
 
                 Swal.fire({
                     title: "حذف روکش سند",
@@ -636,12 +638,18 @@
                                 if (response.success) {
                                     showToast("success", "روکش سند با موفقیت حذف شد");
                                     button.remove(); // یا مخفی کردن
+                                    setTimeout(function () {
+                                        const redirect_page = response.redirect_url || "/";
+                                        window.location.href = redirect_page;
+                                    }, 1200);
+
                                 } else {
                                     showToast("error", response.error || "خطا در حذف روکش سند");
                                 }
                             },
                             error: function () {
-                                showToast("error", 'ss');
+                                showToast("error", 'مشکلی در ارتباط با سرور پیش آمده است لطفا مجددا تلاش کنید.');
+
                             }
                         });
                     }
