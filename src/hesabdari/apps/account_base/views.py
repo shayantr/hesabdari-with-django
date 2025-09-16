@@ -848,20 +848,21 @@ class BalanceListView(LoginRequiredMixin, generic.View):
 
         total_debt = aggregates['debt'] or 0
         total_credit = aggregates['credit'] or 0
-        running_total = 0
         running_debt_total = 0
         running_credit_total = 0
-        for obj in qs:
-            if obj.transaction_type == 'debt':
-                running_debt_total += obj.amount
-            else:
-                running_credit_total += obj.amount
-            running_total = running_debt_total - running_credit_total
-            obj.jame_amount = running_total
-            # print(running_total)
+        balance_list = []
+        running_balance = 0  # مانده اول دوره
+        for item in qs.order_by('document__date_created', 'id'):  # مرتب از قدیم به جدید
+            if item.transaction_type == 'debt':  # بدهکاری
+                running_balance += item.amount
+            elif item.transaction_type == 'credit':  # بستانکاری
+                running_balance -= item.amount
+            item.running_balance = abs(running_balance)
+            balance_list.append(item)
+        balance_list.reverse()
         total_balance = total_debt - total_credit
         context = {
-            'balance_lists': qs,
+            'balance_lists': balance_list,
             'total_debt': total_debt,
             'total_credit': total_credit,
             'total_balance': total_balance,
@@ -956,13 +957,25 @@ def filter_balance(request):
     )
 
 
+
     pre_total_credit = pre_aggregates['pre_credit'] or 0
     pre_total_debt = pre_aggregates['pre_debt'] or 0
     sum_debt = aggregates['debt'] or 0
     sum_credit = aggregates['credit'] or 0
     total_debt = pre_total_debt + sum_debt
     total_credit = pre_total_credit + sum_credit
-    html = render_to_string('partials/search_balance.html', {'balance_lists': qs})
+
+    balance_list = []
+    running_balance = pre_total_debt - pre_total_credit  # مانده اول دوره
+    for item in qs.order_by('document__date_created', 'id'):  # مرتب از قدیم به جدید
+        if item.transaction_type == 'debt':  # بدهکاری
+            running_balance += item.amount
+        elif item.transaction_type == 'credit':  # بستانکاری
+            running_balance -= item.amount
+        item.running_balance = abs(running_balance)
+        balance_list.append(item)
+    balance_list.reverse()
+    html = render_to_string('partials/search_balance.html', {'balance_lists': balance_list})
     return JsonResponse({'html': html, 'total_debt': total_debt, 'total_credit':total_credit, 'pre_total_credit':pre_total_credit, 'pre_total_debt':pre_total_debt})
 
 class ChangeStatusCheque(generic.View):

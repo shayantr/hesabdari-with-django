@@ -40,14 +40,16 @@
                 <th scope="col">تاریخ</th>
                 <th scope="col">مبلغ</th>
                 <th scope="col">چک</th>
+                <th scope="col">مانده</th>
             </tr>
             </thead>
             <tbody>
             <tr>
                 <th scope="row">{{ balance.document.id }}</th>
-                <td>{{ balance.document.date_created }}</td>
-                <td>{{ balance.amount|toman }}</td>
-                <td>{% if not balance.cheque %}ندارد{% else %}{{ balance.cheque.cheque_status }}{% endif %}</td>
+                <th>{{ balance.document.date_created }}</th>
+                <th>{{ balance.amount|toman }}</th>
+                <th>{% if not balance.cheque %}ندارد{% else %}{{ balance.cheque.cheque_status }}{% endif %}</th>
+                <th>{{ balance.running_balance|toman }}</th>
             </tr>
             </tbody>
         </table>
