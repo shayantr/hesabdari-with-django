@@ -798,9 +798,8 @@ def delete_document(request, pk):
         if last_ids:
             BalanceSheet.objects.filter(id__in=last_ids).update(is_active=True)
     next_url = request.GET.get('next')
-    print(next_url)
     # delete document
-    # document.delete()
+    document.delete()
     if next_url:
         return JsonResponse({'success': True, "redirect_url": next_url})
     else:
