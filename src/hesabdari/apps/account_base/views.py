@@ -4,6 +4,7 @@ from collections import namedtuple
 from itertools import zip_longest
 from keyword import kwlist
 from lib2to3.fixes.fix_input import context
+from urllib.parse import urlencode
 
 import jdatetime
 import uuid
@@ -82,7 +83,7 @@ def createbalancesheet(request):
         token = str(uuid.uuid4())
         tokens[token] = time.time()
         request.session["form_tokens"] = tokens
-        document_instance = DocumentForm(initial={'user': request.user})
+        document_instance = DocumentForm(initial={'user': request.user, 'date_created': request.GET.get('date_created')})
         context = {
             'all_balanceforms': [],
             'all_chequeforms': [],
@@ -151,7 +152,10 @@ def createbalancesheet(request):
                 try:
                     tokens.pop(token, None)
                     request.session["form_tokens"] = tokens
-                    return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")},)
+                    url = reverse('create-document')
+                    date_created = request.POST.get('date_created')
+                    redirect_url = f"{url}?{urlencode({'date_created': date_created})}"
+                    return JsonResponse({'success': True, "redirect_url": redirect_url})
                 except KeyError:
                     return JsonResponse({'success': False, 'errors': 'testieeee'}, )
 
@@ -600,8 +604,8 @@ class ChequeListView(LoginRequiredMixin, generic.View):
         receivables_credit_amount = aggregates['receivables_credit'] or 0
 
         context = {
-            'receivables': qs.filter(cheque__cheque_type='دریافتنی'),
-            'payables': qs.filter(cheque__cheque_type='پرداختنی'),
+            'receivables': qs.filter(cheque__cheque_type='دریافتنی').order_by("cheque__maturity_date"),
+            'payables': qs.filter(cheque__cheque_type='پرداختنی').order_by("cheque__maturity_date"),
             'receivables_debt_amount': aggregates['receivables_debt'] or 0,
             'receivables_credit_amount': aggregates['receivables_credit'] or 0,
             'receivables_balance': receivables_debt_amount - receivables_credit_amount,
@@ -623,7 +627,7 @@ def filter_receivable_cheques(request):
         'amount',
         'description',
         'cheque__cheque_type'
-    )
+    ).order_by("cheque__maturity_date")
 
     # فیلترها
     name = request.GET.get('cheque_name')
@@ -636,13 +640,13 @@ def filter_receivable_cheques(request):
     description = request.GET.get('description')
 
     if due_date_from:
-        receivables = receivables.filter(cheque__maturity_date__gte=due_date_from)
+        receivables = receivables.filter(cheque__maturity_date__gte=due_date_from).order_by("cheque__maturity_date")
     if due_date_to:
-        receivables = receivables.filter(cheque__maturity_date__lte=due_date_to)
+        receivables = receivables.filter(cheque__maturity_date__lte=due_date_to).order_by("cheque__maturity_date")
     if created_at_from:
-        receivables = receivables.filter(document__date_created__gte=created_at_from)
+        receivables = receivables.filter(document__date_created__gte=created_at_from).order_by('-document__date_created')
     if created_at_to:
-        receivables = receivables.filter(document__date_created__lte=created_at_to)
+        receivables = receivables.filter(document__date_created__lte=created_at_to).order_by('-document__date_created')
     if amount:
         receivables = receivables.filter(amount=amount)
     if status:
@@ -694,7 +698,7 @@ def filter_credit_cheques(request):
         'amount',
         'description',
         'cheque__cheque_type'
-    )
+    ).order_by("cheque__maturity_date")
 
     # فیلترها
     name = request.GET.get('cheque_name')
@@ -707,13 +711,13 @@ def filter_credit_cheques(request):
     description = request.GET.get('description')
 
     if due_date_from:
-        payables = payables.filter(cheque__maturity_date__gte=due_date_from)
+        payables = payables.filter(cheque__maturity_date__gte=due_date_from).order_by("cheque__maturity_date")
     if due_date_to:
-        payables = payables.filter(cheque__maturity_date__lte=due_date_to)
+        payables = payables.filter(cheque__maturity_date__lte=due_date_to).order_by("cheque__maturity_date")
     if created_at_from:
-        payables = payables.filter(document__date_created__gte=created_at_from)
+        payables = payables.filter(document__date_created__gte=created_at_from).order_by('-document__date_created')
     if created_at_to:
-        payables = payables.filter(document__date_created__lte=created_at_to)
+        payables = payables.filter(document__date_created__lte=created_at_to).order_by('-document__date_created')
     if amount:
         payables = payables.filter(amount=amount)
     if status:
@@ -856,7 +860,7 @@ class BalanceListView(LoginRequiredMixin, generic.View):
                 running_balance += item.amount
             elif item.transaction_type == 'credit':  # بستانکاری
                 running_balance -= item.amount
-            item.running_balance = abs(running_balance)
+            item.running_balance = running_balance
             balance_list.append(item)
         balance_list.reverse()
         total_balance = total_debt - total_credit
@@ -971,7 +975,7 @@ def filter_balance(request):
             running_balance += item.amount
         elif item.transaction_type == 'credit':  # بستانکاری
             running_balance -= item.amount
-        item.running_balance = abs(running_balance)
+        item.running_balance = running_balance
         balance_list.append(item)
     balance_list.reverse()
     html = render_to_string('partials/search_balance.html', {'balance_lists': balance_list})

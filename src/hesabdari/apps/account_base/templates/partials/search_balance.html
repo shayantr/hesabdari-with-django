@@ -49,7 +49,7 @@
                 <th>{{ balance.document.date_created }}</th>
                 <th>{{ balance.amount|toman }}</th>
                 <th>{% if not balance.cheque %}ندارد{% else %}{{ balance.cheque.cheque_status }}{% endif %}</th>
-                <th>{{ balance.running_balance|toman }}</th>
+                <th><span id="running_balance" class="{% if balance.running_balance < 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ balance.running_balance|toman }}</span></th>
             </tr>
             </tbody>
         </table>
