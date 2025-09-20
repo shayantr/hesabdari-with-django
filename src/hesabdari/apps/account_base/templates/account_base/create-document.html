@@ -185,6 +185,7 @@
                 {% endfor %}
             </div>
             <button type="button" id="add-form-debt">افزودن فرم بدهی</button>
+            <button type="button" id="debt-to-credit">ساخت فرم متقابل</button>
             <div class="credit">
                 {% for i in combined_forms %}
                     {% if i.form_balance.transaction_type.value == "credit" %}
@@ -194,6 +195,8 @@
                 {% endfor %}
             </div>
             <button type="button" id="add-form-credit">افزودن فرم بستانکاری</button>
+            <button type="button" id="credit-to-debt">ساخت فرم متقابل</button>
+
         </div>
         <div class="col-12">
             <div class="invoice-total ms-auto">
@@ -285,6 +288,71 @@
             // --- 4. جمع اولیه هنگام load ---
             calcDebtTotal();
             calcCreditTotal();
+            
+            
+            // sum all debts into new form in credit
+            $('#debt-to-credit').click(function () {
+                let csrfToken = getCSRFToken(); // Get CSRF token
+                let transaction_type = 'debt'
+                const debtForm = $('#forms-container .debt .form-wrapper');
+                var total = 0;
+
+                debtForm.each(function () {
+                    var amount = $(this).find('[name$="-balance-amount"]').val();
+                    amount = persianToEnglishNumbers(amount);
+                    total += cleanNumber(amount);
+                });
+                var firstdesc = debtForm.find('[name$="-balance-description"]').first().val();
+                $.ajax({
+                    url: "{% url 'get_form_fragment' %}",
+                    type: "POST",
+                    {#headers: { "X-CSRFToken": csrfToken }, // Send CSRF token in headers#}
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        transaction_type: transaction_type,
+                    },
+                    success: function (response) {
+                        const $newForm = $(response.form_html);
+                        $newForm.find(`[name$="-balance-description"]`).val(firstdesc);
+                        $newForm.find(`[name$="-balance-amount"]`).val(total.toLocaleString("en-US"));
+                        $('.credit').append($newForm);
+                        calcCreditTotal();
+                    }
+                });
+            });
+            
+            
+            // sum all credits into new form in debt
+            $('#credit-to-debt').click(function () {
+                let csrfToken = getCSRFToken(); // Get CSRF token
+                let transaction_type = 'credit'
+                const creditForm = $('#forms-container .credit .form-wrapper');
+                var total = 0;
+
+                creditForm.each(function () {
+                    var amount = $(this).find('[name$="-balance-amount"]').val();
+                    amount = persianToEnglishNumbers(amount);
+                    total += cleanNumber(amount);
+                });
+                var firstdesc = creditForm.find('[name$="-balance-description"]').first().val();
+                $.ajax({
+                    url: "{% url 'get_form_fragment' %}",
+                    type: "POST",
+                    {#headers: { "X-CSRFToken": csrfToken }, // Send CSRF token in headers#}
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        transaction_type: transaction_type,
+                    },
+                    success: function (response) {
+                        const $newForm = $(response.form_html);
+                        $newForm.find(`[name$="-balance-description"]`).val(firstdesc);
+                        $newForm.find(`[name$="-balance-amount"]`).val(total.toLocaleString("en-US"));
+                        $('.debt').append($newForm);
+                        calcDebtTotal();
+                    }
+                });
+            });
+
             $('#add-form-debt').click(function () {
                 let csrfToken = getCSRFToken(); // Get CSRF token
                 let transaction_type = 'debt'

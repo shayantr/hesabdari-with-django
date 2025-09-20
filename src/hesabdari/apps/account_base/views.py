@@ -846,9 +846,6 @@ class BalanceListView(LoginRequiredMixin, generic.View):
             ),
 
         )
-
-
-
         total_debt = aggregates['debt'] or 0
         total_credit = aggregates['credit'] or 0
         running_debt_total = 0
@@ -907,7 +904,6 @@ def filter_balance(request):
         accounts = AccountsClass.objects.get(id=account_id)
         accounts = accounts.get_descendants(include_self=True)
         qs = qs.filter(account__in=accounts)
-        #qs = qs.filter(account__name__contains=account_name)
     pre_qs = qs
 
     if created_at_from:
