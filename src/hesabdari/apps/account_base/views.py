@@ -830,7 +830,7 @@ def delete_account(request, pk):
 
 class BalanceListView(LoginRequiredMixin, generic.View):
     def get(self, request):
-        qs = BalanceSheet.objects.select_related('cheque', 'document').filter(user=request.user.id).order_by('-document__date_created')
+        qs = BalanceSheet.objects.select_related('cheque', 'document').prefetch_related('document__items__account').filter(user=request.user.id).order_by('-document__date_created')
         aggregates = qs.aggregate(
             debt=Sum(
                 Case(
@@ -848,17 +848,22 @@ class BalanceListView(LoginRequiredMixin, generic.View):
         )
         total_debt = aggregates['debt'] or 0
         total_credit = aggregates['credit'] or 0
-        running_debt_total = 0
-        running_credit_total = 0
         balance_list = []
         running_balance = 0  # مانده اول دوره
         for item in qs.order_by('document__date_created', 'id'):  # مرتب از قدیم به جدید
+            doc = item.document
             if item.transaction_type == 'debt':  # بدهکاری
                 running_balance += item.amount
             elif item.transaction_type == 'credit':  # بستانکاری
                 running_balance -= item.amount
             item.running_balance = running_balance
+            people = set()
+            for i in doc.items.all():
+                if item.transaction_type != i.transaction_type:
+                    people.add(i.account.name)
+            item.people = people
             balance_list.append(item)
+
         balance_list.reverse()
         total_balance = total_debt - total_credit
         context = {

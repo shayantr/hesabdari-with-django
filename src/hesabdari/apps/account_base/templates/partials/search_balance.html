@@ -2,14 +2,14 @@
 
 {% for balance in balance_lists %}
     <div class="card selectable"
-         {% if balance.transaction_type == 'debt' %}
-             style="background-color: #ffe5e5;"
-         {% else %}
-             style="background-color: #e5fbe5;"
-         {% endif %}
+            {% if balance.transaction_type == 'debt' %}
+         style="background-color: #ffe5e5;"
+            {% else %}
+         style="background-color: #e5fbe5;"
+            {% endif %}
          onclick="toggleHighlight(this)">
-        
-         
+
+
         <div class="card-header">
             <div class="row align-items-center">
                 <div class="col d-flex justify-content-end">
@@ -20,14 +20,20 @@
                         </div>
                     </a>
                 </div>
+                <p>
+                {% if balance.transaction_type == 'debt' %}به{% else %}از{% endif %}
+                {% for people in balance.people %}
+                    {{ people }} - 
+                {% endfor %}
+                </p>
                 <div class="col d-flex justify-content-start">
                     {% if balance.image %}
-                    <div class="grid g-3">
-                        <a class="card-gallery" data-fslightbox="gallery" href="{{ balance.image.url }}">
-                            <img class="img-fluid" src="{{ balance.image.url }}" alt="Card image" style="width:50%">
-                            <div class="gallery-hover-data card-body justify-content-end"></div>
-                        </a>
-                    </div>
+                        <div class="grid g-3">
+                            <a class="card-gallery" data-fslightbox="gallery" href="{{ balance.image.url }}">
+                                <img class="img-fluid" src="{{ balance.image.url }}" alt="Card image" style="width:50%">
+                                <div class="gallery-hover-data card-body justify-content-end"></div>
+                            </a>
+                        </div>
                     {% endif %}
                 </div>
             </div>
@@ -39,7 +45,6 @@
                 <td>سند</td>
                 <td>تاریخ</td>
                 <td>مبلغ</td>
-                <td>چک</td>
                 <td>مانده</td>
             </tr>
             </thead>
@@ -48,31 +53,33 @@
                 <th>{{ balance.document.id }}</th>
                 <th>{{ balance.document.date_created }}</th>
                 <th>{{ balance.amount|toman }}</th>
-                <th>{% if not balance.cheque %}ندارد{% else %}{{ balance.cheque.cheque_status }}{% endif %}</th>
-                <th><span id="running_balance" class="{% if balance.running_balance < 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ balance.running_balance|toman }}</span></th>
+                <th><span id="running_balance"
+                          class="{% if balance.running_balance < 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ balance.running_balance|toman }}</span>
+                </th>
             </tr>
             </tbody>
         </table>
 
         <div class="row">
+            <p>چک:{% if not balance.cheque %}ندارد{% else %}{{ balance.cheque.cheque_status }}{% endif %}</p>
             <p>توضیحات: {{ balance.description }}</p>
         </div>
     </div>
 {% endfor %}
 
 <style>
-/* استایل هایلایت کارت */
-.card.highlight {
-  outline: 2px solid blue;
-  box-shadow: 0 0 8px rgba(0, 0, 255, 0.5);
-}
+    /* استایل هایلایت کارت */
+    .card.highlight {
+        outline: 2px solid blue;
+        box-shadow: 0 0 8px rgba(0, 0, 255, 0.5);
+    }
 </style>
 
 <script>
-function toggleHighlight(element) {
-    // فقط تغییر وضعیت هایلایت (چند کارت می‌تونه انتخاب بشه)
-    element.classList.toggle('highlight');
-}
+    function toggleHighlight(element) {
+        // فقط تغییر وضعیت هایلایت (چند کارت می‌تونه انتخاب بشه)
+        element.classList.toggle('highlight');
+    }
 </script>
 
 
