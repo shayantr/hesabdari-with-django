@@ -288,8 +288,8 @@
             // --- 4. جمع اولیه هنگام load ---
             calcDebtTotal();
             calcCreditTotal();
-            
-            
+
+
             // sum all debts into new form in credit
             $('#debt-to-credit').click(function () {
                 let csrfToken = getCSRFToken(); // Get CSRF token
@@ -320,8 +320,8 @@
                     }
                 });
             });
-            
-            
+
+
             // sum all credits into new form in debt
             $('#credit-to-debt').click(function () {
                 let csrfToken = getCSRFToken(); // Get CSRF token
@@ -364,6 +364,7 @@
                 const balance_account_new = lastForm.find('[id$="-accounts-list"]').text();
                 const amount = lastForm.find('[name$="-balance-amount"]').val();
                 const description = lastForm.find('[name$="-balance-description"]').val();
+                const in_cash = lastForm.find('[name$="-cheque-in_cash"]').val();
                 $.ajax({
                     url: "{% url 'get_form_fragment' %}",
                     type: "POST",
@@ -391,6 +392,7 @@
                                 $newForm.find(`[name$="-cheque-account"]`).val(Cheque_account);
                                 $newForm.find(`[name$="-maturity_date"]`).val(datease);
                                 $newForm.find(`[name$="-balance-amount"]`).val(amount);
+                                $newForm.find(`[name$="-cheque-in_cash"]`).val(in_cash);
 
                                 const bank_account_new = lastForm.find('[id$="-bank-list"]').text();
 
@@ -420,6 +422,7 @@
                 const balance_account_new = lastForm.find('[id$="-accounts-list"]').text();
                 const description = lastForm.find('[name$="-balance-description"]').val();
                 const amount = lastForm.find('[name$="-balance-amount"]').val();
+                const in_cash = lastForm.find('[name$="-cheque-in_cash"]').val();
 
 
                 $.ajax({
@@ -447,6 +450,7 @@
                                 $newForm.find(`[name$="-balance-account"]`).val(balance_account);
                                 $newForm.find(`[name$="-cheque-account"]`).val(Cheque_account);
                                 $newForm.find(`[name$="-maturity_date"]`).val(datease);
+                                $newForm.find(`[name$="-cheque-in_cash"]`).val(in_cash);
                                 const bank_account_new = lastForm.find('[id$="-bank-list"]').text();
                                 $newForm.find(`[name$="-balance-amount"]`).val(amount);
                                 const chequeFields = ['name', 'bank_name'];

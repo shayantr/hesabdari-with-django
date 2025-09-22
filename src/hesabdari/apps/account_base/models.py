@@ -92,6 +92,7 @@ class CashierCheque(models.Model):
     Cheque_numbder = models.IntegerField(null=True, blank=True)
     created_at = jmodels.jDateField(auto_now_add=True, editable=True)
     maturity_date = jmodels.jDateField(verbose_name='زمان سررسید', null=True, blank=True)
+    in_cash = models.CharField(max_length=255, null=True, blank=True)
     cheque_status = models.CharField(
         max_length=255,
         choices=ChequeType.choices,

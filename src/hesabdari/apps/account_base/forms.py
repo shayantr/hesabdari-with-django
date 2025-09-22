@@ -64,6 +64,8 @@ class CashierChequeForm(forms.ModelForm):
                 attrs={'class': 'form-control', 'data-jdp':'data-jdp', 'placeholder':'زمان سررسید'}),
             'name': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'نام', 'id': "floatingInput"}),
+            'in_cash': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'در وجه', 'id': "floatingInput"}),
             'Cheque_numbder': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'شماره چک', 'id': "floatingInput"}),
             'cheque_status': forms.Select(attrs={'class': 'dropdown form-select form-select-lg'}),

@@ -31,6 +31,7 @@ from hesabdari.apps.account_base.models import AccountsClass, Document, BalanceS
 
 User = get_user_model()
 
+
 # Create your views here.
 def add_month_to_jalali_date(jdate):
     # فرض: jdate = jdatetime.date(1402, 12, 10)
@@ -60,6 +61,8 @@ def extract_all_prefixes(post_data, file_data):
             prefix = key.split('-')[0]
             prefixes.add(prefix)
     return prefixes
+
+
 TOKEN_TTL = 30 * 60  # ⏱ مدت اعتبار توکن = ۳۰ دقیقه (ثانیه)
 
 
@@ -83,7 +86,8 @@ def createbalancesheet(request):
         token = str(uuid.uuid4())
         tokens[token] = time.time()
         request.session["form_tokens"] = tokens
-        document_instance = DocumentForm(initial={'user': request.user, 'date_created': request.GET.get('date_created')})
+        document_instance = DocumentForm(
+            initial={'user': request.user, 'date_created': request.GET.get('date_created')})
         context = {
             'all_balanceforms': [],
             'all_chequeforms': [],
@@ -92,8 +96,9 @@ def createbalancesheet(request):
         }
         return render(request, 'account_base/create-document.html', context)
     all_prefixes = extract_all_prefixes(request.POST, request.FILES) if request.method == "POST" else set()
-    document_instance = DocumentForm(request.POST or None, initial={'user':request.user})
-    all_balanceforms = [BalanceSheetForm(request.POST, request.FILES or None, prefix=f'{i}-new-balance') for i in all_prefixes]
+    document_instance = DocumentForm(request.POST or None, initial={'user': request.user})
+    all_balanceforms = [BalanceSheetForm(request.POST, request.FILES or None, prefix=f'{i}-new-balance') for i in
+                        all_prefixes]
     all_chequeforms = [CashierChequeForm(request.POST or None, prefix=f'{i}-new-cheque') for i in all_prefixes]
     if request.method == "POST":
         tokens = _get_tokens(request.session)
@@ -114,7 +119,8 @@ def createbalancesheet(request):
                 print(balance.prefix)
                 return JsonResponse({
                     "success": False,
-                    "errors": render_to_string("partials/errors.html", {"form": balance, 'err_id':balance.prefix}, request=request)
+                    "errors": render_to_string("partials/errors.html", {"form": balance, 'err_id': balance.prefix},
+                                               request=request)
                 })
 
         if not document_instance.is_valid():
@@ -122,7 +128,7 @@ def createbalancesheet(request):
             return JsonResponse({'success': False, 'errors': document_instance.errors}, )
 
         if all_forms_valid:
-            d=document_instance.save(commit=False)
+            d = document_instance.save(commit=False)
             for balance in all_balanceforms:
                 if balance.cleaned_data.get('transaction_type') == "debt":
                     all_debt += balance.cleaned_data.get('amount') or 0
@@ -130,7 +136,7 @@ def createbalancesheet(request):
                     all_credit += balance.cleaned_data.get('amount') or 0
 
             if all_credit != all_debt:
-                return JsonResponse({'success': False, 'errors': 'مجموع بدهکاری و بستانکاری برابر نیست.'},)
+                return JsonResponse({'success': False, 'errors': 'مجموع بدهکاری و بستانکاری برابر نیست.'}, )
             else:
                 try:
                     with transaction.atomic():
@@ -178,22 +184,27 @@ class GetFormFragmentView(generic.View):
         uniqueid = str(uuid.uuid1())[:4]
         transaction_type = request.POST.get('transaction_type')
 
-        form_balance = BalanceSheetForm(prefix=f'{uniqueid}-new-balance', initial={'transaction_type': transaction_type, 'user':request.user.id})
+        form_balance = BalanceSheetForm(prefix=f'{uniqueid}-new-balance',
+                                        initial={'transaction_type': transaction_type, 'user': request.user.id})
         if transaction_type == 'debt':
-            form_cheque = CashierChequeForm(prefix=f'{uniqueid}-new-cheque', initial={'user': request.user.id, 'cheque_type': 'دریافتنی'})
-            form_html = render_to_string('account_base/form_fragment.html',
-                                         {'form_balance': form_balance,'form_cheque':form_cheque,
-                                          'transaction_type':transaction_type, 'uniqueid':uniqueid})
-        else:
-            form_cheque = CashierChequeForm(prefix=f'{uniqueid}-new-cheque', initial={'user': request.user.id, 'cheque_type': 'پرداختنی'})
+            form_cheque = CashierChequeForm(prefix=f'{uniqueid}-new-cheque',
+                                            initial={'user': request.user.id, 'cheque_type': 'دریافتنی'})
             form_html = render_to_string('account_base/form_fragment.html',
                                          {'form_balance': form_balance, 'form_cheque': form_cheque,
-                                          'transaction_type': transaction_type, 'uniqueid':uniqueid})
-        return JsonResponse({'form_html': form_html, 'datease':datease })
+                                          'transaction_type': transaction_type, 'uniqueid': uniqueid})
+        else:
+            form_cheque = CashierChequeForm(prefix=f'{uniqueid}-new-cheque',
+                                            initial={'user': request.user.id, 'cheque_type': 'پرداختنی'})
+            form_html = render_to_string('account_base/form_fragment.html',
+                                         {'form_balance': form_balance, 'form_cheque': form_cheque,
+                                          'transaction_type': transaction_type, 'uniqueid': uniqueid})
+        return JsonResponse({'form_html': form_html, 'datease': datease})
 
 
 def account_report(request):
     return render(request, 'account_base/accounts-report.html')
+
+
 # class AccountsView(generic.View):
 #     def get(self, request):
 #         def serialize_node(node, net_total):
@@ -246,7 +257,7 @@ class AccountsView(generic.View):
             balances = balances.filter(user=request.user, document__date_created__gte=start_date)
         if request.GET.get('end-date'):
             end_date = str(request.GET.get('end-date'))
-            balances = balances.filter(user=request.user,document__date_created__lte=end_date)
+            balances = balances.filter(user=request.user, document__date_created__lte=end_date)
 
         # جمع تراکنش‌ها بر اساس account_id
         totals = balances.values('account_id', 'transaction_type').annotate(total=Sum('amount'))
@@ -287,15 +298,18 @@ class AccountReportDetails(generic.View):
     def get(self, request, pk):
         parent_account = AccountsClass.objects.filter(pk=pk, user=request.user)
         descendants = (parent_account.get_descendants(include_self=True).prefetch_related(
-        Prefetch('balance_sheets', queryset=BalanceSheet.objects.filter(user=request.user))))
+            Prefetch('balance_sheets', queryset=BalanceSheet.objects.filter(user=request.user))))
         created_at_from = request.GET.get('created_at_from')
         created_at_to = request.GET.get('created_at_to')
         if created_at_from and created_at_to:
             descendants = (parent_account.get_descendants(include_self=True).prefetch_related(
-                Prefetch('balance_sheets', queryset=BalanceSheet.objects.filter(user=request.user, document__date_created__gte=created_at_from, document__date_created__lte=created_at_to))))
+                Prefetch('balance_sheets', queryset=BalanceSheet.objects.filter(user=request.user,
+                                                                                document__date_created__gte=created_at_from,
+                                                                                document__date_created__lte=created_at_to))))
         elif created_at_from:
             descendants = (parent_account.get_descendants(include_self=True).prefetch_related(
-                Prefetch('balance_sheets', queryset=BalanceSheet.objects.filter(user=request.user, document__date_created__gte=created_at_from))))
+                Prefetch('balance_sheets', queryset=BalanceSheet.objects.filter(user=request.user,
+                                                                                document__date_created__gte=created_at_from))))
         elif created_at_to:
             descendants = (parent_account.get_descendants(include_self=True).prefetch_related(
                 Prefetch('balance_sheets', queryset=BalanceSheet.objects.filter(user=request.user,
@@ -308,7 +322,7 @@ class AccountReportDetails(generic.View):
                 id_lists.append(balance.id)
         qs = sorted(qs, key=lambda b: b.document.date_created, reverse=True)
         context = {
-            'balance_lists':qs,
+            'balance_lists': qs,
             'id_lists': id_lists,
 
         }
@@ -335,7 +349,6 @@ def create_accounts(request):
         })
     else:
         return JsonResponse({'success': False, 'errors': form.errors})
-
 
 
 def extract_all_update_prefixes(post_data, file_data):
@@ -369,8 +382,8 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
         balancesheets = (
             BalanceSheet.objects
             .filter(document=document)
-            .select_related("account", "cheque__account")     # FK ها
-            .prefetch_related("cheque__balance_sheet")        # reverse relation
+            .select_related("account", "cheque__account")  # FK ها
+            .prefetch_related("cheque__balance_sheet")  # reverse relation
         )
 
         combined_forms = []
@@ -418,8 +431,8 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
         balancesheets = (
             BalanceSheet.objects
             .filter(user=user, document=document)
-            .select_related("account", "cheque__account")     # FK ها
-            .prefetch_related("cheque__balance_sheet")        # reverse relation
+            .select_related("account", "cheque__account")  # FK ها
+            .prefetch_related("cheque__balance_sheet")  # reverse relation
         )
 
         combined_forms = []
@@ -546,6 +559,7 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
             balance.save()
             document_form.save()
 
+
 @login_required
 @require_POST
 def deletechequeview(request):
@@ -561,7 +575,6 @@ def deletechequeview(request):
     else:
         cheque.delete()
     return JsonResponse({'success': True})
-
 
 
 class ChequeListView(LoginRequiredMixin, generic.View):
@@ -614,6 +627,8 @@ class ChequeListView(LoginRequiredMixin, generic.View):
             'payables_balance': payables_debt_amount - payables_credit_amount
         }
         return render(request, 'account_base/cheque-lists.html', context)
+
+
 def filter_receivable_cheques(request):
     receivables = BalanceSheet.objects.filter(
         user=request.user.id,
@@ -644,7 +659,8 @@ def filter_receivable_cheques(request):
     if due_date_to:
         receivables = receivables.filter(cheque__maturity_date__lte=due_date_to).order_by("cheque__maturity_date")
     if created_at_from:
-        receivables = receivables.filter(document__date_created__gte=created_at_from).order_by('-document__date_created')
+        receivables = receivables.filter(document__date_created__gte=created_at_from).order_by(
+            '-document__date_created')
     if created_at_to:
         receivables = receivables.filter(document__date_created__lte=created_at_to).order_by('-document__date_created')
     if amount:
@@ -683,6 +699,7 @@ def filter_receivable_cheques(request):
         'receivables_debt_amount': receivables_debt_amount,
         'receivables_credit_amount': receivables_credit_amount,
     })
+
 
 def filter_credit_cheques(request):
     payables = BalanceSheet.objects.filter(
@@ -810,8 +827,6 @@ def delete_document(request, pk):
         return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")})
 
 
-
-
 def delete_account(request, pk):
     if request.method == 'POST':
         try:
@@ -828,9 +843,11 @@ def delete_account(request, pk):
     else:
         raise Http404()
 
+
 class BalanceListView(LoginRequiredMixin, generic.View):
     def get(self, request):
-        qs = BalanceSheet.objects.select_related('cheque', 'document').prefetch_related('document__items__account').filter(user=request.user.id).order_by('-document__date_created')
+        qs = BalanceSheet.objects.select_related('cheque', 'document').prefetch_related(
+            'document__items__account').filter(user=request.user.id)
         aggregates = qs.aggregate(
             debt=Sum(
                 Case(
@@ -857,17 +874,12 @@ class BalanceListView(LoginRequiredMixin, generic.View):
             elif item.transaction_type == 'credit':  # بستانکاری
                 running_balance -= item.amount
             item.running_balance = running_balance
-            people = set()
-            for i in doc.items.all():
-                if item.transaction_type != i.transaction_type:
-                    people.add(i.account.name)
+            people = {i.account.name for i in doc.items.all() if item.transaction_type != i.transaction_type}
             item.people = people
             balance_list.append(item)
-
-        balance_list.reverse()
         total_balance = total_debt - total_credit
         context = {
-            'balance_lists': balance_list,
+            'balance_lists': reversed(balance_list),
             'total_debt': total_debt,
             'total_credit': total_credit,
             'total_balance': total_balance,
@@ -883,10 +895,10 @@ def filter_balance(request):
         id_lists = [int(i) for i in id_lists]
         qs = BalanceSheet.objects.filter(
             Q(user=request.user.id, id__in=id_lists),
-        ).order_by('-document__date_created').select_related('document')
+        ).select_related('document').prefetch_related('document__items__account')
     else:
         qs = BalanceSheet.objects.filter(
-            Q(user=request.user.id)).order_by('-document__date_created')
+            Q(user=request.user.id)).select_related('document').prefetch_related('document__items__account')
 
     account_id = request.GET.get('account_id')
     amount = request.GET.get('amount')
@@ -895,12 +907,12 @@ def filter_balance(request):
     created_at_from = request.GET.get('created_at_from')
     created_at_to = request.GET.get('created_at_to')
     description = request.GET.get('description')
-    debt_condition = {'transaction_type':'debt'}
-    credit_condition = {'transaction_type':'credit'}
+    debt_condition = {'transaction_type': 'debt'}
+    credit_condition = {'transaction_type': 'credit'}
     if balance_id:
-        qs = qs.filter(id = int(balance_id))
+        qs = qs.filter(id=int(balance_id))
     if document_id:
-        qs = qs.filter(document_id = document_id)
+        qs = qs.filter(document_id=document_id)
     if amount:
         qs = qs.filter(amount=amount)
     if description:
@@ -960,8 +972,6 @@ def filter_balance(request):
         ),
     )
 
-
-
     pre_total_credit = pre_aggregates['pre_credit'] or 0
     pre_total_debt = pre_aggregates['pre_debt'] or 0
     sum_debt = aggregates['debt'] or 0
@@ -970,42 +980,57 @@ def filter_balance(request):
     total_credit = pre_total_credit + sum_credit
 
     balance_list = []
-    running_balance = pre_total_debt - pre_total_credit  # مانده اول دوره
-    for item in qs.order_by('document__date_created', 'id'):  # مرتب از قدیم به جدید
+    running_balance = pre_total_debt - pre_total_credit
+    for item in qs.order_by('document__date_created', 'id'):
+        doc = item.document
         if item.transaction_type == 'debt':  # بدهکاری
             running_balance += item.amount
         elif item.transaction_type == 'credit':  # بستانکاری
             running_balance -= item.amount
         item.running_balance = running_balance
+        people = {i.account.name for i in doc.items.all() if item.transaction_type != i.transaction_type}
+        item.people = people
         balance_list.append(item)
-    balance_list.reverse()
-    html = render_to_string('partials/search_balance.html', {'balance_lists': balance_list})
-    return JsonResponse({'html': html, 'total_debt': total_debt, 'total_credit':total_credit, 'pre_total_credit':pre_total_credit, 'pre_total_debt':pre_total_debt})
+    html = render_to_string('partials/search_balance.html', {'balance_lists': reversed(balance_list)})
+    return JsonResponse(
+        {'html': html, 'total_debt': total_debt, 'total_credit': total_credit, 'pre_total_credit': pre_total_credit,
+         'pre_total_debt': pre_total_debt})
+
 
 class ChangeStatusCheque(generic.View):
     def get(self, request, pk):
         balancesheet = get_object_or_404(BalanceSheet, id=pk, user=request.user, is_active=True)
-        document = DocumentForm(request.POST or None, initial={'user':request.user})
+        document = DocumentForm(request.POST or None, initial={'user': request.user})
         combined_forms = []
         locked = True
         combined_form = namedtuple('combined_form',
                                    ['uniqueid', 'form_balance', 'form_cheque', 'chequeid', 'bank_str',
                                     'balance_id', 'account_str', 'locked'])
         if balancesheet.transaction_type == 'debt':
-            balance_forms = BalanceSheetForm(prefix=f"old-update-cheque-update-balance", initial={"user":request.user, "transaction_type":'credit', 'amount':balancesheet.amount, 'account':balancesheet.account})
+            balance_forms = BalanceSheetForm(prefix=f"old-update-cheque-update-balance",
+                                             initial={"user": request.user, "transaction_type": 'credit',
+                                                      'amount': balancesheet.amount, 'account': balancesheet.account
+                                                 , 'description': balancesheet.description
+                                                      })
         else:
-            balance_forms = BalanceSheetForm(prefix=f"old-update-cheque-update-balance", initial={"user":request.user, "transaction_type": 'debt', 'amount':balancesheet.amount, 'account':balancesheet.account})
+            balance_forms = BalanceSheetForm(prefix=f"old-update-cheque-update-balance",
+                                             initial={"user": request.user, "transaction_type": 'debt',
+                                                      'amount': balancesheet.amount, 'account': balancesheet.account
+                                                 , 'description': balancesheet.description
+                                                      })
         balance_id = 'old-update-balance'
         cheque_forms = CashierChequeForm(prefix=f"old-update-cheque-update-cheque", instance=balancesheet.cheque)
         chequeid = balancesheet.cheque.id
         bank_str = balancesheet.cheque.account.__str__()
         combined_forms.append(
-                combined_form("old-update-cheque", balance_forms, cheque_forms, chequeid, bank_str, balance_id, balancesheet.account, locked))
+            combined_form("old-update-cheque", balance_forms, cheque_forms, chequeid, bank_str, balance_id,
+                          balancesheet.account, locked))
         context = {
             'document_instance': document,
             'combined_forms': combined_forms,
         }
         return render(request, "account_base/create-document.html", context)
+
     def post(self, request, pk):
         document = DocumentForm(request.POST or None)
         balancesheet = BalanceSheet.objects.filter(id=pk, user=request.user, is_active=True).last()
@@ -1016,7 +1041,8 @@ class ChangeStatusCheque(generic.View):
         all_valid = True
         user = request.user
         balanceCheqe = BalanceSheetForm(request.POST, request.FILES, prefix=f"old-update-cheque-update-balance")
-        update_Cheqe = CashierChequeForm(request.POST or None, prefix=f"old-update-cheque-update-cheque", instance=balancesheet.cheque)
+        update_Cheqe = CashierChequeForm(request.POST or None, prefix=f"old-update-cheque-update-cheque",
+                                         instance=balancesheet.cheque)
         if not balanceCheqe.is_valid() or not update_Cheqe.is_valid() or not document.is_valid():
             all_valid = False
             print('1')
@@ -1080,7 +1106,3 @@ class ChangeStatusCheque(generic.View):
         }
 
         return render(request, 'account_base/create-document.html', context)
-
-
-
-

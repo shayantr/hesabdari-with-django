@@ -9,9 +9,12 @@
 
             <!-- اطلاعات کلیدی -->
             <div class="d-flex flex-wrap flex-grow-1 gap-3 align-items-center">
-                <span><i class="fas fa-user-circle text-primary"></i> <b>{{ receivable.cheque.name }}</b></span>
-                <span><i class="fas fa-money-check-alt text-success"></i> {{ receivable.amount|toman }}</span>
                 <span><i class="fas fa-calendar-day text-danger"></i> {{ receivable.cheque.maturity_date }}</span>
+                <span><i class="fas fa-money-check-alt text-success"></i> {{ receivable.amount|toman }}</span>
+                <span>دروجه: {{ receivable.cheque.in_cash }}</span>
+                <span><i class="fas fa-user-circle text-primary"></i> <b>{{ receivable.cheque.name }}</b></span>
+                <span><i class="ti ti-building-bank text-primary"></i> {{ receivable.account }}</span>
+
             </div>
 
             <!-- آیکون فلش -->
@@ -52,8 +55,10 @@
                 </h6>
 
                 <!-- جزئیات -->
-                <p><i class="ti ti-list-numbers text-info"></i> شماره چک: <b>{{ receivable.cheque.Cheque_numbder }}</b></p>
-                <p><i class="fas fa-calendar-plus text-secondary"></i> تاریخ ثبت: {{ receivable.document.date_created }}</p>
+                <p><i class="ti ti-list-numbers text-info"></i> شماره چک: <b>{{ receivable.cheque.Cheque_numbder }}</b>
+                </p>
+                <p><i class="fas fa-calendar-plus text-secondary"></i> تاریخ ثبت: {{ receivable.document.date_created }}
+                </p>
                 <p><i class="fas fa-sticky-note text-warning"></i> توضیحات: {{ receivable.description }}</p>
             </div>
         </div>
