@@ -293,7 +293,7 @@
             // sum all debts into new form in credit
             $('#debt-to-credit').click(function () {
                 let csrfToken = getCSRFToken(); // Get CSRF token
-                let transaction_type = 'debt'
+                let transaction_type = 'credit'
                 const debtForm = $('#forms-container .debt .form-wrapper');
                 var total = 0;
 
@@ -325,7 +325,7 @@
             // sum all credits into new form in debt
             $('#credit-to-debt').click(function () {
                 let csrfToken = getCSRFToken(); // Get CSRF token
-                let transaction_type = 'credit'
+                let transaction_type = 'debt'
                 const creditForm = $('#forms-container .credit .form-wrapper');
                 var total = 0;
 
@@ -583,7 +583,7 @@
                                 toast: true,
                                 position: "top-end",
                                 icon: "error",
-                                title: "لطفاً خطاهای فرم را بررسی کنید",
+                                title: response.errors,
                                 showConfirmButton: false,
                                 timer: 2500,
                                 timerProgressBar: true
