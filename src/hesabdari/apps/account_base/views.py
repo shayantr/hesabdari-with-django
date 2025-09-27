@@ -116,7 +116,6 @@ def createbalancesheet(request):
         for balance, cheque in zip(all_balanceforms, all_chequeforms):
             if not balance.is_valid() or not cheque.is_valid():
                 all_forms_valid = False
-                print(balance.prefix)
                 return JsonResponse({
                     "success": False,
                     "errors": render_to_string("partials/errors.html", {"form": balance, 'err_id': balance.prefix},
@@ -204,39 +203,6 @@ class GetFormFragmentView(generic.View):
 def account_report(request):
     return render(request, 'account_base/accounts-report.html')
 
-
-# class AccountsView(generic.View):
-#     def get(self, request):
-#         def serialize_node(node, net_total):
-#             return {
-#                 'id': str(node.id),
-#                 'text': node.name,
-#                 'parent': str(node.parent.id) if node.parent else '#',
-#                 'li_attr': {'data-net-total': net_total},
-#             }
-#
-#         accounts = AccountsClass.objects.filter(user=request.user).prefetch_related(
-#             Prefetch('balance_sheets', queryset=BalanceSheet.objects.filter(user=request.user)))
-#         data= []
-#         for account in accounts:
-#             descendants = account.get_descendants(include_self=True)
-#             total_debtor = 0
-#             total_creditor = 0
-#             for descendant in descendants:
-#                 for bs in descendant.balance_sheets.all():
-#                     if bs.amount:
-#                         if bs.transaction_type == 'debt':
-#                             total_debtor += bs.amount
-#                         elif bs.transaction_type == 'credit':
-#                             total_creditor += bs.amount
-#
-#             net_total = total_creditor - total_debtor
-#
-#             data.append(serialize_node(account, net_total))
-#         form_html = render_to_string('account_base/accounts.html', {
-#             'uniqueid': request.GET.get('uid', 'default')
-#         })
-#         return JsonResponse({'form_html': form_html, 'data': data})
 
 class AccountsView(generic.View):
     def get(self, request):
@@ -1019,6 +985,7 @@ class ChangeStatusCheque(generic.View):
                                                  , 'description': balancesheet.description
                                                       })
         balance_id = 'old-update-balance'
+        # balancesheet.cheque.cheque_status = 'وصولی'
         cheque_forms = CashierChequeForm(prefix=f"old-update-cheque-update-cheque", instance=balancesheet.cheque)
         chequeid = balancesheet.cheque.id
         bank_str = balancesheet.cheque.account.__str__()
@@ -1035,7 +1002,6 @@ class ChangeStatusCheque(generic.View):
         document = DocumentForm(request.POST or None)
         balancesheet = BalanceSheet.objects.filter(id=pk, user=request.user, is_active=True).last()
         next_url = request.GET.get('next', reverse('cheque-lists-view'))
-        print(balancesheet)
         all_credit = 0
         all_debt = 0
         all_valid = True
@@ -1045,7 +1011,6 @@ class ChangeStatusCheque(generic.View):
                                          instance=balancesheet.cheque)
         if not balanceCheqe.is_valid() or not update_Cheqe.is_valid() or not document.is_valid():
             all_valid = False
-            print('1')
             print(balanceCheqe.errors, update_Cheqe.errors)
         if balanceCheqe.cleaned_data.get('transaction_type') == "debt":
             all_debt += balanceCheqe.cleaned_data.get('amount') or 0
@@ -1072,7 +1037,6 @@ class ChangeStatusCheque(generic.View):
             else:
                 # save existing balance and cheque forms
                 with transaction.atomic():
-                    print('atomic')
                     balancesheet.is_active = False
                     balancesheet.save()
                     d = document.save()

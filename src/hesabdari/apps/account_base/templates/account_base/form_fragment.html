@@ -104,9 +104,22 @@
        
     </div>
     <div class="col-md-3">
-
-                <div class="form-control">{{ form_cheque.cheque_status }}</div>
-          
+                {% if uniqueid == 'old-update-cheque' %}
+                    <div class="form-control">
+                        <select name="old-update-cheque-update-cheque-cheque_status" class="dropdown form-select form-select-lg" id="id_old-update-cheque-update-cheque-cheque_status">
+                            {% for value, label in form_cheque.cheque_status.field.choices %}
+                                {% if value != form_cheque.cheque_status.value %}
+                                    <option value="{{ value }}">
+                                        {{ label }}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                {% else %}
+                    <div class="form-control">{{ form_cheque.cheque_status }}</div>
+                {% endif %}
     </div>
         <div class="col-md-3">
 
