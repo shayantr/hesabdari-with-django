@@ -542,9 +542,9 @@ def deletechequeview(request):
         cheque.delete()
     return JsonResponse({'success': True})
 
-
 class ChequeListView(LoginRequiredMixin, generic.View):
     def get(self, request):
+
         qs = BalanceSheet.objects.filter(
             user=request.user.id,
             cheque__isnull=False,
@@ -667,7 +667,7 @@ def filter_receivable_cheques(request):
     })
 
 
-def filter_credit_cheques(request):
+def filter_payable_cheques(request):
     payables = BalanceSheet.objects.filter(
         user=request.user.id,
         cheque__cheque_type='پرداختنی',
