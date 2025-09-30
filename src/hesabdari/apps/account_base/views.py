@@ -1070,3 +1070,4 @@ class ChangeStatusCheque(generic.View):
         }
 
         return render(request, 'account_base/create-document.html', context)
+
