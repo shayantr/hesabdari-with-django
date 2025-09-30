@@ -965,9 +965,6 @@ def filter_balance(request):
 
 class ChangeStatusCheque(generic.View):
     def get(self, request, pk):
-        next_url = request.GET.get('next', reverse('cheque-lists-view'))
-        print(request.GET.get('next'))
-        print(next_url)
         balancesheet = get_object_or_404(BalanceSheet, id=pk, user=request.user, is_active=True)
         document = DocumentForm(request.POST or None, initial={'user': request.user, 'date_created': balancesheet.cheque.maturity_date})
         combined_forms = []
@@ -1004,7 +1001,7 @@ class ChangeStatusCheque(generic.View):
     def post(self, request, pk):
         document = DocumentForm(request.POST or None)
         balancesheet = BalanceSheet.objects.filter(id=pk, user=request.user, is_active=True).last()
-        # next_url = request.GET.get('next', reverse('cheque-lists-view'))
+        next_url = request.GET.get('next', reverse('cheque-lists-view'))
         all_credit = 0
         all_debt = 0
         all_valid = True

@@ -23,10 +23,10 @@
     </li>
     </ul>
     <div class="tab-content" id="pills-tabContent">
-    
+
         <div id="recivables" class="tab-pane fade show active" id="pills-recivable" role="tabpanel" aria-labelledby="pills-recivable-tab" tabindex="0">
             <form id="recivable-filter-form">
-                <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;"> 
+                <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;">
                     <div class="col-md-3 mb-2">
                                 <input type="text" name="cheque_name" placeholder="جستجو نام چک" class="form-control mb-2">
                             </div>
@@ -69,13 +69,13 @@
                 </div>
 
             </form>
-            
+
         <div id="recivable-cheques-list">
                         {% include "partials/receivable_cheques.html" %}
-                        
 
 
-                        
+
+
         </div>
                 <div id="receivables-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
   <div class="col-4">
@@ -95,7 +95,7 @@
                     </div>
         <div id="payables" class="tab-pane fade show" id="pills-payable" role="tabpanel" aria-labelledby="pills-payable-tab" tabindex="0">
             <form id="payable-filter-form">
-                <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;"> 
+                <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;">
                     <div class="col-md-3 mb-2">
                         <input type="text" name="cheque_name" placeholder="جستجو نام چک" class="form-control mb-2">
                     </div>
@@ -142,7 +142,7 @@
 
             {% include "partials/payable_cheques.html" %}
 
-            
+
             </div>
 <div id="payables-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
   <div class="col-4">
@@ -160,7 +160,7 @@
 
 </div>
 
-            
+
         </div>
     </div>
     </div>
@@ -171,7 +171,7 @@
 
 $(document).ready(function () {
     let receivablesSearchTimeout = null;
-    
+
     function formatNumber(value) {
                 value = persianToEnglishNumbers(value);
                 value = value.replace(/,/g, "");
@@ -209,6 +209,7 @@ $(document).ready(function () {
                 let balance = data.receivables_credit_amount - data.receivables_debt_amount;
                 let $balanceEl = $('#receivables-balance-amount');
                 $balanceEl.text(balance.toLocaleString());
+                appendNextToUpdateLinks();
 
                 // تغییر رنگ مانده
                 if (balance < 0) {
@@ -216,7 +217,7 @@ $(document).ready(function () {
                 } else {
                     $balanceEl.removeClass('text-red-600').addClass('text-green-600');
                 }
-                
+
             }
         });
         }, 1000);
@@ -252,6 +253,7 @@ function filterpayables() {
                 let balance = data.payables_debt_amount - data.payables_credit_amount;
                 let $balanceEl = $('#payables-balance-amount');
                 $balanceEl.text(balance.toLocaleString());
+                appendNextToUpdateLinks();
 
                 // تغییر رنگ مانده
                 if (balance < 0) {
@@ -349,11 +351,39 @@ $(document).ready(function () {
     };
 });
 
-$('.update-cheque').each(function () {
-    const currentUrl = window.location.href;
-    const href = $(this).attr('href');
-    const separator = href.includes('?') ? '&' : '?';
-    $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
-});
+
     </script>
+    <script>
+function appendNextToUpdateLinks() {
+    const fullUrl = window.location.pathname + window.location.search; // کل آدرس فعلی
+
+    if (!fullUrl) return;
+
+    $('a.update-cheque').each(function() {
+        let href = $(this).attr('href');
+        if (!href) return;
+
+        // جلوگیری از دوبار اضافه شدن
+        if (href.includes('next=')) return;
+
+        if (href.includes('?')) {
+            href += '&next=' + encodeURIComponent(fullUrl);
+        } else {
+            href += '?next=' + encodeURIComponent(fullUrl);
+        }
+
+        $(this).attr('href', href);
+    });
+}
+
+$(document).ready(function() {
+    // بار اول
+    appendNextToUpdateLinks();
+
+    // بعد از هر بار Ajax (لیست دوباره لود میشه)
+    $(document).ajaxSuccess(function() {
+        appendNextToUpdateLinks();
+    });
+});
+</script>
 {% endblock %}
