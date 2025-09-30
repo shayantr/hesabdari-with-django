@@ -324,12 +324,6 @@ function handleAccountSelection() {
     
 
 }
-$('.edit').each(function () {
-    const currentUrl = window.location.href;
-    const href = $(this).attr('href');
-    const separator = href.includes('?') ? '&' : '?';
-    $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
-});
             
 
 });

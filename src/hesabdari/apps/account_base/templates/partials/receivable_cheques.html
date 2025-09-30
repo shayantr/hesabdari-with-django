@@ -74,18 +74,4 @@
             transform: rotate(180deg);
         }
     </style>
-    <script>
-        $('#change-cheque-status').each(function () {
-            const currentUrl = window.location.href;
-            const href = $(this).attr('href');
-            const separator = href.includes('?') ? '&' : '?';
-            $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
-        });
-        $('.update-cheque').each(function () {
-            const currentUrl = window.location.href;
-            const href = $(this).attr('href');
-            const separator = href.includes('?') ? '&' : '?';
-            $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
-        });
-    </script>
 {% endfor %}
