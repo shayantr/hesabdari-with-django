@@ -26,10 +26,10 @@
             <div class="card-body">
                 <!-- دکمه‌ها -->
                 <div class="d-flex flex-wrap gap-2 mb-3">
-                    <a href="{% url 'UpdateBalanceView' receivable.document.id %}"
-                       class="btn btn-outline-primary btn-sm flex-fill update-cheque">✏️ ویرایش</a>
                     <a href="{% url 'change_status_cheque' receivable.id %}"
                        class="btn btn-outline-secondary btn-sm flex-fill update-cheque">🔄 تغییر وضعیت چک</a>
+                    <a href="{% url 'UpdateBalanceView' receivable.document.id %}"
+                       class="btn btn-outline-primary btn-sm flex-fill update-cheque">✏️ ویرایش</a>
                 </div>
 
                 <!-- تصویر -->
@@ -74,5 +74,6 @@
             transform: rotate(180deg);
         }
     </style>
+
 
 {% endfor %}

@@ -23,10 +23,10 @@
             <div class="card-body">
                 <!-- دکمه‌ها -->
                 <div class="d-flex flex-wrap gap-2 mb-3">
-                    <a id="edit-cheque" href="{% url 'UpdateBalanceView' payable.document.id %}"
-                       class="btn btn-outline-primary btn-sm flex-fill">✏️ ویرایش</a>
                     <a id="change-cheque-status" href="{% url 'change_status_cheque' payable.id %}"
                        class="btn btn-outline-secondary btn-sm flex-fill">🔄 تغییر وضعیت چک</a>
+                    <a id="edit-cheque" href="{% url 'UpdateBalanceView' payable.document.id %}"
+                       class="btn btn-outline-primary btn-sm flex-fill">✏️ ویرایش</a>
                 </div>
 
                 <!-- تصویر -->

@@ -33,8 +33,11 @@ class Document(models.Model):
     objects = jmodels.jManager()
 
     def delete(self, *args, **kwargs):
-        if self.items.filter(is_active=False).exists():
-            raise ValueError("به دلیل وجود تراکنش غیر فعال، امکان حذف این سند وجود ندارد.")
+        for bs in self.items.all():
+            if bs.is_active is False:
+                raise ValueError("به دلیل وجود تراکنش غیر فعال، امکان حذف این سند وجود ندارد.")
+            else:
+                bs.delete()
         super().delete(*args, **kwargs)
 
 class BalanceSheetQuerySet(models.QuerySet):
@@ -70,6 +73,7 @@ class BalanceSheet(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='images/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    previous_cheque_status = models.CharField(max_length=50, null=True, blank=True)
     objects = jmodels.jManager()
     with_children = BalanceSheetManager()
 

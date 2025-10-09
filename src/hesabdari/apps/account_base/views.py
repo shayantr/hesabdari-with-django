@@ -13,6 +13,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.db import transaction, DatabaseError
 from django.db.models import Q, Prefetch, Max, Sum, Case, IntegerField, When, F
 from django.db.transaction import commit
@@ -545,52 +546,52 @@ def deletechequeview(request):
 class ChequeListView(LoginRequiredMixin, generic.View):
     def get(self, request):
 
-        qs = BalanceSheet.objects.filter(
-            user=request.user.id,
-            cheque__isnull=False,
-            is_active=True
-        ).select_related('cheque')
-
-        aggregates = qs.aggregate(
-            receivables_debt=Sum(
-                Case(
-                    When(cheque__cheque_type='دریافتنی', transaction_type='debt', then='amount'),
-                    output_field=IntegerField(),
-                )
-            ),
-            receivables_credit=Sum(
-                Case(
-                    When(cheque__cheque_type='دریافتنی', transaction_type='credit', then='amount'),
-                    output_field=IntegerField(),
-                )
-            ),
-            payables_debt=Sum(
-                Case(
-                    When(cheque__cheque_type='پرداختنی', transaction_type='debt', then='amount'),
-                    output_field=IntegerField(),
-                )
-            ),
-            payables_credit=Sum(
-                Case(
-                    When(cheque__cheque_type='پرداختنی', transaction_type='credit', then='amount'),
-                    output_field=IntegerField(),
-                )
-            ),
-        )
-        payables_debt_amount = aggregates['payables_debt'] or 0
-        payables_credit_amount = aggregates['payables_credit'] or 0
-        receivables_debt_amount = aggregates['receivables_debt'] or 0
-        receivables_credit_amount = aggregates['receivables_credit'] or 0
+        # qs = BalanceSheet.objects.filter(
+        #     user=request.user.id,
+        #     cheque__isnull=False,
+        #     is_active=True
+        # ).select_related('cheque')
+        #
+        # aggregates = qs.aggregate(
+        #     receivables_debt=Sum(
+        #         Case(
+        #             When(cheque__cheque_type='دریافتنی', transaction_type='debt', then='amount'),
+        #             output_field=IntegerField(),
+        #         )
+        #     ),
+        #     receivables_credit=Sum(
+        #         Case(
+        #             When(cheque__cheque_type='دریافتنی', transaction_type='credit', then='amount'),
+        #             output_field=IntegerField(),
+        #         )
+        #     ),
+        #     payables_debt=Sum(
+        #         Case(
+        #             When(cheque__cheque_type='پرداختنی', transaction_type='debt', then='amount'),
+        #             output_field=IntegerField(),
+        #         )
+        #     ),
+        #     payables_credit=Sum(
+        #         Case(
+        #             When(cheque__cheque_type='پرداختنی', transaction_type='credit', then='amount'),
+        #             output_field=IntegerField(),
+        #         )
+        #     ),
+        # )
+        # payables_debt_amount = aggregates['payables_debt'] or 0
+        # payables_credit_amount = aggregates['payables_credit'] or 0
+        # receivables_debt_amount = aggregates['receivables_debt'] or 0
+        # receivables_credit_amount = aggregates['receivables_credit'] or 0
 
         context = {
-            'receivables': qs.filter(cheque__cheque_type='دریافتنی').order_by("cheque__maturity_date"),
-            'payables': qs.filter(cheque__cheque_type='پرداختنی').order_by("cheque__maturity_date"),
-            'receivables_debt_amount': aggregates['receivables_debt'] or 0,
-            'receivables_credit_amount': aggregates['receivables_credit'] or 0,
-            'receivables_balance': receivables_debt_amount - receivables_credit_amount,
-            'payables_debt_amount': aggregates['payables_debt'] or 0,
-            'payables_credit_amount': aggregates['payables_credit'] or 0,
-            'payables_balance': payables_debt_amount - payables_credit_amount
+            # 'receivables': qs.filter(cheque__cheque_type='دریافتنی').order_by("cheque__maturity_date"),
+            # 'payables': qs.filter(cheque__cheque_type='پرداختنی').order_by("cheque__maturity_date"),
+            # 'receivables_debt_amount': aggregates['receivables_debt'] or 0,
+            # 'receivables_credit_amount': aggregates['receivables_credit'] or 0,
+            # 'receivables_balance': receivables_debt_amount - receivables_credit_amount,
+            # 'payables_debt_amount': aggregates['payables_debt'] or 0,
+            # 'payables_credit_amount': aggregates['payables_credit'] or 0,
+            # 'payables_balance': payables_debt_amount - payables_credit_amount
         }
         return render(request, 'account_base/cheque-lists.html', context)
 
@@ -619,6 +620,7 @@ def filter_receivable_cheques(request):
     created_at_from = request.GET.get('created_at_from')
     created_at_to = request.GET.get('created_at_to')
     description = request.GET.get('description')
+    page = request.GET.get('page', 1)
 
     if due_date_from:
         receivables = receivables.filter(cheque__maturity_date__gte=due_date_from).order_by("cheque__maturity_date")
@@ -654,16 +656,22 @@ def filter_receivable_cheques(request):
         ),
     )
 
+    paginator = Paginator(receivables, 20)
+    current_page = paginator.get_page(page)
+
+
     receivables_debt_amount = aggregates['debt'] or 0
     receivables_credit_amount = aggregates['credit'] or 0
 
     # رندر لیست به html
-    html = render_to_string('partials/receivable_cheques.html', {'receivables': receivables})
+    html = render_to_string('partials/receivable_cheques.html', {'receivables': current_page})
 
     return JsonResponse({
         'html': html,
         'receivables_debt_amount': receivables_debt_amount,
         'receivables_credit_amount': receivables_credit_amount,
+        'has_next': current_page.has_next(),
+        'next_page_number': current_page.next_page_number() if current_page.has_next() else None,
     })
 
 
@@ -692,6 +700,7 @@ def filter_payable_cheques(request):
     created_at_from = request.GET.get('created_at_from')
     created_at_to = request.GET.get('created_at_to')
     description = request.GET.get('description')
+    page = request.GET.get('page', 1)
 
     if due_date_from:
         payables = payables.filter(cheque__maturity_date__gte=due_date_from).order_by("cheque__maturity_date")
@@ -725,17 +734,21 @@ def filter_payable_cheques(request):
             )
         ),
     )
+    paginator = Paginator(payables, 20)
+    current_page = paginator.get_page(page)
 
     payables_debt_amount = aggregates['debt'] or 0
     payables_credit_amount = aggregates['credit'] or 0
 
     # رندر لیست به html
-    html = render_to_string('partials/payable_cheques.html', {'payables': payables})
+    html = render_to_string('partials/payable_cheques.html', {'payables': current_page})
 
     return JsonResponse({
         'html': html,
         'payables_debt_amount': payables_debt_amount,
         'payables_credit_amount': payables_credit_amount,
+        'has_next': current_page.has_next(),
+        'next_page_number': current_page.next_page_number() if current_page.has_next() else None,
     })
 
 
@@ -767,7 +780,7 @@ def delete_document(request, pk):
         return JsonResponse({
             "success": False,
             "error": "به دلیل وجود تراکنش غیر فعال، امکان حذف این سند وجود ندارد."
-        }, status=400)
+        })
 
     # find all cheques in document
     cheque_ids = document.items.filter(
@@ -976,13 +989,13 @@ class ChangeStatusCheque(generic.View):
             balance_forms = BalanceSheetForm(prefix=f"old-update-cheque-update-balance",
                                              initial={"user": request.user, "transaction_type": 'credit',
                                                       'amount': balancesheet.amount, 'account': balancesheet.account
-                                                 , 'description': balancesheet.description
+                                                 , 'description': balancesheet.description, 'previous_cheque_status': balancesheet.cheque.cheque_status
                                                       })
         else:
             balance_forms = BalanceSheetForm(prefix=f"old-update-cheque-update-balance",
                                              initial={"user": request.user, "transaction_type": 'debt',
                                                       'amount': balancesheet.amount, 'account': balancesheet.account
-                                                 , 'description': balancesheet.description
+                                                 , 'description': balancesheet.description, 'previous_cheque_status': balancesheet.cheque.cheque_status
                                                       })
         balance_id = 'old-update-balance'
         # balancesheet.cheque.cheque_status = 'وصولی'

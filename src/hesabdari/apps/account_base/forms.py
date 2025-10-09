@@ -34,6 +34,7 @@ class BalanceSheetForm(forms.ModelForm):
             'transaction_type': forms.HiddenInput(),
             'document': forms.HiddenInput(),
             'cheque': forms.HiddenInput(),
+            'previous_cheque_status': forms.HiddenInput(),
             'date_created': forms.TextInput(
                 attrs={'class': 'form-control', 'data-jdp':'data-jdp', 'placeholder':'تاریخ ثبت'}),
         }

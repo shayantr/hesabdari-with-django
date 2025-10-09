@@ -25,6 +25,7 @@
         <div class="col-sm-6 col-xl-3">
             {{ form_balance.is_active }}
             {{ form_balance.user }}
+            {{ form_balance.previous_cheque_status }}
             <div class="input-group mb-4">
             <select class='dropdown form-select-sm ' disabled id="{{ uniqueid }}-accounts-list">
                 {% if account_str %}<option value="">{{ account_str }}</option>{% endif %}
