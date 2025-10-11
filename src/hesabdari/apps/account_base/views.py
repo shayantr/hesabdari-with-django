@@ -1,5 +1,6 @@
 import json
 import time
+import urllib
 from collections import namedtuple
 from itertools import zip_longest
 from keyword import kwlist
@@ -9,6 +10,7 @@ from urllib.parse import urlencode
 import jdatetime
 import uuid
 
+import openpyxl
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -94,6 +96,7 @@ def createbalancesheet(request):
             'all_chequeforms': [],
             'document_instance': document_instance,
             'form_token': token,
+            'enable_date_check': True,
         }
         return render(request, 'account_base/create-document.html', context)
     all_prefixes = extract_all_prefixes(request.POST, request.FILES) if request.method == "POST" else set()
@@ -384,6 +387,7 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
             'combined_forms': combined_forms,
             'document_id': document.id,
             'document_instance': document_form,
+            'enable_date_check': True,
         }
         return render(request, "account_base/create-document.html", context)
 
@@ -760,6 +764,99 @@ def edit_account(request, pk):
         account.save()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'نام خالی است'})
+
+def csv_cheque(request):
+    cheque_type = request.GET.get('tab') or 'recivable'
+    if cheque_type == 'recivable':
+        cheque_type = 'دریافتنی'
+    elif cheque_type == 'payable':
+        cheque_type = 'پرداختنی'
+    qs = BalanceSheet.objects.filter(
+        user=request.user.id,
+        cheque__cheque_type= cheque_type,
+        cheque__isnull=False,
+        is_active=True
+    ).select_related('cheque').only(
+        'cheque__name',
+        'cheque__cheque_status',
+        'cheque__maturity_date',
+        'amount',
+        'description',
+        'cheque__cheque_type'
+    ).order_by("cheque__maturity_date")
+
+    # فیلترها
+    name = request.GET.get('cheque_name')
+    status = request.GET.get('cheque_status')
+    amount = request.GET.get('amount')
+    due_date_from = request.GET.get('due_date_from')
+    due_date_to = request.GET.get('due_date_to')
+    created_at_from = request.GET.get('created_at_from')
+    created_at_to = request.GET.get('created_at_to')
+    description = request.GET.get('description')
+
+    if due_date_from:
+        qs = qs.filter(cheque__maturity_date__gte=due_date_from).order_by("cheque__maturity_date")
+    if due_date_to:
+        qs = qs.filter(cheque__maturity_date__lte=due_date_to).order_by("cheque__maturity_date")
+    if created_at_from:
+        qs = qs.filter(document__date_created__gte=created_at_from).order_by(
+            '-document__date_created')
+    if created_at_to:
+        qs = qs.filter(document__date_created__lte=created_at_to).order_by(
+            '-document__date_created')
+    if amount:
+        qs = qs.filter(amount=amount)
+    if status:
+        qs = qs.filter(cheque__cheque_status=status)
+    if name:
+        qs = qs.filter(cheque__name__icontains=name)
+    if description:
+        qs = qs.filter(description__contains=description)
+
+    # محاسبه جمع‌ها
+    aggregates = qs.aggregate(
+        debt=Sum(
+            Case(
+                When(transaction_type='debt', then='amount'),
+                output_field=IntegerField(),
+            )
+        ),
+        credit=Sum(
+            Case(
+                When(transaction_type='credit', then='amount'),
+                output_field=IntegerField(),
+            )
+        ),
+    )
+
+    receivables_debt_amount = aggregates['debt'] or 0
+    receivables_credit_amount = aggregates['credit'] or 0
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = cheque_type
+    ws.append(['تاریخ سررسید', "مبلغ", "صاحب چک", "در وجه", "بانک", 'شماره چک', 'وضعیت چک', "توضیحات"])
+    for item in qs:
+        ws.append([
+            item.cheque.maturity_date.strftime("%Y-%m-%d") if item.cheque.maturity_date else "",
+            item.amount,
+            item.cheque.name,
+            item.cheque.in_cash,
+            item.cheque.account.__str__(),
+            item.cheque.Cheque_numbder,
+            item.cheque.cheque_status,
+            item.description or "",
+        ])
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    today = str(jdatetime.date.today())
+    filename = f"{cheque_type}_cheques_{today}.xlsx"
+    filename = urllib.parse.quote(filename)
+    response['Content-Disposition'] = f"attachment; filename*=UTF-8''{filename}"
+    wb.save(response)
+    return response
 
 
 @login_required
