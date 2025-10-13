@@ -25,6 +25,7 @@ urlpatterns = [
     path('accounts/', include('hesabdari.apps.account_base.urls')),
     path('profile/', include('hesabdari.apps.accounts.urls')),
     path('', include('hesabdari.apps.home.urls')),
+    path('api-auth/', include('rest_framework.urls')),
     ]
 
 

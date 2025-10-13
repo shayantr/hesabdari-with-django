@@ -27,6 +27,8 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.views import generic
 from django.views.decorators.http import require_POST
+from rest_framework import viewsets
+from rest_framework.response import Response
 
 from hesabdari.apps.account_base.forms import BalanceSheetForm, CashierChequeForm, \
     DocumentForm, AccountsForm
@@ -34,7 +36,7 @@ from hesabdari.apps.account_base.models import AccountsClass, Document, BalanceS
 
 User = get_user_model()
 
-
+# region FBV and CBV
 # Create your views here.
 def add_month_to_jalali_date(jdate):
     # فرض: jdate = jdatetime.date(1402, 12, 10)
@@ -1180,4 +1182,8 @@ class ChangeStatusCheque(generic.View):
         }
 
         return render(request, 'account_base/create-document.html', context)
+
+#endregion
+
+
 
