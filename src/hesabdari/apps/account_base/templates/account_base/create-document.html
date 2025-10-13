@@ -229,7 +229,6 @@
                 const dateInput = document.getElementById("id_date_created");
 
                 dateInput.addEventListener("change", function () {
-                    console.log("تاریخ شمسی امروز:", moment().format('jYYYY/jM/jD'));
 
                     // مقدار وارد شده توسط کاربر
                     let inputValue = dateInput.value.trim();
@@ -245,10 +244,20 @@
                     let inputDate = moment(inputValue, "jYYYY-jMM-jDD");
                     let today = moment().startOf('day'); // تاریخ امروز شمسی
                     // مقایسه تاریخ‌ها
+                    if (inputDate.jYear() !== today.jYear()) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'سال نامعتبر',
+                            text: 'فقط سال جاری قابل انتخاب است!',
+                            confirmButtonText: 'باشه'
+                        });
+                        dateInput.value = "";
+                        return;
+                    }
                     if (inputDate.isAfter(today)) {
                         Swal.fire({
                             icon: 'warning',
-                            title: 'تاریخ نامعتبر',
+                            title: 'اخطار تاریخ',
                             text: 'تاریخ انتخابی از امروز جلوتر هست!',
                             confirmButtonText: 'متوجه شدم',
                             confirmButtonColor: '#3085d6'
