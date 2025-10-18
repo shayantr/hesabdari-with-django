@@ -7,10 +7,6 @@ from hesabdari.apps.account_base.views import createbalancesheet, \
     filter_balance, create_accounts, account_report, AccountReportDetails, delete_document, \
     ChangeStatusCheque, filter_receivable_cheques, csv_cheque
 
-router = DefaultRouter()
-router.register(r'documents', DocumentViewSet, basename='documents')
-
-
 
 urlpatterns = [
     path('create-document/', createbalancesheet, name='create-document'),
