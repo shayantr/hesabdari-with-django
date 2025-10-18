@@ -58,6 +58,15 @@
         0%, 80%, 100% { transform: translateY(0); }
         40% { transform: translateY(-6px); }
     }
+    .summary-bar {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
+    padding: 12px 16px;
+    z-index: 10;
+    }
 
 </style>
 
@@ -136,7 +145,7 @@
                 <div class="dot"></div>
                 <span>در حال بارگذاری...</span>
         </div>
-        <div id="receivables-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
+        <div id="receivables-summary" class=" summary-bar row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
           <div class="col-4">
             <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
             <span id="receivables-debt-amount" class="font-bold text-red-600">{{ receivables_debt_amount|toman }}</span>
@@ -213,7 +222,7 @@
                 <div class="dot"></div>
                 <span>در حال بارگذاری...</span>
             </div>
-<div id="payables-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
+<div id="payables-summary" class=" summary-bar row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
   <div class="col-4">
     <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
     <span id="payables-debt-amount" class="font-bold text-red-600">{{ payables_debt_amount|toman }}</span>
@@ -324,6 +333,17 @@ $(document).ready(function () {
                     observer.unobserve(document.querySelector('#recivable_loading'));
                     $('#recivable_loading').hide();
                 }
+                $('#receivables-debt-amount').text(data.receivables_debt_amount.toLocaleString());
+                $('#receivables-credit-amount').text(data.receivables_credit_amount.toLocaleString());
+                let balance = data.receivables_credit_amount - data.receivables_debt_amount;
+                let $balanceEl = $('#receivables-balance-amount');
+                $balanceEl.text(balance.toLocaleString());
+                // تغییر رنگ مانده
+                if (balance < 0) {
+                    $balanceEl.removeClass('text-green-600').addClass('text-red-600');
+                } else {
+                    $balanceEl.removeClass('text-red-600').addClass('text-green-600');
+                }
                 
             } 
         });
@@ -416,6 +436,17 @@ $(document).ready(function () {
                     payable_observer.unobserve(document.querySelector('#payable_loading'));
                     $('#payable_loading').hide();
                 }
+                $('#payables-debt-amount').text(data.payables_debt_amount.toLocaleString());
+                $('#payables-credit-amount').text(data.payables_credit_amount.toLocaleString());
+                let balance = data.payables_debt_amount - data.payables_credit_amount;
+                let $balanceEl = $('#payables-balance-amount');
+                $balanceEl.text(balance.toLocaleString());
+                // تغییر رنگ مانده
+                if (balance < 0) {
+                    $balanceEl.removeClass('text-green-600').addClass('text-red-600');
+                } else {
+                    $balanceEl.removeClass('text-red-600').addClass('text-green-600');
+                }
             }
         });
     }
@@ -469,7 +500,7 @@ $(document).ready(function () {
     }
 
     // بار اول
-    {#fillFormsFromUrl();#}
+    fillFormsFromUrl();
 
     // هندل تغییرات فرم‌ها
     $('#recivable-filter-form input, #recivable-filter-form select').on('input change keyup', filterrecivables);
