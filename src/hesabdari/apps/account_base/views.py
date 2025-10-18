@@ -27,14 +27,18 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.views import generic
 from django.views.decorators.http import require_POST
+from rest_framework import status, viewsets
+from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.response import Response
 
 from hesabdari.apps.account_base.forms import BalanceSheetForm, CashierChequeForm, \
     DocumentForm, AccountsForm
 from hesabdari.apps.account_base.models import AccountsClass, Document, BalanceSheet, CashierCheque
+from hesabdari.apps.account_base.serializers import DocumentSerializer
 
 User = get_user_model()
 
-
+# region Templates
 # Create your views here.
 def add_month_to_jalali_date(jdate):
     # فرض: jdate = jdatetime.date(1402, 12, 10)
@@ -1181,3 +1185,29 @@ class ChangeStatusCheque(generic.View):
 
         return render(request, 'account_base/create-document.html', context)
 
+#endregion
+
+
+class IsOwnerOnly(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.user == request.user
+
+class DocumentViewSet(viewsets.ModelViewSet):
+    queryset = Document.objects.all()
+    serializer_class = DocumentSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOnly]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request  # this is needed so it can be accesisble from serializer
+        return context
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            with transaction.atomic():
+                document = serializer.save()
+        except Exception as e:
+            return Response({"success": False, "errors": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"success": True, "document_id": document.id}, status=status.HTTP_201_CREATED)
