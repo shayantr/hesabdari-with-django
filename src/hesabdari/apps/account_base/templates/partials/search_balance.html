@@ -1,99 +1,113 @@
 {% load jinja_filters %}
 
 {% for balance in balance_lists %}
-    <div class="card selectable"
-            {% if balance.transaction_type == 'debt' %}
-         style="background-color: #ffe5e5;"
-            {% else %}
-         style="background-color: #e5fbe5;"
-            {% endif %}
-         onclick="toggleHighlight(this)">
+<div class="card balance-card mb-3 selectable
+            {% if balance.transaction_type == 'debt' %} debt-card {% else %} credit-card {% endif %}"
+     onclick="toggleHighlight(this)"
+     id="balanceCard{{ balance.id }}"
+     role="button"
+     aria-pressed="false"
+     >
 
+    <!-- اضافه کردن نوار رنگی با pseudo-element: برای پشتیبانی بهتر، یک div کناری هم اضافه میکنیم -->
+    <div style="display:flex;">
+        <div style="width:6px;"
+             class="{% if balance.transaction_type == 'debt' %}debt-left{% else %}credit-left{% endif %}"></div>
 
-        <div class="card-header">
-            <div class="row align-items-center">
-                <div class="col d-flex justify-content-end">
-                    <a class="edit-balance" href="{% url 'UpdateBalanceView' balance.document.id %}">
-                        <div class="flex-shrink-0">
-                            {{ balance.sum_b }}
-                            <h5><i class="fas fa-user-circle"></i>{{ balance.account }}</h5>
-                        </div>
+        <div style="flex:1;">
+
+            <div class="balance-header">
+                <div>
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-user-circle me-2"></i>{{ balance.account }}</h6>
+                    <small class="text-muted">
+                        {% if balance.transaction_type == 'debt' %}به{% else %}از{% endif %}
+                        {% for people in balance.people %}
+                            {{ people }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </small>
+                </div>
+
+                <div class="text-end">
+                    <div class="balance-amount text-dark">{{ balance.sum_b }}</div>
+                    <a href="{% url 'UpdateBalanceView' balance.document.id %}" class="btn btn-sm btn-outline-secondary ms-2" title="ویرایش">
+                        <i class="fas fa-pen"></i>
                     </a>
                 </div>
-                <p>
-                {% if balance.transaction_type == 'debt' %}به{% else %}از{% endif %}
-                {% for people in balance.people %}
-                    {{ people }} - 
-                {% endfor %}
-                </p>
-                <div class="col d-flex justify-content-start">
-                    {% if balance.image %}
-                        <div class="grid g-3">
-                            <a class="card-gallery" data-fslightbox="gallery" href="{{ balance.image.url }}">
-                                <img class="img-fluid" src="{{ balance.image.url }}" alt="Card image" style="width:50%">
-                                <div class="gallery-hover-data card-body justify-content-end"></div>
-                            </a>
-                        </div>
-                    {% endif %}
+            </div>
+
+            {% if balance.image %}
+            <div class="text-center">
+                <a data-fslightbox="gallery" href="{{ balance.image.url }}">
+                    <img src="{{ balance.image.url }}" alt="تصویر" class="card-thumb img-fluid">
+                </a>
+            </div>
+            {% endif %}
+
+            <div class="balance-info">
+                <div class="badge-pill"><strong>سند:</strong>&nbsp; {{ balance.document.id }}</div>
+                <div class="badge-pill"><strong>تاریخ:</strong>&nbsp; {{ balance.document.date_created }}</div>
+                <div class="badge-pill"><strong>مبلغ:</strong>&nbsp; {{ balance.amount|toman }}</div>
+                <div class="badge-pill"><strong>مانده:</strong>&nbsp;
+                    <span class="{% if balance.running_balance < 0 %}text-danger{% else %}text-success{% endif %}">
+                        {{ balance.running_balance|toman }}
+                    </span>
+                </div>
+                <div class="badge-pill"><button class="show-more-btn" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapse{{ balance.id }}"
+                        aria-expanded="false"
+                        aria-controls="collapse{{ balance.id }}"
+                        onclick="toggleChevron(event, {{ balance.id }})">
+                    <span>نمایش جزئیات</span>
+                    <i id="chev{{ balance.id }}" class="fas fa-chevron-down rotate-icon"></i>
+                </button></div>
+
+            </div>
+
+            <div class="card-body pt-0">
+                <div class="collapse" id="collapse{{ balance.id }}">
+                    <div class="details">
+                        <p class="mb-2"><strong>چک:</strong>
+                            {% if not balance.cheque %} ندارد
+                            {% else %} {{ balance.cheque.cheque_status }} {% endif %}
+                        </p>
+                        <p class="mb-0"><strong>توضیحات:</strong> {{ balance.description }}</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <table class="table">
-            <thead>
-            <tr>
-                <td>سند</td>
-                <td>تاریخ</td>
-                <td>مبلغ</td>
-                <td>مانده</td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <th>{{ balance.document.id }}</th>
-                <th>{{ balance.document.date_created }}</th>
-                <th>{{ balance.amount|toman }}</th>
-                <th><span id="running_balance"
-                          class="{% if balance.running_balance < 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ balance.running_balance|toman }}</span>
-                </th>
-            </tr>
-            </tbody>
-        </table>
-
-        <div class="row">
-            <p>چک:{% if not balance.cheque %}ندارد{% else %}{{ balance.cheque.cheque_status }}{% endif %}</p>
-            <p>توضیحات: {{ balance.description }}</p>
         </div>
     </div>
+</div>
 {% endfor %}
 
-<style>
-    /* استایل هایلایت کارت */
-    .card.highlight {
-        outline: 2px solid blue;
-        box-shadow: 0 0 8px rgba(0, 0, 255, 0.5);
-    }
-</style>
-
 <script>
-    function toggleHighlight(element) {
-        // فقط تغییر وضعیت هایلایت (چند کارت می‌تونه انتخاب بشه)
-        element.classList.toggle('highlight');
-    }
-</script>
+/* تابع toggleHighlight: مطابق درخواستت کارت رو هایلایت/آنهایلایت میکنه */
+function toggleHighlight(cardEl) {
+    // اگر روی المان داخلی دکمه collapse کلیک شده، نباید toggle انجام بشه.
+    // به همین خاطر بررسی میکنیم اگر target یک دکمه یا لینک باشه از ادامه جلوگیری کنیم.
+    // اما از آنجایی که این تابع به onclick کارت متصل است، event نداریم. پس از timeout ساده استفاده میکنیم.
+    // امن‌ترین کار: فقط toggle کلاس highlighted.
+    cardEl.classList.toggle('highlighted');
 
+    // برای دسترسی: aria-pressed
+    const pressed = cardEl.classList.contains('highlighted');
+    cardEl.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+}
 
-<script>
-    $('.edit-balance').each(function () {
-        const currentUrl = window.location.href;
-        const href = $(this).attr('href');
-        const separator = href.includes('?') ? '&' : '?';
-        $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
-    });
+/* وقتی دکمه نمایش جزئیات کلیک میشه، آیکن بچرخد یا برگردد */
+function toggleChevron(e, id) {
+    // جلوگیری از پراپاگیشن تا onclick کارت را هم فعال نکند
+    e.stopPropagation();
 
-    function selectCard(element) {
-        // اگر فقط یکی باید فعال باشه:
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('highlight'));
-        element.classList.add('highlight');
-    }
+    const icon = document.getElementById('chev' + id);
+    // تا وقتی bootstrap collapse کار کنه، بعد از کوتاهی کلاس رو toggle کن
+    setTimeout(() => {
+        icon.classList.toggle('rotated');
+    }, 10);
+}
+
+/* OPTIONAL: اگر میخوای حالت پیش‌فرض (مثلاً هایلایت شدن با کلیک دوباره) پیچیده‌تر باشه،
+   میشه اینجا رفتارهای بیشتری اضافه کرد (مثلاً فقط یک کارت در لیست هایلایت باشه).
+*/
 </script>
