@@ -10,6 +10,9 @@
 
 
 <style>
+    .debt-color{
+        color: #1123e9;
+    }
     .balance-card {
         border: 1px solid rgba(0,0,0,0.04);
         border-radius: 14px;
@@ -35,8 +38,8 @@
     }
     
     /* نوار رنگی سمت چپ */
-    .debt-left { background: linear-gradient(90deg,#e53935,#ffcdd2); }   /* قرمز پررنگ */
-    .credit-left { background: linear-gradient(90deg,#2e7d32,#c8e6c9); } /* سبز پررنگ */
+    .debt-left { background: linear-gradient(90deg,#1123e9,#8a90de); }   
+    .credit-left { background: linear-gradient(90deg,#e53935,#ffcdd2); } 
     
     .balance-header {
         display:flex;
@@ -114,6 +117,38 @@
     padding: 12px 16px;
     z-index: 10;
     }
+    
+    #balance_loading {
+        background: #f3f4f6;
+        color: #555;
+        text-align: center;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    /* حالت انیمیشن نقطه‌های در حال حرکت */
+    .dot {
+        width: 6px;
+        height: 6px;
+        background: #6366f1;
+        border-radius: 50%;
+        animation: bounce 1s infinite;
+    }
+
+    .dot:nth-child(2) { animation-delay: .2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+        0%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-6px); }
+    }
 </style>
 
     {% endblock %}
@@ -186,15 +221,15 @@
                 <div id="balance-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
                 <div class="col-4">
                     <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
-                    <span id="total-debt" class="font-bold text-red-600">{{ total_debt|toman }}</span>
+                    <span id="total-debt" class="font-bold debt-color">{{ total_debt|toman }}</span>
                 </div>
                 <div class="col-4">
                     <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
-                    <span id="total-credit" class="font-bold text-green-600">{{ total_credit|toman }}</span>
+                    <span id="total-credit" class="font-bold text-red-600">{{ total_credit|toman }}</span>
                 </div>
                     <div class="col-4">
                     <span class="font-semibold text-gray-700">مانده:</span>
-                <span id="total-balance" class="font-bold">{{ total_balance|toman }}</span>
+                <span id="total-balance" class="font-bold {% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">{{ total_balance|toman }}</span>
             </div>
             
             </div>
@@ -203,14 +238,20 @@
             {% include "partials/search_balance.html" %}
           
         </div>
+        <div id="balance_loading">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <span>در حال بارگذاری...</span>
+        </div>
         <div id="pre-balance-summary" class=" summary-bar row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
                 <div class="col-4">
                     <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
-                    <span id="pre-total-debt" class="font-bold text-red-600">0</span>
+                    <span id="pre-total-debt" class="font-bold debt-color">0</span>
                 </div>
                 <div class="col-4">
                     <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
-                    <span id="pre-total-credit" class="font-bold text-green-600">0</span>
+                    <span id="pre-total-credit" class="font-bold text-red-600">0</span>
                 </div>
                     <div class="col-4">
                     <span class="font-semibold text-gray-700">مانده:</span>
@@ -224,6 +265,8 @@
         jalaliDatepicker.startWatch();
 $(document).ready(function () {
     let searchtimaout = null;
+    let balance_page=1;
+    let balance_loading = false;
     function filterbalance() {
         clearTimeout(searchtimaout);
         searchtimaout = setTimeout(function () {
@@ -249,9 +292,9 @@ $(document).ready(function () {
 
                 // تغییر رنگ مانده
                 if (pre_balance < 0) {
-                    $pre_balanceEl.removeClass('text-green-600').addClass('text-green-600');
-                } else {
                     $pre_balanceEl.removeClass('text-red-600').addClass('text-red-600');
+                } else {
+                    $pre_balanceEl.removeClass('debt-color').addClass('debt-color');
                 }
                 $('#total-debt').text(data.total_debt.toLocaleString());
                 $('#total-credit').text(data.total_credit.toLocaleString());
@@ -261,15 +304,90 @@ $(document).ready(function () {
 
                 // تغییر رنگ مانده
                 if (balance < 0) {
-                    $balanceEl.removeClass('text-green-600').addClass('text-green-600');
-                } else {
                     $balanceEl.removeClass('text-red-600').addClass('text-red-600');
+                } else {
+                    $balanceEl.removeClass('debt-color').addClass('debt-color');
+                }
+                $('#balance_loading').show();
+                observer.observe(document.querySelector('#balance_loading'));
+                if (!data.has_next) {
+                    balance_loading=true;
+                    observer.unobserve(document.querySelector('#balance_loading'));
+                    $('#balance_loading').hide();
+
+                   
+                } else {
+                    balance_loading = false;
+                    balance_page=2;
                 }
 
             }
         });
         }, 1000);
     }
+    
+    function loadbalance(){
+        if (balance_loading) {
+            observer.unobserve(document.querySelector('#balance_loading'));
+            $('#balance_loading').hide();
+            return;
+        }
+        recivable_loading = true;
+        $.ajax({
+                       
+            url: "{% url 'filter_balance' %}",
+            data: $('#search-filter-form').serialize() + '&page=' + balance_page,
+            success: function (data) {
+                if (data.has_next) {
+                    balance_page = data.next_page_number;
+                    balance_loading=false;
+                } else {
+                    observer.unobserve(document.querySelector('#balance_loading'));
+                    $('#balance_loading').hide();
+                }
+                $('#search-balance-list').append(data.html);
+                $('#pre-total-debt').text(data.pre_total_debt.toLocaleString());
+                $('#pre-total-credit').text(data.pre_total_credit.toLocaleString());
+                let pre_balance = data.pre_total_debt - data.pre_total_credit;
+                let $pre_balanceEl = $('#pre-total-balance');
+                $pre_balanceEl.text(pre_balance.toLocaleString());
+                // تغییر رنگ مانده
+                if (pre_balance < 0) {
+                    $pre_balanceEl.removeClass('text-red-600').addClass('text-red-600');
+                } else {
+                    $pre_balanceEl.removeClass('debt-color').addClass('debt-color');
+                }
+                $('#total-debt').text(data.total_debt.toLocaleString());
+                $('#total-credit').text(data.total_credit.toLocaleString());
+                let balance = data.total_debt - data.total_credit;
+                let $balanceEl = $('#total-balance');
+                $balanceEl.text(balance.toLocaleString());
+
+                // تغییر رنگ مانده
+                if (balance < 0) {
+                    $balanceEl.removeClass('text-red-600').addClass('text-red-600');
+                } else {
+                    $balanceEl.removeClass('debt-color').addClass('debt-color');
+                }
+                
+            } 
+        });
+        
+    }
+    
+    
+    const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            // یعنی div loading وارد دید کاربر شده
+            loadbalance();
+        }
+        });
+    }, {
+        threshold: 0.1 // وقتی حداقل ۱۰٪ از loading دیده بشه
+    });
+    
+    observer.observe(document.querySelector('#balance_loading'));
 
     // پر کردن فرم از روی URL
     const params = new URLSearchParams(window.location.search);
@@ -289,9 +407,9 @@ $(document).ready(function () {
     }
 
     // هندل تغییرات فرم
-    $('#search-filter-form input, #search-filter-form select').on('input change keyup', function () {
-        filterbalance();
-    });
+    $('#search-filter-form input, #search-filter-form select').on('input change keyup', filterbalance);
+        
+    
     function createTree(uniqueid, data, selectedId=null) {
         const treeElement = $(`#${uniqueid}-accounts_tree`);
         if (!treeElement.length) return;

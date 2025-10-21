@@ -924,43 +924,43 @@ def delete_account(request, pk):
 
 class BalanceListView(LoginRequiredMixin, generic.View):
     def get(self, request):
-        qs = BalanceSheet.objects.select_related('cheque', 'document').prefetch_related(
-            'document__items__account').filter(user=request.user.id)
-        aggregates = qs.aggregate(
-            debt=Sum(
-                Case(
-                    When(transaction_type='debt', then='amount'),
-                    output_field=IntegerField(),
-                )
-            ),
-            credit=Sum(
-                Case(
-                    When(transaction_type='credit', then='amount'),
-                    output_field=IntegerField(),
-                )
-            ),
-
-        )
-        total_debt = aggregates['debt'] or 0
-        total_credit = aggregates['credit'] or 0
-        balance_list = []
-        running_balance = 0  # مانده اول دوره
-        for item in qs.order_by('document__date_created', 'id'):  # مرتب از قدیم به جدید
-            doc = item.document
-            if item.transaction_type == 'debt':  # بدهکاری
-                running_balance += item.amount
-            elif item.transaction_type == 'credit':  # بستانکاری
-                running_balance -= item.amount
-            item.running_balance = running_balance
-            people = {i.account.name for i in doc.items.all() if item.transaction_type != i.transaction_type}
-            item.people = people
-            balance_list.append(item)
-        total_balance = total_debt - total_credit
+        # qs = BalanceSheet.objects.select_related('cheque', 'document').prefetch_related(
+        #     'document__items__account').filter(user=request.user.id)
+        # aggregates = qs.aggregate(
+        #     debt=Sum(
+        #         Case(
+        #             When(transaction_type='debt', then='amount'),
+        #             output_field=IntegerField(),
+        #         )
+        #     ),
+        #     credit=Sum(
+        #         Case(
+        #             When(transaction_type='credit', then='amount'),
+        #             output_field=IntegerField(),
+        #         )
+        #     ),
+        #
+        # )
+        # total_debt = aggregates['debt'] or 0
+        # total_credit = aggregates['credit'] or 0
+        # balance_list = []
+        # running_balance = 0  # مانده اول دوره
+        # for item in qs.order_by('document__date_created', 'id'):  # مرتب از قدیم به جدید
+        #     doc = item.document
+        #     if item.transaction_type == 'debt':  # بدهکاری
+        #         running_balance += item.amount
+        #     elif item.transaction_type == 'credit':  # بستانکاری
+        #         running_balance -= item.amount
+        #     item.running_balance = running_balance
+        #     people = {i.account.name for i in doc.items.all() if item.transaction_type != i.transaction_type}
+        #     item.people = people
+        #     balance_list.append(item)
+        # total_balance = total_debt - total_credit
         context = {
-            'balance_lists': reversed(balance_list),
-            'total_debt': total_debt,
-            'total_credit': total_credit,
-            'total_balance': total_balance,
+            # 'balance_lists': reversed(balance_list),
+            # 'total_debt': total_debt,
+            # 'total_credit': total_credit,
+            # 'total_balance': total_balance,
         }
         return render(request, 'account_base/balance_list.html', context)
 
@@ -985,6 +985,7 @@ def filter_balance(request):
     created_at_from = request.GET.get('created_at_from')
     created_at_to = request.GET.get('created_at_to')
     description = request.GET.get('description')
+    page = request.GET.get('page')
     debt_condition = {'transaction_type': 'debt'}
     credit_condition = {'transaction_type': 'credit'}
     if balance_id:
@@ -1069,10 +1070,19 @@ def filter_balance(request):
         people = {i.account.name for i in doc.items.all() if item.transaction_type != i.transaction_type}
         item.people = people
         balance_list.append(item)
-    html = render_to_string('partials/search_balance.html', {'balance_lists': reversed(balance_list)})
+
+    paginator = Paginator(balance_list, 20)
+    current_page = paginator.get_page(page)
+    html = render_to_string('partials/search_balance.html', {'balance_lists': reversed(current_page)})
     return JsonResponse(
-        {'html': html, 'total_debt': total_debt, 'total_credit': total_credit, 'pre_total_credit': pre_total_credit,
-         'pre_total_debt': pre_total_debt})
+        {
+            'html': html,
+            'total_debt': total_debt,
+            'total_credit': total_credit,
+            'pre_total_credit': pre_total_credit,
+            'pre_total_debt': pre_total_debt,
+            'has_next': current_page.has_next(),
+            'next_page_number': current_page.next_page_number() if current_page.has_next() else None,})
 
 
 class ChangeStatusCheque(generic.View):

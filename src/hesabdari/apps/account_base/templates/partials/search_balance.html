@@ -44,14 +44,15 @@
             {% endif %}
 
             <div class="balance-info">
-                <div class="badge-pill"><strong>سند:</strong>&nbsp; {{ balance.document.id }}</div>
-                <div class="badge-pill"><strong>تاریخ:</strong>&nbsp; {{ balance.document.date_created }}</div>
-                <div class="badge-pill"><strong>مبلغ:</strong>&nbsp; {{ balance.amount|toman }}</div>
+                <div class="badge-pill">تاریخ:<strong>&nbsp; {{ balance.document.date_created }}</strong></div>
+                <div class="badge-pill">مبلغ:<strong class="{% if balance.transaction_type == 'debt' %}debt-color{% else %}text-danger{% endif %}" >{{ balance.amount|toman }}</strong> </div>
                 <div class="badge-pill"><strong>مانده:</strong>&nbsp;
-                    <span class="{% if balance.running_balance < 0 %}text-danger{% else %}text-success{% endif %}">
+                    <strong class="{% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">
                         {{ balance.running_balance|toman }}
-                    </span>
+                    </strong>
                 </div>
+                <div class="badge-pill"> سند:{{ balance.document.id }}</div>
+
                 <div class="badge-pill"><button class="show-more-btn" type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#collapse{{ balance.id }}"
