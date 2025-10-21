@@ -2,9 +2,9 @@
 {% for payable in payables %}
 
     <div style="background-color:
-            {% if receivable.cheque.cheque_status == "جاری" %}#e3f2fd
+            {% if receivable.cheque.cheque_status == "جاری" %}#5699bc
             {% elif receivable.cheque.cheque_status == 'عودتی' %}#fff8e1
-            {% elif receivable.cheque.cheque_status == 'وصولی' %}#e8f5e9
+            {% elif receivable.cheque.cheque_status == 'وصولی' %}#90e897
             {% elif receivable.cheque.cheque_status == 'برگشتنی' %}#ffebee
             {% elif receivable.cheque.cheque_status == 'امانی' %}#ede7f6
             {% endif %}
