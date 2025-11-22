@@ -976,7 +976,9 @@ def filter_balance(request):
     else:
         qs = BalanceSheet.objects.filter(
             Q(user=request.user.id)).select_related('document').prefetch_related('document__items__account')
-
+    debt_div = request.GET.get('debt_div')
+    credit_div = request.GET.get('credit_div')
+    result_div = request.GET.get('result_div')
     account_id = request.GET.get('account_id')
     amount = request.GET.get('amount')
     balance_id = request.GET.get('balance_id')
@@ -985,9 +987,12 @@ def filter_balance(request):
     created_at_to = request.GET.get('created_at_to')
     description = request.GET.get('description')
     page = request.GET.get('page')
-    print(page)
     debt_condition = {'transaction_type': 'debt'}
     credit_condition = {'transaction_type': 'credit'}
+    if debt_div:
+        qs = qs.filter(transaction_type='debt')
+    if credit_div:
+        qs = qs.filter(transaction_type='credit')
     if balance_id:
         qs = qs.filter(id=int(balance_id))
     if document_id:

@@ -162,6 +162,16 @@
       width: 100%;
       text-align: right;
     }
+
+    .selectable-block {
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.2s;
+    }
+    .selectable-active {
+        background-color: #e5f2ff; /* آبی خیلی ملایم */
+        border-radius: 12px;
+        transform: scale(1.02);
+    }
 </style>
 
     {% endblock %}
@@ -230,22 +240,26 @@
                 </div>
             </div>
 
+            <input type="hidden" name="debt_div" id="debt_input">
+            <input type="hidden" name="credit_div" id="credit_input">
+            <input type="hidden" name="result_div" id="result_input">
+
+
         </form>
                 <div id="balance-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
-                <div class="col-4">
-                    <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
-                    <span id="total-debt" class="font-bold debt-color">{{ total_debt|toman }}</span>
+                    <div class="col-4" id="debt_div">
+                        <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
+                        <span id="total-debt" class="font-bold debt-color">{{ total_debt|toman }}</span>
+                    </div>
+                    <div class="col-4" id="credit_div">
+                        <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
+                        <span id="total-credit" class="font-bold text-red-600">{{ total_credit|toman }}</span>
+                    </div>
+                        <div class="col-4" id="result_div">
+                        <span class="font-semibold text-gray-700">مانده:</span>
+                    <span id="total-balance" class="font-bold {% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">{{ total_balance|toman }}</span>
+                    </div>
                 </div>
-                <div class="col-4">
-                    <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
-                    <span id="total-credit" class="font-bold text-red-600">{{ total_credit|toman }}</span>
-                </div>
-                    <div class="col-4">
-                    <span class="font-semibold text-gray-700">مانده:</span>
-                <span id="total-balance" class="font-bold {% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">{{ total_balance|toman }}</span>
-            </div>
-            
-            </div>
         <div class="container py-4">
           <div class="card filter-card">
             <button class="btn btn-primary filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
@@ -290,15 +304,15 @@
             <span>در حال بارگذاری...</span>
         </div>
         <div id="pre-balance-summary" class=" summary-bar row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
-                <div class="col-4">
+                <div class="col-4" id="debt_div">
                     <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
                     <span id="pre-total-debt" class="font-bold debt-color">0</span>
                 </div>
-                <div class="col-4">
+                <div class="col-4" id="credit_div">
                     <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
                     <span id="pre-total-credit" class="font-bold text-red-600">0</span>
                 </div>
-                    <div class="col-4">
+                    <div class="col-4" id="result_div">
                     <span class="font-semibold text-gray-700">مانده:</span>
                 <span id="pre-total-balance" class="font-bold">0</span>
             </div>
@@ -308,10 +322,60 @@
     <script src="{% static 'js/plugins/index.js' %}"></script>
     <script>
         jalaliDatepicker.startWatch();
+document.addEventListener("DOMContentLoaded", function() {
+
+
+
+});
+
 
         $(document).ready(function () {
 
+                const inputIds = ["debt_input", "credit_input", "result_input"];
+                const divIds = ["debt_div", "credit_div", "result_div"];
 
+                document.addEventListener("click", function(e) {
+
+                    const clickedDebt  = e.target.closest("#debt_div");
+                    const clickedCredit = e.target.closest("#credit_div");
+                    const clickedResult = e.target.closest("#result_div");
+
+                    // پاک‌کردن مقدار input ها
+                    inputIds.forEach(id => {
+                        const inp = document.getElementById(id);
+                        if (inp) inp.value = "";
+
+                    });
+
+                    // پاک‌کردن هایلایت
+                    divIds.forEach(id => {
+                        const d = document.getElementById(id);
+                        if (d) d.classList.remove("selectable-active");
+                    });
+
+                    // تشخیص اینکه روی کدام div زده شده
+                    if (clickedDebt) {
+                        document.getElementById("debt_input").value = "clicked";
+                        clickedDebt.classList.add("selectable-active");
+                        filterbalance();
+
+                    }
+
+                    if (clickedCredit) {
+                        document.getElementById("credit_input").value = "clicked";
+                        clickedCredit.classList.add("selectable-active");
+                        filterbalance();
+
+                    }
+
+                    if (clickedResult) {
+                        document.getElementById("result_input").value = "clicked";
+                        clickedResult.classList.add("selectable-active");
+                        filterbalance();
+
+                    }
+
+                });
             let searchtimaout = null;
             let balance_page=1;
             let balance_loading = false;
@@ -625,7 +689,7 @@
                 $(`#selected-account-id`).val(nodeId).trigger('input');
                 const fullPath = paths.join(' > ');
 
-                {#$(`#${uniqueid}-accounts-list`).text(paths.join(' > '));#}
+                // $(`#${uniqueid}-accounts-list`).text(paths.join(' > '));
                 $(`#account_name`).val(`${fullPath}`).trigger('input');
 
 
@@ -662,7 +726,7 @@
                 $(`#transfer-selected-account-id`).val(nodeId).trigger('input');
                 const fullPath = paths.join(' > ');
 
-                {#$(`#${uniqueid}-accounts-list`).text(paths.join(' > '));#}
+                // (`#${uniqueid}-accounts-list`).text(paths.join(' > '));
                 $(`#transfer-account_name`).val(`${fullPath}`).trigger('input');
 
 
