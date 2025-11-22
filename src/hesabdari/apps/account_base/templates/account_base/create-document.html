@@ -546,7 +546,8 @@
                     if (result.isConfirmed) {
                         try {
                             if (balance_id) {
-                                deleted_balances_id.push(parseInt(balance_id, 10));
+                                // deleted 10
+                                deleted_balances_id.push(parseInt(balance_id));
                             }
                             form.remove();
                             calcDebtTotal();

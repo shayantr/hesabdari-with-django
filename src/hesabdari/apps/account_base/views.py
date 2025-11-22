@@ -4,7 +4,6 @@ import urllib
 from collections import namedtuple
 from itertools import zip_longest
 from keyword import kwlist
-from lib2to3.fixes.fix_input import context
 from urllib.parse import urlencode
 
 import jdatetime
@@ -986,6 +985,7 @@ def filter_balance(request):
     created_at_to = request.GET.get('created_at_to')
     description = request.GET.get('description')
     page = request.GET.get('page')
+    print(page)
     debt_condition = {'transaction_type': 'debt'}
     credit_condition = {'transaction_type': 'credit'}
     if balance_id:
@@ -1262,6 +1262,17 @@ class ChangeStatusCheque(generic.View):
 
         return render(request, 'account_base/create-document.html', context)
 
+
+class UpdateBulkAccount(LoginRequiredMixin, generic.View):
+    def post(self, request):
+        data = json.loads(request.body)
+        selected_ids = data.get("balances", [])
+        transfer_value = data.get("transfer_value")
+        balances = BalanceSheet.objects.filter(user=request.user,id__in=selected_ids)
+        for balance in balances:
+            balance.account_id = int(transfer_value)
+        BalanceSheet.objects.bulk_update(balances, ['account_id'])
+        return JsonResponse({"status": "ok", "received": selected_ids})
 #endregion
 
 

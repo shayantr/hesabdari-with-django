@@ -149,6 +149,19 @@
         0%, 80%, 100% { transform: translateY(0); }
         40% { transform: translateY(-6px); }
     }
+
+    /* کمی استایل برای بهتر دیده شدن در موبایل */
+    .filter-card {
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #fff;
+    }
+    .filter-toggle {
+      width: 100%;
+      text-align: right;
+    }
 </style>
 
     {% endblock %}
@@ -169,14 +182,14 @@
                 <div id="accounts-report"></div>
                 </div>
                 <div class="modal-footer justify-content-between collapse multi-collapse show">
-                    <div class="flex-grow-1 text-end">
-                        <button type="button" class="btn btn-link-danger" data-bs-dismiss="modal">لغو</button>
-                        <button type="button" id="select-account" class="btn btn-primary" data-bs-dismiss="modal">ذخیره</button>
+                    <div class="flex-grow-1 text-end" id="save-decline-filter">
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
         
         <form id="search-filter-form">
             <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;">
@@ -233,7 +246,39 @@
             </div>
             
             </div>
+        <div class="container py-4">
+          <div class="card filter-card">
+            <button class="btn btn-primary filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+              🔽 فیلتر تغییرات
+            </button>
 
+            <div class="collapse mt-3" id="filterCollapse">
+              <div class="col-md-3 mb-2">
+
+                <input type="text" name="account_transfer_id" id="transfer-selected-account-id" hidden>
+                <div class="input-group">
+
+                <input type="text" id="transfer-account_name" name="transfer-account_name" placeholder="جستجو نام حساب" class="form-control" readonly>
+                <div class="input-group-text"><button type="button"
+                    class="btn btn-sm btn-light-secondary" data-bs-toggle="modal"
+                    data-bs-target="#accounts-lists"
+                    id="transfer-accounts-list-btn">
+                    <i class="ph-duotone ph-pencil-simple-line"></i> انتخاب
+                </button></div>
+              </div>
+            </div>
+
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="" id="selectAll">
+                <label class="form-check-label" for="selectAll">
+                  انتخاب همه
+                </label>
+              </div>
+
+              <button class="btn btn-success w-100" id="applyupdate">اعمال تغییرات</button>
+            </div>
+          </div>
+        </div>
         <div id="search-balance-list">
             {% include "partials/search_balance.html" %}
           
@@ -263,299 +308,447 @@
     <script src="{% static 'js/plugins/index.js' %}"></script>
     <script>
         jalaliDatepicker.startWatch();
-$(document).ready(function () {
-    let searchtimaout = null;
-    let balance_page=1;
-    let balance_loading = false;
-    function filterbalance() {
-        clearTimeout(searchtimaout);
-        searchtimaout = setTimeout(function () {
-        
-        let formData = $('#search-filter-form').serializeArray();
-        const queryString = $.param(formData);
 
-        // آپدیت URL بدون رفرش
-        const newUrl = window.location.pathname + "?" + queryString;
-        window.history.pushState({}, '', newUrl);
+        $(document).ready(function () {
 
-        $.ajax({
-            url: "{% url 'filter_balance' %}",
-            type: "GET",
-            data: formData,
-            success: function (data) {
-                $('#search-balance-list').html(data.html);
-                $('#pre-total-debt').text(data.pre_total_debt.toLocaleString());
-                $('#pre-total-credit').text(data.pre_total_credit.toLocaleString());
-                let pre_balance = data.pre_total_debt - data.pre_total_credit;
-                let $pre_balanceEl = $('#pre-total-balance');
-                $pre_balanceEl.text(pre_balance.toLocaleString());
 
-                // تغییر رنگ مانده
-                if (pre_balance < 0) {
-                    $pre_balanceEl.removeClass('text-red-600').addClass('text-red-600');
-                } else {
-                    $pre_balanceEl.removeClass('debt-color').addClass('debt-color');
-                }
-                $('#total-debt').text(data.total_debt.toLocaleString());
-                $('#total-credit').text(data.total_credit.toLocaleString());
-                let balance = data.total_debt - data.total_credit;
-                let $balanceEl = $('#total-balance');
-                $balanceEl.text(balance.toLocaleString());
+            let searchtimaout = null;
+            let balance_page=1;
+            let balance_loading = false;
+            function filterbalance() {
+                clearTimeout(searchtimaout);
+                searchtimaout = setTimeout(function () {
 
-                // تغییر رنگ مانده
-                if (balance < 0) {
-                    $balanceEl.removeClass('text-red-600').addClass('text-red-600');
-                } else {
-                    $balanceEl.removeClass('debt-color').addClass('debt-color');
-                }
-                $('#balance_loading').show();
-                observer.observe(document.querySelector('#balance_loading'));
-                if (!data.has_next) {
-                    balance_loading=true;
+                let formData = $('#search-filter-form').serializeArray();
+                const queryString = $.param(formData);
+
+                // آپدیت URL بدون رفرش
+                const newUrl = window.location.pathname + "?" + queryString;
+                window.history.pushState({}, '', newUrl);
+
+                $.ajax({
+                    url: "{% url 'filter_balance' %}",
+                    type: "GET",
+                    data: formData,
+                    success: function (data) {
+                        $('#search-balance-list').html(data.html);
+                        $('#pre-total-debt').text(data.pre_total_debt.toLocaleString());
+                        $('#pre-total-credit').text(data.pre_total_credit.toLocaleString());
+                        let pre_balance = data.pre_total_debt - data.pre_total_credit;
+                        let $pre_balanceEl = $('#pre-total-balance');
+                        $pre_balanceEl.text(pre_balance.toLocaleString());
+
+                        // تغییر رنگ مانده
+                        if (pre_balance < 0) {
+                            $pre_balanceEl.removeClass('text-red-600').addClass('text-red-600');
+                        } else {
+                            $pre_balanceEl.removeClass('debt-color').addClass('debt-color');
+                        }
+                        $('#total-debt').text(data.total_debt.toLocaleString());
+                        $('#total-credit').text(data.total_credit.toLocaleString());
+                        let balance = data.total_debt - data.total_credit;
+                        let $balanceEl = $('#total-balance');
+                        $balanceEl.text(balance.toLocaleString());
+
+                        // تغییر رنگ مانده
+                        if (balance < 0) {
+                            $balanceEl.removeClass('text-red-600').addClass('text-red-600');
+                        } else {
+                            $balanceEl.removeClass('debt-color').addClass('debt-color');
+                        }
+                        $('#balance_loading').show();
+                        observer.observe(document.querySelector('#balance_loading'));
+                        if (!data.has_next) {
+                            balance_loading=true;
+                            observer.unobserve(document.querySelector('#balance_loading'));
+                            $('#balance_loading').hide();
+
+
+                        } else {
+                            balance_loading = false;
+                            balance_page=2;
+                        }
+
+                    }
+                });
+                }, 1000);
+            }
+
+            function loadbalance(){
+                if (balance_loading) {
                     observer.unobserve(document.querySelector('#balance_loading'));
                     $('#balance_loading').hide();
-
-                   
-                } else {
-                    balance_loading = false;
-                    balance_page=2;
+                    return;
                 }
+                recivable_loading = true;
+                $.ajax({
+
+                    url: "{% url 'filter_balance' %}",
+                    data: $('#search-filter-form').serialize() + '&page=' + balance_page,
+                    success: function (data) {
+                        if (data.has_next) {
+                            balance_page = data.next_page_number;
+                            balance_loading=false;
+                        } else {
+                            observer.unobserve(document.querySelector('#balance_loading'));
+                            $('#balance_loading').hide();
+                        }
+                        $('#search-balance-list').append(data.html);
+                        $('#pre-total-debt').text(data.pre_total_debt.toLocaleString());
+                        $('#pre-total-credit').text(data.pre_total_credit.toLocaleString());
+                        let pre_balance = data.pre_total_debt - data.pre_total_credit;
+                        let $pre_balanceEl = $('#pre-total-balance');
+                        $pre_balanceEl.text(pre_balance.toLocaleString());
+                        // تغییر رنگ مانده
+                        if (pre_balance < 0) {
+                            $pre_balanceEl.removeClass('text-red-600').addClass('text-red-600');
+                        } else {
+                            $pre_balanceEl.removeClass('debt-color').addClass('debt-color');
+                        }
+                        $('#total-debt').text(data.total_debt.toLocaleString());
+                        $('#total-credit').text(data.total_credit.toLocaleString());
+                        let balance = data.total_debt - data.total_credit;
+                        let $balanceEl = $('#total-balance');
+                        $balanceEl.text(balance.toLocaleString());
+
+                        // تغییر رنگ مانده
+                        if (balance < 0) {
+                            $balanceEl.removeClass('text-red-600').addClass('text-red-600');
+                        } else {
+                            $balanceEl.removeClass('debt-color').addClass('debt-color');
+                        }
+
+                    }
+                });
 
             }
-        });
-        }, 1000);
-    }
-    
-    function loadbalance(){
-        if (balance_loading) {
-            observer.unobserve(document.querySelector('#balance_loading'));
-            $('#balance_loading').hide();
-            return;
-        }
-        recivable_loading = true;
-        $.ajax({
-                       
-            url: "{% url 'filter_balance' %}",
-            data: $('#search-filter-form').serialize() + '&page=' + balance_page,
-            success: function (data) {
-                if (data.has_next) {
-                    balance_page = data.next_page_number;
-                    balance_loading=false;
-                } else {
-                    observer.unobserve(document.querySelector('#balance_loading'));
-                    $('#balance_loading').hide();
+
+
+            const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // یعنی div loading وارد دید کاربر شده
+                    loadbalance();
                 }
-                $('#search-balance-list').append(data.html);
-                $('#pre-total-debt').text(data.pre_total_debt.toLocaleString());
-                $('#pre-total-credit').text(data.pre_total_credit.toLocaleString());
-                let pre_balance = data.pre_total_debt - data.pre_total_credit;
-                let $pre_balanceEl = $('#pre-total-balance');
-                $pre_balanceEl.text(pre_balance.toLocaleString());
-                // تغییر رنگ مانده
-                if (pre_balance < 0) {
-                    $pre_balanceEl.removeClass('text-red-600').addClass('text-red-600');
+                });
+            }, {
+                threshold: 0.1 // وقتی حداقل ۱۰٪ از loading دیده بشه
+            });
+
+            observer.observe(document.querySelector('#balance_loading'));
+
+            // fill form from url
+            const params = new URLSearchParams(window.location.search);
+            params.forEach(function (value, key) {
+                let field = $(`[name="${key}"]`);
+
+                if (field.attr('type') === 'checkbox' || field.attr('type') === 'radio') {
+                    field.filter(`[value="${value}"]`).prop('checked', true);
                 } else {
-                    $pre_balanceEl.removeClass('debt-color').addClass('debt-color');
-                }
-                $('#total-debt').text(data.total_debt.toLocaleString());
-                $('#total-credit').text(data.total_credit.toLocaleString());
-                let balance = data.total_debt - data.total_credit;
-                let $balanceEl = $('#total-balance');
-                $balanceEl.text(balance.toLocaleString());
-
-                // تغییر رنگ مانده
-                if (balance < 0) {
-                    $balanceEl.removeClass('text-red-600').addClass('text-red-600');
-                } else {
-                    $balanceEl.removeClass('debt-color').addClass('debt-color');
-                }
-                
-            } 
-        });
-        
-    }
-    
-    
-    const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            // یعنی div loading وارد دید کاربر شده
-            loadbalance();
-        }
-        });
-    }, {
-        threshold: 0.1 // وقتی حداقل ۱۰٪ از loading دیده بشه
-    });
-    
-    observer.observe(document.querySelector('#balance_loading'));
-
-    // پر کردن فرم از روی URL
-    const params = new URLSearchParams(window.location.search);
-    params.forEach(function (value, key) {
-        let field = $(`[name="${key}"]`);
-
-        if (field.attr('type') === 'checkbox' || field.attr('type') === 'radio') {
-            field.filter(`[value="${value}"]`).prop('checked', true);
-        } else {
-            field.val(value).trigger('change'); // برای select2 و datepicker هم
-        }
-    });
-
-    // اجرای اولیه بر اساس URL
-    if (params.toString()) {
-        filterbalance();
-    }
-
-    // هندل تغییرات فرم
-    $('#search-filter-form input, #search-filter-form select').on('input change keyup', filterbalance);
-        
-    
-    function createTree(uniqueid, data, selectedId=null) {
-        const treeElement = $(`#${uniqueid}-accounts_tree`);
-        if (!treeElement.length) return;
-
-        $(`#${uniqueid}-add_root_btn`).hide()
-        
-        treeElement.jstree("destroy");
-        treeElement.jstree({
-            core: {
-                data: data,
-                check_callback: true,
-                themes: { stripes: true }
-            },
-            plugins: ['wholerow', 'search', 'contextmenu'],
-            ...(selectedId ? { selected: [selectedId] } : {})
-        }).on('ready.jstree refresh.jstree open_node.jstree', function () {
-            addControlsToNodes(uniqueid);
-            if (selectedId) {
-                treeElement.jstree(true).select_node(selectedId);
-            }
-        });
-
-    }
-    function addControlsToNodes(uniqueid) {
-        const tree = $(`#${uniqueid}-accounts_tree`).jstree(true);
-    
-        // کل نودها
-        const fullNodes = tree.get_json('#');
-    
-        function flattenNodes(nodes) {
-            let flat = [];
-            nodes.forEach(node => {
-                flat.push(node);
-                if (node.children && node.children.length > 0) {
-                    flat = flat.concat(flattenNodes(node.children));
+                    field.val(value).trigger('change'); // برای select2 و datepicker هم
                 }
             });
-            return flat;
-        }
-    
-        const nodes = flattenNodes(fullNodes);
-        
-    
-        nodes.forEach(node => {
-            // گرفتن مقدار از li_attr
-            const net_total_raw = node.li_attr?.['data-net-total'] ?? 0;
-    const net_total = parseInt(net_total_raw, 10) || 0;
-    
-    // فرمت سه‌رقمی
-    const formatted_total = net_total.toLocaleString("fa-IR")
-            
-            
-    
-            const nodeId = node.id;
-            const baseUrl = "{% url 'accounts_report_detail' 0 %}";
-            let url = baseUrl.replace(0, nodeId);
-            const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
-                    // تعیین رنگ
-            let colorClass = "";
-            if (net_total > 0) {
-                colorClass = "text-success"; // سبز
-            } else if (net_total < 0) {
-                colorClass = "text-danger"; // قرمز
-            } else {
-                colorClass = "text-muted"; // خاکستری
-            }
-    
-            if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
-                const $buttons = $('<span class="ms-auto">')
-                    .append(`<span class="${colorClass}" data-uid="${uniqueid}" data-id="${nodeId}">&nbsp;(${formatted_total})</span>`)
-                $anchor.append($buttons);
-            }
-        });
-    }
-    
-    $('#accounts-list-btn').click(function(){
-        const selectedId = $(`#selected-account-id`).val();
-        console.log(selectedId);
-       $.ajax({
-        url: "{% url 'get_accounts_list' %}",
-        type: "GET",
-        success: function (response) {
-            $('#accounts-report').html(response.form_html);
-            
 
-            createTree('default', response.data, selectedId);
-            //search bank
-            let to = false;
-            $(`#default-jstree-search`).on('keyup', function () {
-                if (to) clearTimeout(to);
-                to = setTimeout(function () {
-                    const query = $(`#default-jstree-search`).val();
-                    $(`#default-accounts_tree`).jstree(true).search(query);
-                }, 250);
+            // initial base on url
+            if (params.toString()) {
+                filterbalance();
+            }
+
+            // هندل تغییرات فرم
+            $('#search-filter-form input, #search-filter-form select').on('input change keyup', filterbalance);
+
+            // load tree account for search
+            function createTree(uniqueid, data, selectedId=null) {
+                const treeElement = $(`#${uniqueid}-accounts_tree`);
+                if (!treeElement.length) return;
+
+                $(`#${uniqueid}-add_root_btn`).hide()
+
+                treeElement.jstree("destroy");
+                treeElement.jstree({
+                    core: {
+                        data: data,
+                        check_callback: true,
+                        themes: { stripes: true }
+                    },
+                    plugins: ['wholerow', 'search', 'contextmenu'],
+                    ...(selectedId ? { selected: [selectedId] } : {})
+                }).on('ready.jstree refresh.jstree open_node.jstree', function () {
+                    addControlsToNodes(uniqueid);
+                    if (selectedId) {
+                        treeElement.jstree(true).select_node(selectedId);
+                    }
+                });
+
+            }
+            function addControlsToNodes(uniqueid) {
+                const tree = $(`#${uniqueid}-accounts_tree`).jstree(true);
+
+                // all nodes
+                const fullNodes = tree.get_json('#');
+
+                function flattenNodes(nodes) {
+                    let flat = [];
+                    nodes.forEach(node => {
+                        flat.push(node);
+                        if (node.children && node.children.length > 0) {
+                            flat = flat.concat(flattenNodes(node.children));
+                        }
+                    });
+                    return flat;
+                }
+
+                const nodes = flattenNodes(fullNodes);
+
+
+                nodes.forEach(node => {
+                    // گرفتن مقدار از li_attr
+                            const net_total_raw = node.li_attr?.['data-net-total'] ?? 0;
+                    const net_total = parseInt(net_total_raw, 10) || 0;
+
+                    // فرمت سه‌رقمی
+                    const formatted_total = net_total.toLocaleString("fa-IR")
+
+
+
+                    const nodeId = node.id;
+                    const nodeName = node.text;
+                    const baseUrl = "{% url 'accounts_report_detail' 0 %}";
+                    let url = baseUrl.replace(0, nodeId);
+
+                    const startDate = $('#start-date').val();
+                    const endDate = $('#end-date').val();
+                    url += `?created_at_from=${encodeURIComponent(startDate)}&created_at_to=${encodeURIComponent(endDate)}&account_name=${encodeURIComponent(nodeName)}&account_id=${encodeURIComponent(nodeId)}`;
+                    const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
+                            // تعیین رنگ
+                    let colorClass = "";
+                    if (net_total > 0) {
+                        colorClass = "text-success"; // سبز
+                    } else if (net_total < 0) {
+                        colorClass = "text-danger"; // قرمز
+                    } else {
+                        colorClass = "text-muted"; // خاکستری
+                    }
+
+                    if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
+                        const $buttons = $('<span class="ms-auto">')
+                            .append(`<span class="${colorClass}" data-uid="${uniqueid}" data-id="${nodeId}">&nbsp;(${formatted_total})</span>`)
+                            .append(`<a class="btn btn-sm btn-edit"><i class="fa fa-eye"></i></a>`)
+                        $anchor.append($buttons);
+                    }
+                });
+            }
+
+            $('#accounts-list-btn').click(function(){
+                const selectedId = $(`#selected-account-id`).val();
+               $.ajax({
+                url: "{% url 'get_accounts_list' %}",
+                type: "GET",
+                success: function (response) {
+                    $('#accounts-report').html(response.form_html);
+                    $('#save-decline-filter').html('<button type="button" class="btn btn-link-danger" data-bs-dismiss="modal">لغو</button><button type="button" id="select-account" class="btn btn-primary" data-bs-dismiss="modal">ذخیره</button>');
+
+
+                    createTree('default', response.data, selectedId);
+                    //search bank
+                    let to = false;
+                    $(`#default-jstree-search`).on('keyup', function () {
+                        if (to) clearTimeout(to);
+                        to = setTimeout(function () {
+                            const query = $(`#default-jstree-search`).val();
+                            $(`#default-accounts_tree`).jstree(true).search(query);
+                        }, 250);
+                    });
+
+                }
             });
-            
-        }
-    }); 
-    });
-    $(document).on('click', "[id='select-account']", function () {
-        handleAccountSelection();
-    });
-
-function handleAccountSelection() {
-    const tree = $(`#default-accounts_tree`).jstree(true);
-    const selectedIds = tree.get_selected();
-
-    if (!selectedIds.length) {
-        alert('لطفاً یک حساب انتخاب کنید.');
-        return;
-    }
-
-    const selectedNode = tree.get_node(selectedIds[0]);
-    const nodeId = selectedNode.original.real_id || selectedNode.id;
-    const nodeText = selectedNode.text;
-    let paths = [];
-    const parents = selectedNode.parents;
-    // چون parents از پایین به بالاست، باید معکوس کنیم تا مسیر درست بشه
-    parents.reverse();
-
-    // حذف ریشه '#'
-    parents.forEach(parentId => {
-        if (parentId !== '#') {
-            const node = tree.get_node(parentId);
-            paths.push(node.text);
-        }
-    });
-    paths.push(nodeText);
+            });
+            $('#transfer-accounts-list-btn').click(function(){
+                const selectedId = $(`#transfer-selected-account-id`).val() || "";
+               $.ajax({
+                url: "{% url 'get_accounts_list' %}",
+                type: "GET",
+                success: function (response) {
+                    $('#accounts-report').html(response.form_html);
+                    $('#save-decline-filter').html('<button type="button" class="btn btn-link-danger" data-bs-dismiss="modal">لغو</button><button type="button" id="transfer-select-account" class="btn btn-primary" data-bs-dismiss="modal">ذخیره</button>');
 
 
-    // فرم اصلی
-    $(`#selected-account-id`).val(nodeId).trigger('input');
-    const fullPath = paths.join(' > ');
+                    createTree('default', response.data, selectedId);
+                    //search bank
+                    let to = false;
+                    $(`#default-jstree-search`).on('keyup', function () {
+                        if (to) clearTimeout(to);
+                        to = setTimeout(function () {
+                            const query = $(`#default-jstree-search`).val();
+                            $(`#default-accounts_tree`).jstree(true).search(query);
+                        }, 250);
+                    });
 
-    {#$(`#${uniqueid}-accounts-list`).text(paths.join(' > '));#}
-    $(`#account_name`).val(`${fullPath}`).trigger('input');
+                }
+            });
+            });
+            $(document).on('click', "[id='select-account']", function () {
+                handleAccountSelection();
+            });
+            $(document).on('click', "[id='transfer-select-account']", function () {
+                TransferhandleAccountSelection();
+            });
 
-    
+            function handleAccountSelection() {
+                const tree = $(`#default-accounts_tree`).jstree(true);
+                const selectedIds = tree.get_selected();
 
-}
-            
+                if (!selectedIds.length) {
+                    alert('لطفاً یک حساب انتخاب کنید.');
+                    return;
+                }
 
-});
-    
+                const selectedNode = tree.get_node(selectedIds[0]);
+                const nodeId = selectedNode.original.real_id || selectedNode.id;
+                const nodeText = selectedNode.text;
+                let paths = [];
+                const parents = selectedNode.parents;
+                // چون parents از پایین به بالاست، باید معکوس کنیم تا مسیر درست بشه
+                parents.reverse();
+
+                // حذف ریشه '#'
+                parents.forEach(parentId => {
+                    if (parentId !== '#') {
+                        const node = tree.get_node(parentId);
+                        paths.push(node.text);
+                    }
+                });
+                paths.push(nodeText);
+
+
+                // فرم اصلی
+                $(`#selected-account-id`).val(nodeId).trigger('input');
+                const fullPath = paths.join(' > ');
+
+                {#$(`#${uniqueid}-accounts-list`).text(paths.join(' > '));#}
+                $(`#account_name`).val(`${fullPath}`).trigger('input');
+
+
+
+            }
+            function TransferhandleAccountSelection() {
+                const tree = $(`#default-accounts_tree`).jstree(true);
+                const selectedIds = tree.get_selected();
+
+                if (!selectedIds.length) {
+                    alert('لطفاً یک حساب انتخاب کنید.');
+                    return;
+                }
+
+                const selectedNode = tree.get_node(selectedIds[0]);
+                const nodeId = selectedNode.original.real_id || selectedNode.id;
+                const nodeText = selectedNode.text;
+                let paths = [];
+                const parents = selectedNode.parents;
+                // چون parents از پایین به بالاست، باید معکوس کنیم تا مسیر درست بشه
+                parents.reverse();
+
+                // حذف ریشه '#'
+                parents.forEach(parentId => {
+                    if (parentId !== '#') {
+                        const node = tree.get_node(parentId);
+                        paths.push(node.text);
+                    }
+                });
+                paths.push(nodeText);
+
+
+                // فرم اصلی
+                $(`#transfer-selected-account-id`).val(nodeId).trigger('input');
+                const fullPath = paths.join(' > ');
+
+                {#$(`#${uniqueid}-accounts-list`).text(paths.join(' > '));#}
+                $(`#transfer-account_name`).val(`${fullPath}`).trigger('input');
+
+
+
+            }
+
+            // update accounts function
+
+            document.getElementById("selectAll").addEventListener("change", function () {
+                const state = this.checked;
+
+                document.querySelectorAll(".balance-card").forEach(card => {
+                    const id = card.id.replace("balanceCard", "");
+                    toggleHighlight(card, id, state);
+                });
+            });
+
+
+            document.getElementById("applyupdate").addEventListener("click", function () {
+
+                let selectedIds = [];
+                document.querySelectorAll('input[name="selected_balances"]').forEach(input => {
+                    if (input.dataset.selected === "true") {
+                        selectedIds.push(input.value);
+                    }
+                });
+
+                if (selectedIds.length === 0) {
+                    alert("هیچ موردی انتخاب نشده است.");
+                    return;
+                }
+                let transfer_value = $('#transfer-selected-account-id').val()
+
+
+                fetch("{% url 'transfer-accounts' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ 'balances': selectedIds, 'transfer_value': transfer_value })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert("تغییرات با موفقیت اعمال شد.");
+                    document.querySelectorAll('input[name="selected_balances"]').forEach(input => {
+                        input.dataset.selected = "false";
+                    });
+
+                    document.getElementById("selectAll").checked = false;
+                });
+            });
+
+            function appendNextToUpdateLinks() {
+                const fullUrl = window.location.pathname + window.location.search; // کل آدرس فعلی
+                if (!fullUrl) return;
+
+                $('a.update-cheque').each(function() {
+                    let href = $(this).attr('href');
+                    if (!href) return;
+
+                    // جلوگیری از دوبار اضافه شدن
+                    if (href.includes('next=')) return;
+
+                    if (href.includes('?')) {
+                        href += '&next=' + encodeURIComponent(fullUrl);
+                    } else {
+                        href += '?next=' + encodeURIComponent(fullUrl);
+                    }
+
+                    $(this).attr('href', href);
+                });
+            }
+            $(document).ready(function() {
+                // بعد از هر بار Ajax (لیست دوباره لود میشه)
+                $(document).ajaxSuccess(function() {
+                    appendNextToUpdateLinks();
+                });
+            });
+
+        });
+
+
 
     </script>
+
     
 
 {% endblock %}

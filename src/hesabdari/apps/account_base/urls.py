@@ -5,8 +5,7 @@ from hesabdari.apps.account_base.views import createbalancesheet, \
     GetFormFragmentView, AccountsView, UpdateBalanceView, deletechequeview, ChequeListView, filter_payable_cheques, \
     edit_account, delete_account, BalanceListView, \
     filter_balance, create_accounts, account_report, AccountReportDetails, delete_document, \
-    ChangeStatusCheque, filter_receivable_cheques, csv_cheque
-
+    ChangeStatusCheque, filter_receivable_cheques, csv_cheque, UpdateBulkAccount
 
 urlpatterns = [
     path('create-document/', createbalancesheet, name='create-document'),
@@ -27,5 +26,6 @@ urlpatterns = [
     # path('delete-balance/', delete_balance, name='delete_balance'),
     path('delete-document/<int:pk>/', delete_document, name='delete_document'),
     path('change-cheque-status/<int:pk>/', ChangeStatusCheque.as_view(), name='change_status_cheque'),
+    path('transfer-accounts/', UpdateBulkAccount.as_view(), name='transfer-accounts'),
     path('export-csv-cheque/', csv_cheque, name='csv_cheque'),
 ]

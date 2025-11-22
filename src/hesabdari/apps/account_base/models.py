@@ -108,4 +108,3 @@ class CashierCheque(models.Model):
         blank=True,
         null=True,)
     objects = jmodels.jManager()
-

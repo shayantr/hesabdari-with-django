@@ -19,6 +19,7 @@
                 <span><i class="fas fa-calendar-day text-danger"></i> {{ receivable.cheque.maturity_date }}</span>
                 <span><i class="fas fa-money-check-alt text-success"></i> {{ receivable.amount|toman }}</span>
                 <span>دروجه: {{ receivable.cheque.in_cash }}</span>
+                <span>{{ receivable.cheque.account }}</span>
                 <span><i class="fas fa-user-circle text-primary"></i> <b>{{ receivable.cheque.name }}</b></span>
                 <span><i class="ti ti-building-bank text-primary"></i> {{ receivable.account }}</span>
 
