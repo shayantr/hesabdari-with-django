@@ -618,6 +618,8 @@ def filter_receivable_cheques(request):
 
     # فیلترها
     name = request.GET.get('cheque_name')
+    debt_div = request.GET.get('receivable_debt_div')
+    credit_div = request.GET.get('receivable_credit_div')
     status = request.GET.get('cheque_status')
     amount = request.GET.get('amount')
     due_date_from = request.GET.get('due_date_from')
@@ -626,6 +628,8 @@ def filter_receivable_cheques(request):
     created_at_to = request.GET.get('created_at_to')
     description = request.GET.get('description')
     page = request.GET.get('page', 1)
+
+    highlight = "receivable_result_div"
 
     if due_date_from:
         receivables = receivables.filter(cheque__maturity_date__gte=due_date_from).order_by("cheque__maturity_date")
@@ -644,7 +648,12 @@ def filter_receivable_cheques(request):
         receivables = receivables.filter(cheque__name__icontains=name)
     if description:
         receivables = receivables.filter(description__contains=description)
-
+    if debt_div:
+        receivables = receivables.filter(transaction_type='debt')
+        highlight = "receivable_debt_div"
+    if credit_div:
+        receivables = receivables.filter(transaction_type='credit')
+        highlight = "receivable_credit_div"
     # محاسبه جمع‌ها
     aggregates = receivables.aggregate(
         debt=Sum(
@@ -670,13 +679,13 @@ def filter_receivable_cheques(request):
 
     # رندر لیست به html
     html = render_to_string('partials/receivable_cheques.html', {'receivables': current_page})
-
     return JsonResponse({
         'html': html,
         'receivables_debt_amount': receivables_debt_amount,
         'receivables_credit_amount': receivables_credit_amount,
         'has_next': current_page.has_next(),
         'next_page_number': current_page.next_page_number() if current_page.has_next() else None,
+        'highlight': highlight
     })
 
 
@@ -697,6 +706,8 @@ def filter_payable_cheques(request):
     ).order_by("cheque__maturity_date")
 
     # فیلترها
+    debt_div = request.GET.get('payable_debt_div')
+    credit_div = request.GET.get('payable_credit_div')
     name = request.GET.get('cheque_name')
     status = request.GET.get('cheque_status')
     amount = request.GET.get('amount')
@@ -706,6 +717,8 @@ def filter_payable_cheques(request):
     created_at_to = request.GET.get('created_at_to')
     description = request.GET.get('description')
     page = request.GET.get('page', 1)
+
+    highlight = "payable_result_div"
 
     if due_date_from:
         payables = payables.filter(cheque__maturity_date__gte=due_date_from).order_by("cheque__maturity_date")
@@ -723,6 +736,12 @@ def filter_payable_cheques(request):
         payables = payables.filter(cheque__name__icontains=name)
     if description:
         payables = payables.filter(description__contains=description)
+    if debt_div:
+        payables = payables.filter(transaction_type='debt')
+        highlight = "payable_debt_div"
+    if credit_div:
+        payables = payables.filter(transaction_type='credit')
+        highlight = "payable_credit_div"
 
     # محاسبه جمع‌ها
     aggregates = payables.aggregate(
@@ -754,6 +773,7 @@ def filter_payable_cheques(request):
         'payables_credit_amount': payables_credit_amount,
         'has_next': current_page.has_next(),
         'next_page_number': current_page.next_page_number() if current_page.has_next() else None,
+        "highlight": highlight,
     })
 
 

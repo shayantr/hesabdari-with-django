@@ -68,6 +68,12 @@
     z-index: 10;
     }
 
+    .selectable-active {
+        background-color: #e5f2ff; /* آبی خیلی ملایم */
+        border-radius: 12px;
+        transform: scale(1.02);
+    }
+
 </style>
 
 {% endblock %}
@@ -131,6 +137,10 @@
                     </div>
                 </div>
 
+            <input type="hidden" name="receivable_debt_div" id="receivable_debt_input">
+            <input type="hidden" name="receivable_credit_div" id="receivable_credit_input">
+            <input type="hidden" name="receivable_result_div" id="receivable_result_input">
+
             </form>
             <a id="receivable-export-excel" class="btn btn-success" href="#">
                 دانلود اکسل
@@ -146,15 +156,15 @@
                 <span>در حال بارگذاری...</span>
         </div>
         <div id="receivables-summary" class=" summary-bar row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
-          <div class="col-4">
+          <div class="col-4" id="receivable_debt_div">
             <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
             <span id="receivables-debt-amount" class="font-bold text-red-600">{{ receivables_debt_amount|toman }}</span>
           </div>
-          <div class="col-4">
+          <div class="col-4" id="receivable_credit_div">
             <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
             <span id="receivables-credit-amount" class="font-bold text-green-600">{{ receivables_credit_amount|toman }}</span>
           </div>
-            <div class="col-4">
+            <div class="col-4" id="receivable_result_div">
             <span class="font-semibold text-gray-700">مانده:</span>
             <span id="receivables-balance-amount" class="font-bold">{{ receivables_balance|toman }}</span>
           </div>
@@ -205,6 +215,9 @@
                         <input type="text" class="form-control" name="due_date_to" data-jdp placeholder="تاریخ سررسید تا">
                     </div>
                 </div>
+            <input type="hidden" name="payable_debt_div" id="payable_debt_input">
+            <input type="hidden" name="payable_credit_div" id="payable_credit_input">
+            <input type="hidden" name="payable_result_div" id="payable_result_input">
 
             </form>
             <a id="payable-export-excel" class="btn btn-success" href="#">
@@ -223,15 +236,15 @@
                 <span>در حال بارگذاری...</span>
             </div>
 <div id="payables-summary" class=" summary-bar row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
-  <div class="col-4">
+  <div class="col-4" id="payable_debt_div">
     <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
     <span id="payables-debt-amount" class="font-bold text-red-600">{{ payables_debt_amount|toman }}</span>
   </div>
-  <div class="col-4">
+  <div class="col-4" id="payable_credit_div">
     <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
     <span id="payables-credit-amount" class="font-bold text-green-600">{{ payables_credit_amount|toman }}</span>
   </div>
-    <div class="col-4">
+    <div class="col-4" id="payable_result_div">
     <span class="font-semibold text-gray-700">مانده:</span>
     <span id="payables-balance-amount" class="font-bold">{{ payables_balance }}</span>
   </div>
@@ -258,6 +271,7 @@ $(document).ready(function () {
         const params = $('#payable-filter-form').serialize() + '&tab=payable';  // فیلترهای فعلی
         window.location = '/accounts/export-csv-cheque/?' + params;
     });
+
     let receivablesSearchTimeout = null;
     let recivable_page=1;
     let recivable_loading = false;
@@ -284,6 +298,7 @@ $(document).ready(function () {
             success: function (data) {
                 $('#recivable_loading').show();
                 observer.observe(document.querySelector('#recivable_loading'));
+                $("#"+data.highlight).addClass('selectable-active')
 
                 $('#recivable-cheques-list').html(data.html);
                 $('#receivables-debt-amount').text(data.receivables_debt_amount.toLocaleString());
@@ -325,6 +340,7 @@ $(document).ready(function () {
             url: "{% url 'filter_receivable_cheques' %}",
             data: $('#recivable-filter-form').serialize() + '&tab=recivable&page=' + recivable_page,
             success: function (data) {
+                $("#"+data.highlight).addClass('selectable-active')
                 $('#recivable-cheques-list').append(data.html);
                 if (data.has_next) {
                     recivable_page = data.next_page_number;
@@ -388,6 +404,7 @@ $(document).ready(function () {
                 url: "{% url 'filter_payable_cheques' %}",
                 data: $('#payable-filter-form').serialize() + '&tab=payable',
                 success: function (data) {
+                    $("#"+data.highlight).addClass('selectable-active')
                     $('#payable_loading').show();
                     payable_observer.observe(document.querySelector('#payable_loading'));
                     $('#payable-cheques-list').html(data.html);
@@ -428,6 +445,7 @@ $(document).ready(function () {
             url: "{% url 'filter_payable_cheques' %}",
             data: $('#payable-filter-form').serialize() + '&tab=payable&page=' + payable_page,
             success: function (data) {
+                $("#"+data.highlight).addClass('selectable-active')
                 $('#payable-cheques-list').append(data.html);
                 if (data.has_next) {
                     payable_page = data.next_page_number;
@@ -506,6 +524,67 @@ $(document).ready(function () {
     $('#recivable-filter-form input, #recivable-filter-form select').on('input change keyup', filterrecivables);
     $('#payable-filter-form input, #payable-filter-form select').on('input change keyup', filterpayables);
 
+    const inputIds = ["receivable_debt_input", "receivable_credit_input", "receivable_result_input", "payable_debt_input", "payable_credit_input", "payable_result_input"];
+    const divIds = ["receivable_debt_div", "receivable_credit_div", "receivable_result_div", "payable_debt_div", "payable_credit_div", "payable_result_div"];
+    document.addEventListener("click", function(e) {
+
+        const clickedDebt  = e.target.closest("#receivable_debt_div");
+        const clickedCredit = e.target.closest("#receivable_credit_div");
+        const clickedResult = e.target.closest("#receivable_result_div");
+        const payable_clickedDebt  = e.target.closest("#payable_debt_div");
+        const payable_clickedCredit = e.target.closest("#payable_credit_div");
+        const payable_clickedResult = e.target.closest("#payable_result_div");
+
+        // پاک‌کردن مقدار input ها
+        inputIds.forEach(id => {
+            const inp = document.getElementById(id);
+            if (inp) inp.value = "";
+
+        });
+
+        // پاک‌کردن هایلایت
+        divIds.forEach(id => {
+            const d = document.getElementById(id);
+            if (d) d.classList.remove("selectable-active");
+        });
+
+        // تشخیص اینکه روی کدام div زده شده
+        if (clickedDebt) {
+            clickedDebt.classList.add("selectable-active");
+            document.getElementById("receivable_debt_input").value = "clicked";
+            filterrecivables();
+        }
+        if (payable_clickedDebt){
+            payable_clickedDebt.classList.add("selectable-active");
+            document.getElementById("payable_debt_input").value = "clicked";
+            filterpayables();
+        }
+
+        if (clickedCredit) {
+            clickedCredit.classList.add("selectable-active");
+            document.getElementById("receivable_credit_input").value = "clicked";
+            filterrecivables();
+        }
+        if (payable_clickedCredit) {
+                payable_clickedCredit.classList.add("selectable-active");
+                document.getElementById("payable_credit_input").value = "clicked";
+                filterpayables();
+        }
+
+        if (clickedResult) {
+            clickedResult.classList.add("selectable-active");
+            document.getElementById("receivable_result_input").value = "clicked";
+            filterrecivables();
+        }
+        if (payable_clickedResult){
+            payable_clickedResult.classList.add("selectable-active");
+            document.getElementById("payable_result_input").value = "clicked";
+            filterpayables();
+        }
+
+    });
+
+
     // back/forward مرورگر
     window.onpopstate = function () {
         fillFormsFromUrl();
@@ -513,7 +592,6 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-
     // فعال کردن تب بر اساس URL
     function activateTabFromUrl() {
         const params = new URLSearchParams(window.location.search);
@@ -557,9 +635,6 @@ $(document).ready(function () {
 
 function appendNextToUpdateLinks() {
     const fullUrl = window.location.pathname + window.location.search; // کل آدرس فعلی
-    console.log(window.location.pathname)
-    console.log(window.location.search)
-
     if (!fullUrl) return;
 
     $('a.update-cheque').each(function() {
