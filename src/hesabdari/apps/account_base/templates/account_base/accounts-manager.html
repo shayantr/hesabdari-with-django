@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block header %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+<link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}" />
+<script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+<div class="row mb-3">
+
+  {% csrf_token %}
+
+</div>
+
+<div id="accounts-report">
+
+</div>
+<script>
+    jalaliDatepicker.startWatch();
+
+$(document).ready(function () {
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+
+    function loadTree(uniqueid) {
+        $.getJSON("{% url 'get_accounts_list' %}", function (response) {
+
+            const treeElement = $(`#${uniqueid}-accounts_tree`);
+            if (!treeElement.length) return;
+
+            const tree = treeElement.jstree(true);
+            if (tree) {
+                tree.settings.core.data = response.data;
+                tree.refresh(true);
+            } else {
+                createTree(uniqueid, response.data);
+            }
+        });
+    }
+
+    function createTree(uniqueid, data) {
+        const treeElement = $(`#${uniqueid}-accounts_tree`);
+        if (!treeElement.length) return;
+
+
+        treeElement.jstree("destroy");
+        treeElement.jstree({
+            core: {
+                data: data,
+                check_callback: true,
+                themes: { stripes: true }
+            },
+            plugins: ['wholerow', 'search'],
+                }).on('ready.jstree refresh.jstree open_node.jstree', function () {
+                    addControlsToNodes(uniqueid);
+                    $(`#${uniqueid}-accounts_tree`).off('click', 'a.btn-edit').on('click', 'a.btn-edit', function (e) {
+                        e.stopPropagation(); // جلوی کلیک روی نود رو بگیر
+                    });
+                });
+    }
+    function addControlsToNodes(uniqueid) {
+        const tree = $(`#${uniqueid}-accounts_tree`).jstree(true);
+        const nodes = tree.get_json('#', { flat: true });
+
+        nodes.forEach(node => {
+            const nodeId = node.id;
+            const realId = node.original?.real_id || node.id;
+            const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
+
+            if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
+                const $buttons = $('<span class="ms-auto">')
+                    .append(`<button type="button" class="btn btn-sm btn-edit" data-uid="${uniqueid}" data-id="${realId}">📝</button>`)
+                    .append(`<button type="button" class="btn btn-sm btn-delete" data-uid="${uniqueid}" data-id="${realId}">🗑</button>`)
+                    .append(`<button type="button" class="btn btn-sm btn-add-child" data-uid="${uniqueid}" data-id="${realId}">➕</button>`);
+
+                $anchor.append($buttons);
+            }
+        });
+    }
+
+    function renameAccountNode(nodeId, newText) {
+        $("select[id*='balance-account']").each(function () {
+            $(this).find(`option[value='${nodeId}']`).text(newText);
+        });
+    }
+
+    function deleteAccountNode(nodeIdToDelete) {
+        $("select[id*='balance-account']").each(function () {
+            $(this).find(`option[value='${nodeIdToDelete}']`).remove();
+        });
+    }
+
+    $(document).on('click', '.btn-edit, .btn-add-child', function () {
+        const $btn = $(this);
+        const isEdit = $btn.hasClass('btn-edit');
+        const nodeId = $btn.data('id');
+        const uniqueid = $btn.data('uid');
+        const $node = $(`#${uniqueid}-accounts_tree #${nodeId}`);
+
+        if ($node.find('.node-form-container').length) return;
+
+        const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
+        const currentText = isEdit ? $anchor.clone().children().remove().end().text().trim() : '';
+
+        const $input = $('<input>', {
+            type: 'text',
+            class: 'form-control form-control-sm me-2 d-inline-block',
+            value: currentText,
+            style: 'width: 60%; max-width: 250px;'
+        });
+
+        const $save = $('<button>', {
+            type: 'button',
+            class: 'btn btn-sm btn-success me-1',
+            html: '💾'
+        });
+
+        const $cancel = $('<button>', {
+            type: 'button',
+            class: 'btn btn-sm btn-outline-secondary',
+            html: '❌'
+        });
+
+        const $form = $('<div class="node-form-container mt-1 d-flex align-items-center">')
+            .append($input, $save, $cancel);
+
+        $node.append($form);
+
+        $cancel.click(() => $form.remove());
+
+        $save.click(function () {
+            const name = $input.val().trim();
+            if (!name) return alert('نام نباید خالی باشد!');
+            const csrf = getCSRFToken();
+
+            if (isEdit) {
+                $.post("{% url 'edit_account' pk=0 %}".replace('0', nodeId), {
+                    name,
+                    csrfmiddlewaretoken: csrf
+                }, function (res) {
+                    if (res.success) {
+                        loadTree(uniqueid);
+                        renameAccountNode(nodeId, name);
+                    } else alert(res.error || 'خطا در ویرایش');
+                });
+            } else {
+                $.post("{% url 'create_accounts' %}", {
+                    name,
+                    parent: nodeId,
+                    csrfmiddlewaretoken: csrf
+                }, function (res) {
+                    if (res.success) loadTree(uniqueid);
+                    else alert('خطا در افزودن حساب');
+                });
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-delete', function () {
+        const nodeId = $(this).data('id');
+        const uniqueid = $(this).data('uid');
+
+        Swal.fire({
+            title: 'حذف حساب؟',
+            text: 'آیا مطمئن هستید؟ این عملیات قابل بازگشت نیست!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'بله، حذف کن',
+            cancelButtonText: 'انصراف'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post("{% url 'delete_account' pk=0 %}".replace('0', nodeId), {
+                    csrfmiddlewaretoken: getCSRFToken()
+                }, function (res) {
+                    if (res.success) {
+                        deleteAccountNode(nodeId);
+                        loadTree(uniqueid);
+                        Swal.fire('حذف شد!', 'حساب با موفقیت حذف شد.', 'success');
+                    } else {
+                        Swal.fire('خطا', res.error || 'خطا در حذف حساب', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    $(document).on('click', '.add-root-btn', function () {
+    const uniqueid = $(this).data('uid');
+
+    // بررسی وجود فرم قبلی فقط در همین بخش
+    if ($(`#${uniqueid}-new_root_input_row`).length) return;
+
+    const $input = $('<input>', {
+        type: 'text',
+        id: `${uniqueid}-new_root_input`,
+        class: 'form-control form-control-sm me-2 d-inline-block',
+        placeholder: 'نام حساب ریشه‌ای',
+        style: 'width: 60%; max-width: 250px;'
+    });
+
+    const $save = $('<button>', {
+        type: 'button',
+        class: 'btn btn-sm btn-success me-1',
+        html: '💾'
+    });
+
+    const $cancel = $('<button>', {
+        type: 'button',
+        class: 'btn btn-sm btn-outline-secondary',
+        html: '❌'
+    });
+
+    const $row = $(`<div id="${uniqueid}-new_root_input_row" class="mb-2 d-flex align-items-center"></div>`)
+        .append($input, $save, $cancel);
+
+    $(this).after($row);
+
+    $cancel.click(() => $row.remove());
+
+    $save.click(function () {
+        const name = $input.val().trim();
+        if (!name) return alert('نام نباید خالی باشد!');
+
+        $.post("{% url 'create_accounts' %}", {
+            name,
+            csrfmiddlewaretoken: getCSRFToken()
+        }, function (res) {
+            if (res.success) {
+                $row.remove();
+                loadTree(uniqueid);
+            } else {
+                alert('خطا در افزودن حساب');
+            }
+        });
+    });
+});
+
+    $.ajax({
+        url: "{% url 'get_accounts_list' %}",
+        type: "GET",
+        success: function (response) {
+            $('#accounts-report').html(response.form_html);
+
+            createTree('default', response.data);
+            //search bank
+            let to = false;
+            $(`#default-jstree-search`).on('keyup', function () {
+                if (to) clearTimeout(to);
+                to = setTimeout(function () {
+                    const query = $(`#default-jstree-search`).val();
+                    $(`#default-accounts_tree`).jstree(true).search(query);
+                }, 250);
+            });
+
+        }
+    });
+
+    });
+</script>
+
+{% endblock %}
+
+
+

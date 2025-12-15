@@ -172,43 +172,64 @@
         border-radius: 12px;
         transform: scale(1.02);
     }
+
+
+
+    .accounting-header-row {
+        min-height: 36px;
+        font-size: 13px;
+        color: #444;
+    }
+
+    /* موبایل */
+    @media (max-width: 576px) {
+        .accounting-header-row {
+            font-size: 12px;
+            min-height: 32px;
+        }
+    }
+
+    .accounting-sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    background-color: #fafafa;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+    border-radius: 9px;
+    border-bottom: 5px rebeccapurple;
+    border-bottom-style: groove;
+    margin-bottom: 3%;
+    }
+
 </style>
 
     {% endblock %}
 
 {% block body %}
     <h2>گزارش سند ها</h2>
-
-        
-        
-        <!-- Modal -->
-        <div class="modal fade" id="accounts-lists" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <!-- Modal -->
+    <div class="modal fade" id="accounts-lists" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="mb-0">انتخاب حساب</h5>
                 </div>
                 <div class="modal-body">
-                <div id="accounts-report"></div>
+                    <div id="accounts-report"></div>
                 </div>
                 <div class="modal-footer justify-content-between collapse multi-collapse show">
                     <div class="flex-grow-1 text-end" id="save-decline-filter">
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-        
-        <form id="search-filter-form">
-            <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;">
-                <div class="col-md-3 mb-2">
-                
-                    <input type="text" name="account_id" id="selected-account-id" hidden>
-                    <div class="input-group">
-                   
-                  
+    <!-- search form -->
+    <form id="search-filter-form">
+        <div class="row mb-3 p-3 rounded" style="background-color: #e7f7ec;">
+            <div class="col-md-3 mb-2">
+                <input type="text" name="account_id" id="selected-account-id" hidden>
+                <div class="input-group">
                     <input type="text" id="account_name" name="account_name" placeholder="جستجو نام حساب" class="form-control" readonly>
                     <div class="input-group-text"><button type="button"
                         class="btn btn-sm btn-light-secondary" data-bs-toggle="modal"
@@ -216,166 +237,165 @@
                         id="accounts-list-btn">
                         <i class="ph-duotone ph-pencil-simple-line"></i> انتخاب
                     </button></div>
-                  </div>  
-                </div>
-                <div class="col-md-3 mb-2">
-                    <input type="text" name="description" placeholder="جستجو در توضیحات" class="form-control mb-2">
-                </div>
-                <div class="col-md-3 mb-2">
-                    <input type="text" name="amount" placeholder="مبلغ" class="form-control mb-2">
-                </div>
-                
-                <div class="col-md-3 mb-2">
-                    <input type="text" name="document_id" placeholder="شماره روکش" class="form-control mb-2">
                 </div>
             </div>
-            <!-- بخش اول: تاریخ ثبت -->
-            <div class="row mb-3 p-3 rounded" style="background-color: #e8f0fe;">
-                <label class="mb-2 fw-bold">تاریخ ثبت:</label>
-                <div class="col-md-6 mb-2">
-                    <input type="text" class="form-control" name="created_at_from" data-jdp placeholder="تاریخ ثبت از">
-                </div>
-                <div class="col-md-6 mb-2">
-                    <input type="text" class="form-control" name="created_at_to" data-jdp placeholder="تاریخ ثبت تا">
-                </div>
+            <div class="col-md-3 mb-2">
+                <input type="text" name="description" placeholder="جستجو در توضیحات" class="form-control mb-2">
             </div>
+            <div class="col-md-3 mb-2">
+                <input type="text" name="amount" placeholder="مبلغ" class="form-control mb-2">
+            </div>
+            <div class="col-md-3 mb-2">
+                <input type="text" name="document_id" placeholder="شماره روکش" class="form-control mb-2">
+            </div>
+        </div>
+        <!-- بخش اول: تاریخ ثبت -->
+        <div class="row mb-3 p-3 rounded" style="background-color: #e8f0fe;">
+            <label class="mb-2 fw-bold">تاریخ ثبت:</label>
+            <div class="col-md-6 mb-2">
+                <input type="text" class="form-control" name="created_at_from" data-jdp placeholder="تاریخ ثبت از">
+            </div>
+            <div class="col-md-6 mb-2">
+                <input type="text" class="form-control" name="created_at_to" data-jdp placeholder="تاریخ ثبت تا">
+            </div>
+        </div>
 
-            <input type="hidden" name="debt_div" id="debt_input">
-            <input type="hidden" name="credit_div" id="credit_input">
-            <input type="hidden" name="result_div" id="result_input">
-
-
-        </form>
-                <div id="balance-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
-                    <div class="col-4" id="debt_div">
-                        <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
-                        <span id="total-debt" class="font-bold debt-color">{{ total_debt|toman }}</span>
-                    </div>
-                    <div class="col-4" id="credit_div">
-                        <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
-                        <span id="total-credit" class="font-bold text-red-600">{{ total_credit|toman }}</span>
-                    </div>
-                        <div class="col-4" id="result_div">
-                        <span class="font-semibold text-gray-700">مانده:</span>
-                    <span id="total-balance" class="font-bold {% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">{{ total_balance|toman }}</span>
-                    </div>
-                </div>
-        <div class="container py-4">
-          <div class="card filter-card">
+        <input type="hidden" name="debt_div" id="debt_input">
+        <input type="hidden" name="credit_div" id="credit_input">
+        <input type="hidden" name="result_div" id="result_input">
+    </form>
+    <div id="balance-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
+        <div class="col-4" id="debt_div">
+            <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
+            <span id="total-debt" class="font-bold debt-color">{{ total_debt|toman }}</span>
+        </div>
+        <div class="col-4" id="credit_div">
+            <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
+            <span id="total-credit" class="font-bold text-red-600">{{ total_credit|toman }}</span>
+        </div>
+        <div class="col-4" id="result_div">
+            <span class="font-semibold text-gray-700">مانده:</span>
+            <span id="total-balance" class="font-bold {% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">{{ total_balance|toman }}</span>
+        </div>
+    </div>
+    <div class="container py-4">
+        <div class="card filter-card">
             <button class="btn btn-primary filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
               🔽 فیلتر تغییرات
             </button>
 
             <div class="collapse mt-3" id="filterCollapse">
-              <div class="col-md-3 mb-2">
+                <div class="col-md-3 mb-2">
 
-                <input type="text" name="account_transfer_id" id="transfer-selected-account-id" hidden>
-                <div class="input-group">
+                    <input type="text" name="account_transfer_id" id="transfer-selected-account-id" hidden>
+                    <div class="input-group">
 
-                <input type="text" id="transfer-account_name" name="transfer-account_name" placeholder="جستجو نام حساب" class="form-control" readonly>
-                <div class="input-group-text"><button type="button"
-                    class="btn btn-sm btn-light-secondary" data-bs-toggle="modal"
-                    data-bs-target="#accounts-lists"
-                    id="transfer-accounts-list-btn">
-                    <i class="ph-duotone ph-pencil-simple-line"></i> انتخاب
-                </button></div>
-              </div>
+                    <input type="text" id="transfer-account_name" name="transfer-account_name" placeholder="جستجو نام حساب" class="form-control" readonly>
+                    <div class="input-group-text"><button type="button"
+                        class="btn btn-sm btn-light-secondary" data-bs-toggle="modal"
+                        data-bs-target="#accounts-lists"
+                        id="transfer-accounts-list-btn">
+                        <i class="ph-duotone ph-pencil-simple-line"></i> انتخاب
+                    </button></div>
+                    </div>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" value="" id="selectAll">
+                    <label class="form-check-label" for="selectAll">انتخاب همه</label>
+                </div>
+
+            <button class="btn btn-success w-100" id="applyupdate">اعمال تغییرات</button>
             </div>
-
-              <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" value="" id="selectAll">
-                <label class="form-check-label" for="selectAll">
-                  انتخاب همه
-                </label>
-              </div>
-
-              <button class="btn btn-success w-100" id="applyupdate">اعمال تغییرات</button>
+        </div>
+    </div>
+    <div class="accounting-sticky-header sticky-top bg-white">
+        <div class="container-fluid px-2">
+            <div class="row text-center align-items-center accounting-header-row">
+                <div class="col-4">
+                    تاریخ
+                </div>
+                <div class="col-4 fw-semibold">
+                    مبلغ
+                </div>
+                <div class="col-4">
+                    مانده
+                </div>
             </div>
-          </div>
         </div>
-        <div id="search-balance-list">
-            {% include "partials/search_balance.html" %}
-          
-        </div>
-        <div id="balance_loading">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <span>در حال بارگذاری...</span>
-        </div>
+    </div>
+    <div id="search-balance-list">
+        {% include "partials/search_balance.html" %}
+
+    </div>
+    <div id="balance_loading">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <span>در حال بارگذاری...</span>
+    </div>
         <div id="pre-balance-summary" class=" summary-bar row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
-                <div class="col-4" id="debt_div">
-                    <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
-                    <span id="pre-total-debt" class="font-bold debt-color">0</span>
-                </div>
-                <div class="col-4" id="credit_div">
-                    <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
-                    <span id="pre-total-credit" class="font-bold text-red-600">0</span>
-                </div>
-                    <div class="col-4" id="result_div">
-                    <span class="font-semibold text-gray-700">مانده:</span>
+            <div class="col-4" id="debt_div">
+                <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
+                <span id="pre-total-debt" class="font-bold debt-color">0</span>
+            </div>
+            <div class="col-4" id="credit_div">
+                <span class="font-semibold text-gray-700">جمع بستانکاری:</span>
+                <span id="pre-total-credit" class="font-bold text-red-600">0</span>
+            </div>
+            <div class="col-4" id="result_div">
+                <span class="font-semibold text-gray-700">مانده:</span>
                 <span id="pre-total-balance" class="font-bold">0</span>
             </div>
-            
-            </div>
+        </div>
     <script src="{% static 'js/plugins/isotope.pkgd.min.js' %}"></script>
     <script src="{% static 'js/plugins/index.js' %}"></script>
     <script>
         jalaliDatepicker.startWatch();
-document.addEventListener("DOMContentLoaded", function() {
-
-
-
-});
-
-
         $(document).ready(function () {
-
+            // highlighting, search total debt, credit and result balances
+            document.addEventListener("click", function(e) {
                 const inputIds = ["debt_input", "credit_input", "result_input"];
                 const divIds = ["debt_div", "credit_div", "result_div"];
-
-                document.addEventListener("click", function(e) {
-
-                    const clickedDebt  = e.target.closest("#debt_div");
-                    const clickedCredit = e.target.closest("#credit_div");
-                    const clickedResult = e.target.closest("#result_div");
-
-                    // پاک‌کردن مقدار input ها
-                    inputIds.forEach(id => {
-                        const inp = document.getElementById(id);
-                        if (inp) inp.value = "";
-
-                    });
-
-                    // پاک‌کردن هایلایت
-                    divIds.forEach(id => {
-                        const d = document.getElementById(id);
-                        if (d) d.classList.remove("selectable-active");
-                    });
-
-                    // تشخیص اینکه روی کدام div زده شده
-                    if (clickedDebt) {
-                        document.getElementById("debt_input").value = "clicked";
-                        clickedDebt.classList.add("selectable-active");
-                        filterbalance();
-
-                    }
-
-                    if (clickedCredit) {
-                        document.getElementById("credit_input").value = "clicked";
-                        clickedCredit.classList.add("selectable-active");
-                        filterbalance();
-
-                    }
-
-                    if (clickedResult) {
-                        document.getElementById("result_input").value = "clicked";
-                        clickedResult.classList.add("selectable-active");
-                        filterbalance();
-
-                    }
-
+                const clickedDebt  = e.target.closest("#debt_div");
+                const clickedCredit = e.target.closest("#credit_div");
+                const clickedResult = e.target.closest("#result_div");
+                // پاک‌کردن مقدار input ها
+                inputIds.forEach(id => {
+                    const inp = document.getElementById(id);
+                    if (inp) inp.value = "";
                 });
+
+                // پاک‌کردن هایلایت
+                divIds.forEach(id => {
+                    const d = document.getElementById(id);
+                    if (d) d.classList.remove("selectable-active");
+                });
+
+                // تشخیص اینکه روی کدام div زده شده
+                if (clickedDebt) {
+                    document.getElementById("debt_input").value = "clicked";
+                    clickedDebt.classList.add("selectable-active");
+                    filterbalance();
+
+                }
+
+                if (clickedCredit) {
+                    document.getElementById("credit_input").value = "clicked";
+                    clickedCredit.classList.add("selectable-active");
+                    filterbalance();
+
+                }
+
+                if (clickedResult) {
+                    document.getElementById("result_input").value = "clicked";
+                    clickedResult.classList.add("selectable-active");
+                    filterbalance();
+
+                }
+
+            });
+            // filter balance list function
             let searchtimaout = null;
             let balance_page=1;
             let balance_loading = false;
@@ -416,9 +436,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
                         // تغییر رنگ مانده
                         if (balance < 0) {
-                            $balanceEl.removeClass('text-red-600').addClass('text-red-600');
+                            $balanceEl.removeClass('debt-color').addClass('text-red-600');
                         } else {
-                            $balanceEl.removeClass('debt-color').addClass('debt-color');
+                            $balanceEl.removeClass('text-red-600').addClass('debt-color');
                         }
                         $('#balance_loading').show();
                         observer.observe(document.querySelector('#balance_loading'));
@@ -437,7 +457,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
                 }, 1000);
             }
-
+            // initial the list
             function loadbalance(){
                 if (balance_loading) {
                     observer.unobserve(document.querySelector('#balance_loading'));
@@ -486,8 +506,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
 
             }
-
-
             const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -518,7 +536,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 filterbalance();
             }
 
-            // هندل تغییرات فرم
+            // search form changes handeling
             $('#search-filter-form input, #search-filter-form select').on('input change keyup', filterbalance);
 
             // load tree account for search
@@ -733,7 +751,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             }
 
-            // update accounts function
+            // update accounts section function
 
             document.getElementById("selectAll").addEventListener("change", function () {
                 const state = this.checked;
@@ -755,28 +773,61 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
 
                 if (selectedIds.length === 0) {
-                    alert("هیچ موردی انتخاب نشده است.");
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'هشدار',
+                        text: 'هیچ موردی انتخاب نشده است'
+                    });
                     return;
                 }
-                let transfer_value = $('#transfer-selected-account-id').val()
 
+                let transfer_value = $('#transfer-selected-account-id').val();
 
-                fetch("{% url 'transfer-accounts' %}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": "{{ csrf_token }}"
-                    },
-                    body: JSON.stringify({ 'balances': selectedIds, 'transfer_value': transfer_value })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    alert("تغییرات با موفقیت اعمال شد.");
-                    document.querySelectorAll('input[name="selected_balances"]').forEach(input => {
-                        input.dataset.selected = "false";
+                // SweetAlert تایید
+                Swal.fire({
+                    title: 'آیا مطمئن هستید؟',
+                    text: 'آیا از اعمال این تغییرات اطمینان دارید؟',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'بله، اعمال شود',
+                    cancelButtonText: 'انصراف'
+                }).then((result) => {
+
+                    if (!result.isConfirmed) {
+                        return;
+                    }
+
+                    fetch("{% url 'transfer-accounts' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: JSON.stringify({
+                            balances: selectedIds,
+                            transfer_value: transfer_value
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'موفق',
+                            text: 'تغییرات با موفقیت اعمال شد'
+                        }).then(() => {
+                            // رفرش صفحه
+                            location.reload();
+                        });
+
+                    })
+                    .catch(() => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطا',
+                            text: 'خطایی در انجام عملیات رخ داد'
+                        });
                     });
-
-                    document.getElementById("selectAll").checked = false;
                 });
             });
 
@@ -808,9 +859,21 @@ document.addEventListener("DOMContentLoaded", function() {
             });
 
         });
+        function toggleHighlight(cardEl, balanceId, forceState = null) {
+            let applyState = forceState !== null ? forceState : !cardEl.classList.contains('highlighted');
 
+            if (applyState) {
+                cardEl.classList.add('highlighted');
+                cardEl.setAttribute('aria-pressed', 'true');
+            } else {
+                cardEl.classList.remove('highlighted');
+                cardEl.setAttribute('aria-pressed', 'false');
+            }
 
-
+            // ست کردن hidden input (چک باکس منطقی)
+            const hiddenInput = document.getElementById('chk' + balanceId);
+            hiddenInput.dataset.selected = applyState ? "true" : "false";
+        }
     </script>
 
     

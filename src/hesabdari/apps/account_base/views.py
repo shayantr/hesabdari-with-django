@@ -1,4 +1,5 @@
 import json
+import os
 import time
 import urllib
 from collections import namedtuple
@@ -10,6 +11,7 @@ import jdatetime
 import uuid
 
 import openpyxl
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -18,7 +20,7 @@ from django.core.paginator import Paginator
 from django.db import transaction, DatabaseError
 from django.db.models import Q, Prefetch, Max, Sum, Case, IntegerField, When, F
 from django.db.transaction import commit
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404, HttpResponseForbidden, FileResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.base import kwarg_re
 from django.template.loader import render_to_string
@@ -28,10 +30,12 @@ from django.views import generic
 from django.views.decorators.http import require_POST
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.reverse import reverse_lazy
 
 from hesabdari.apps.account_base.forms import BalanceSheetForm, CashierChequeForm, \
     DocumentForm, AccountsForm
 from hesabdari.apps.account_base.models import AccountsClass, Document, BalanceSheet, CashierCheque
+from hesabdari.apps.account_base.services.backup import backup_full_system
 
 User = get_user_model()
 
@@ -550,54 +554,7 @@ def deletechequeview(request):
 
 class ChequeListView(LoginRequiredMixin, generic.View):
     def get(self, request):
-
-        # qs = BalanceSheet.objects.filter(
-        #     user=request.user.id,
-        #     cheque__isnull=False,
-        #     is_active=True
-        # ).select_related('cheque')
-        #
-        # aggregates = qs.aggregate(
-        #     receivables_debt=Sum(
-        #         Case(
-        #             When(cheque__cheque_type='دریافتنی', transaction_type='debt', then='amount'),
-        #             output_field=IntegerField(),
-        #         )
-        #     ),
-        #     receivables_credit=Sum(
-        #         Case(
-        #             When(cheque__cheque_type='دریافتنی', transaction_type='credit', then='amount'),
-        #             output_field=IntegerField(),
-        #         )
-        #     ),
-        #     payables_debt=Sum(
-        #         Case(
-        #             When(cheque__cheque_type='پرداختنی', transaction_type='debt', then='amount'),
-        #             output_field=IntegerField(),
-        #         )
-        #     ),
-        #     payables_credit=Sum(
-        #         Case(
-        #             When(cheque__cheque_type='پرداختنی', transaction_type='credit', then='amount'),
-        #             output_field=IntegerField(),
-        #         )
-        #     ),
-        # )
-        # payables_debt_amount = aggregates['payables_debt'] or 0
-        # payables_credit_amount = aggregates['payables_credit'] or 0
-        # receivables_debt_amount = aggregates['receivables_debt'] or 0
-        # receivables_credit_amount = aggregates['receivables_credit'] or 0
-
-        context = {
-            # 'receivables': qs.filter(cheque__cheque_type='دریافتنی').order_by("cheque__maturity_date"),
-            # 'payables': qs.filter(cheque__cheque_type='پرداختنی').order_by("cheque__maturity_date"),
-            # 'receivables_debt_amount': aggregates['receivables_debt'] or 0,
-            # 'receivables_credit_amount': aggregates['receivables_credit'] or 0,
-            # 'receivables_balance': receivables_debt_amount - receivables_credit_amount,
-            # 'payables_debt_amount': aggregates['payables_debt'] or 0,
-            # 'payables_credit_amount': aggregates['payables_credit'] or 0,
-            # 'payables_balance': payables_debt_amount - payables_credit_amount
-        }
+        context = {}
         return render(request, 'account_base/cheque-lists.html', context)
 
 
@@ -943,46 +900,8 @@ def delete_account(request, pk):
 
 class BalanceListView(LoginRequiredMixin, generic.View):
     def get(self, request):
-        # qs = BalanceSheet.objects.select_related('cheque', 'document').prefetch_related(
-        #     'document__items__account').filter(user=request.user.id)
-        # aggregates = qs.aggregate(
-        #     debt=Sum(
-        #         Case(
-        #             When(transaction_type='debt', then='amount'),
-        #             output_field=IntegerField(),
-        #         )
-        #     ),
-        #     credit=Sum(
-        #         Case(
-        #             When(transaction_type='credit', then='amount'),
-        #             output_field=IntegerField(),
-        #         )
-        #     ),
-        #
-        # )
-        # total_debt = aggregates['debt'] or 0
-        # total_credit = aggregates['credit'] or 0
-        # balance_list = []
-        # running_balance = 0  # مانده اول دوره
-        # for item in qs.order_by('document__date_created', 'id'):  # مرتب از قدیم به جدید
-        #     doc = item.document
-        #     if item.transaction_type == 'debt':  # بدهکاری
-        #         running_balance += item.amount
-        #     elif item.transaction_type == 'credit':  # بستانکاری
-        #         running_balance -= item.amount
-        #     item.running_balance = running_balance
-        #     people = {i.account.name for i in doc.items.all() if item.transaction_type != i.transaction_type}
-        #     item.people = people
-        #     balance_list.append(item)
-        # total_balance = total_debt - total_credit
-        context = {
-            # 'balance_lists': reversed(balance_list),
-            # 'total_debt': total_debt,
-            # 'total_credit': total_credit,
-            # 'total_balance': total_balance,
-        }
+        context = {}
         return render(request, 'account_base/balance_list.html', context)
-
 
 def filter_balance(request):
     current_day = jdatetime.date.today()
@@ -1298,6 +1217,40 @@ class UpdateBulkAccount(LoginRequiredMixin, generic.View):
             balance.account_id = int(transfer_value)
         BalanceSheet.objects.bulk_update(balances, ['account_id'])
         return JsonResponse({"status": "ok", "received": selected_ids})
+
+
+@login_required
+def download_backup(request, filename):
+    backup_dir = os.path.join(settings.BASE_DIR, 'backups')
+    file_path = os.path.join(backup_dir, filename)
+
+    if not os.path.exists(file_path):
+        raise Http404()
+
+    if not request.user.is_superuser:
+        raise Http404()
+
+    return FileResponse(
+        open(file_path, 'rb'),
+        as_attachment=True,
+        filename=filename
+    )
+
+@login_required
+def backup_system_view(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden()
+    path = backup_full_system()
+    return JsonResponse({
+        'success': True,
+        'download_url': reverse(
+            "download_backup",
+            args=[os.path.basename(path)]
+        ),
+        'filename': os.path.basename(path)
+    })
+def accouns_manager(request):
+    return render(request, 'account_base/accounts-manager.html', {})
 #endregion
 
 

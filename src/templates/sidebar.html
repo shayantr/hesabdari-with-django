@@ -65,6 +65,13 @@
             <span class="pc-mtext">گزارشات</span></a
           >
         </li>
+        <li class="pc-item">
+          <a href="{% url 'accounts_manager' %}" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-textbox"></i>
+            </span>
+            <span class="pc-mtext">مدیریت حساب ها</span></a>
+        </li>
           <li class="pc-item">
           <a href="../application/calendar.html" class="pc-link">
             <span class="pc-micon">
@@ -73,6 +80,14 @@
             <span class="pc-mtext">تقویم</span></a
           >
         </li>
+        <li class="pc-item">
+          <button id="backup-btn" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-calendar-blank"></i>
+            </span>
+            <span class="pc-mtext">دانلود بکاپ</span></button>
+        </li>
+          <div id="backup-status" class="mt-2"></div>
 
 
 
@@ -81,7 +96,7 @@
         <div class="card-body" style="background-image: url('{% static "images/layout/nav-card-bg.svg')" %}">
           <h5 class="text-dark">مرکز راهنمایی</h5>
           <p class="text-dark text-opacity-75">لطفا برای سوالات بیشتر با ما تماس بگیرید.</p>
-          <a href="https://phoenixcoded.support-hub.io/" class="btn btn-primary" target="_blank">به مرکز کمک بروید</a>
+          <a href="tel:09380043744" class="btn btn-primary" target="_blank">همین حالا تماس بگیرید</a>
         </div>
       </div>
     </div>
@@ -115,18 +130,6 @@
                     </a>
                   </li>
                   <li>
-                    <a class="pc-user-links">
-                      <i class="ph-duotone ph-gear"></i>
-                      <span>تنظیمات</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a class="pc-user-links">
-                      <i class="ph-duotone ph-lock-key"></i>
-                      <span>قفل صفحه</span>
-                    </a>
-                    </li>
-                  <li>
                     <a class="pc-user-links" href="{% url 'profile:logout' %}">
                       <i class="ph-duotone ph-power"></i>
                       <span>خروج</span>
@@ -142,4 +145,24 @@
   </div>
 </nav>
 <!-- [ Sidebar Menu ] end -->
+<script>
+
+    const csrftoken = '{{ csrf_token }}';
+
+    $('#backup-btn').on('click', function () {
+        $.ajax({
+            url: '/accounts/full_backup/',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function (res) {
+                if (res.success) {
+                    window.location.href = res.download_url;
+                }
+            }
+        });
+    });
+
+</script>
 {% endblock %}

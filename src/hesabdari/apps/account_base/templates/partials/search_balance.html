@@ -44,26 +44,29 @@
                 </a>
             </div>
             {% endif %}
+            <div class="row text-center">
+                <div class="col-4 "><bold><strong>{{ balance.document.date_created }}</strong></bold></div>
+                <div class="col-4"><bold><strong class="{% if balance.transaction_type == 'debt' %}debt-color" >{{ balance.amount|toman }}بدهکار {% else %}text-danger" >{{ balance.amount|toman }}بستانکار {% endif %}</strong></bold> </div>
+                <div class="col-4">&nbsp;
+                    <bold><strong class="{% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">
+                        {{ balance.running_balance|toman }}
+                    </strong></bold>
+                </div>
+            </div>
 
             <div class="balance-info">
-                <div class="badge-pill right">تاریخ:<strong>&nbsp; {{ balance.document.date_created }}</strong></div>
-                <div class="badge-pill"><strong class="{% if balance.transaction_type == 'debt' %}debt-color" >{{ balance.amount|toman }}بدهکار {% else %}text-danger" >{{ balance.amount|toman }}بستانکار {% endif %}</strong> </div>
-                <div class="badge-pill"><strong>مانده:</strong>&nbsp;
-                    <strong class="{% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">
-                        {{ balance.running_balance|toman }}
-                    </strong>
-                </div>
+
                 <div class="badge-pill"> سند:{{ balance.document.id }}</div>
 
-                <div class="badge-pill"><button class="show-more-btn" type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapse{{ balance.id }}"
-                        aria-expanded="false"
-                        aria-controls="collapse{{ balance.id }}"
-                        onclick="toggleChevron(event, {{ balance.id }})">
-                    <span> جزئیات</span>
-                    <i id="chev{{ balance.id }}" class="fas fa-chevron-down rotate-icon"></i>
-                </button></div>
+{#                <div><button  class="badge-pill" type="button"#}
+{#                        data-bs-toggle="collapse"#}
+{#                        data-bs-target="#collapse{{ balance.id }}"#}
+{#                        aria-expanded="false"#}
+{#                        aria-controls="collapse{{ balance.id }}"#}
+{#                        onclick="toggleChevron(event, {{ balance.id }})">#}
+{#                    <span> جزئیات</span>#}
+{#                    <i id="chev{{ balance.id }}" class="fas fa-chevron-down rotate-icon"></i>#}
+{#                </button></div>#}
 
             </div>
 
@@ -85,34 +88,15 @@
 {% endfor %}
 
 <script>
-
-function toggleHighlight(cardEl, balanceId, forceState = null) {
-    let applyState = forceState !== null ? forceState : !cardEl.classList.contains('highlighted');
-
-    if (applyState) {
-        cardEl.classList.add('highlighted');
-        cardEl.setAttribute('aria-pressed', 'true');
-    } else {
-        cardEl.classList.remove('highlighted');
-        cardEl.setAttribute('aria-pressed', 'false');
-    }
-
-    // ست کردن hidden input (چک باکس منطقی)
-    const hiddenInput = document.getElementById('chk' + balanceId);
-    hiddenInput.dataset.selected = applyState ? "true" : "false";
-}
-
-
-/* وقتی دکمه نمایش جزئیات کلیک میشه، آیکن بچرخد یا برگردد */
-function toggleChevron(e, id) {
-    // جلوگیری از پراپاگیشن تا onclick کارت را هم فعال نکند
-    e.stopPropagation();
-
-    const icon = document.getElementById('chev' + id);
-    // تا وقتی bootstrap collapse کار کنه، بعد از کوتاهی کلاس رو toggle کن
-    setTimeout(() => {
-        icon.classList.toggle('rotated');
-    }, 10);
-}
-
+{#/* وقتی دکمه نمایش جزئیات کلیک میشه، آیکن بچرخد یا برگردد */#}
+{#function toggleChevron(e, id) {#}
+{#    // جلوگیری از پراپاگیشن تا onclick کارت را هم فعال نکند#}
+{#    e.stopPropagation();#}
+{##}
+{#    const icon = document.getElementById('chev' + id);#}
+{#    // تا وقتی bootstrap collapse کار کنه، بعد از کوتاهی کلاس رو toggle کن#}
+{#    setTimeout(() => {#}
+{#        icon.classList.toggle('rotated');#}
+{#    }, 10);#}
+{#}#}
 </script>
