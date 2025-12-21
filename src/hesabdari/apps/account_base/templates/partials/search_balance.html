@@ -34,6 +34,8 @@
                     <a href="{% url 'UpdateBalanceView' balance.document.id %}" class="btn btn-sm btn-outline-secondary ms-2 update-cheque" title="ویرایش">
                         <i class="fas fa-pen"></i>
                     </a>
+                    {{ balance.document.id }}
+
                 </div>
             </div>
 
@@ -46,17 +48,17 @@
             {% endif %}
             <div class="row text-center">
                 <div class="col-4 "><bold><strong>{{ balance.document.date_created }}</strong></bold></div>
-                <div class="col-4"><bold><strong class="{% if balance.transaction_type == 'debt' %}debt-color" >{{ balance.amount|toman }}بدهکار {% else %}text-danger" >{{ balance.amount|toman }}بستانکار {% endif %}</strong></bold> </div>
+                <div class="col-4"><bold><strong class="{% if balance.transaction_type == 'debt' %}debt-color" >{{ balance.amount|toman }}بد{% else %}text-danger" >{{ balance.amount|toman }}بس {% endif %}</strong></bold> </div>
                 <div class="col-4">&nbsp;
-                    <bold><strong class="{% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">
+                    <text class="{% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">
                         {{ balance.running_balance|toman }}
-                    </strong></bold>
+                    </text>
                 </div>
             </div>
 
             <div class="balance-info">
+                {% if balance.description %}<p class="mb-0"><strong>توضیحات:</strong> {{ balance.description }}</p>{% endif %}
 
-                <div class="badge-pill"> سند:{{ balance.document.id }}</div>
 
 {#                <div><button  class="badge-pill" type="button"#}
 {#                        data-bs-toggle="collapse"#}
@@ -70,17 +72,17 @@
 
             </div>
 
-            <div class="card-body pt-0">
-                <div class="collapse" id="collapse{{ balance.id }}">
-                    <div class="details">
-                        <p class="mb-2"><strong>چک:</strong>
-                            {% if not balance.cheque %} ندارد
-                            {% else %} {{ balance.cheque.cheque_status }} {% endif %}
-                        </p>
-                        <p class="mb-0"><strong>توضیحات:</strong> {{ balance.description }}</p>
-                    </div>
-                </div>
-            </div>
+{#            <div class="card-body pt-0">#}
+{#                <div class="collapse" id="collapse{{ balance.id }}">#}
+{#                    <div class="details">#}
+{#                        <p class="mb-2"><strong>چک:</strong>#}
+{#                            {% if not balance.cheque %} ندارد#}
+{#                            {% else %} {{ balance.cheque.cheque_status }} {% endif %}#}
+{#                        </p>#}
+{#                        <p class="mb-0"><strong>توضیحات:</strong> {{ balance.description }}</p>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
 
         </div>
     </div>

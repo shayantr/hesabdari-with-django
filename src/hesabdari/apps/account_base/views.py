@@ -28,10 +28,6 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.views import generic
 from django.views.decorators.http import require_POST
-from rest_framework import viewsets
-from rest_framework.response import Response
-from rest_framework.reverse import reverse_lazy
-
 from hesabdari.apps.account_base.forms import BalanceSheetForm, CashierChequeForm, \
     DocumentForm, AccountsForm
 from hesabdari.apps.account_base.models import AccountsClass, Document, BalanceSheet, CashierCheque
@@ -55,7 +51,7 @@ def add_month_to_jalali_date(jdate):
     try:
         new_date = jdatetime.date(year, month, day)
     except ValueError:
-        new_date = jdatetime.date(year, month, 1)  # یا آخر ماه قبلی رو بگیر
+        new_date = jdatetime.date(year, month, 29)  # یا آخر ماه قبلی رو بگیر
 
     return new_date
 
@@ -149,7 +145,6 @@ def createbalancesheet(request):
                 try:
                     with transaction.atomic():
                         d.save()
-                        document_instance.save()
                         for balance, cheque in zip(all_balanceforms, all_chequeforms):
                             b = balance.save(commit=False)
                             if cheque.cleaned_data.get('name'):
