@@ -552,11 +552,10 @@ class ChequeListView(LoginRequiredMixin, generic.View):
         context = {}
         return render(request, 'account_base/cheque-lists.html', context)
 
-
-def filter_receivable_cheques(request):
-    receivables = BalanceSheet.objects.filter(
+def _filter_cheques(request, cheque_type, transaction):
+    qs = BalanceSheet.objects.filter(
         user=request.user.id,
-        cheque__cheque_type='دریافتنی',
+        cheque__cheque_type=cheque_type,
         cheque__isnull=False,
         is_active=True
     ).select_related('cheque').only(
@@ -581,33 +580,33 @@ def filter_receivable_cheques(request):
     description = request.GET.get('description')
     page = request.GET.get('page', 1)
 
-    highlight = "receivable_result_div"
+    highlight = f"{transaction}_result_div"
 
     if due_date_from:
-        receivables = receivables.filter(cheque__maturity_date__gte=due_date_from).order_by("cheque__maturity_date")
+        qs = qs.filter(cheque__maturity_date__gte=due_date_from).order_by("cheque__maturity_date")
     if due_date_to:
-        receivables = receivables.filter(cheque__maturity_date__lte=due_date_to).order_by("cheque__maturity_date")
+        qs = qs.filter(cheque__maturity_date__lte=due_date_to).order_by("cheque__maturity_date")
     if created_at_from:
-        receivables = receivables.filter(document__date_created__gte=created_at_from).order_by(
+        qs = qs.filter(document__date_created__gte=created_at_from).order_by(
             '-document__date_created')
     if created_at_to:
-        receivables = receivables.filter(document__date_created__lte=created_at_to).order_by('-document__date_created')
+        qs = qs.filter(document__date_created__lte=created_at_to).order_by('-document__date_created')
     if amount:
-        receivables = receivables.filter(amount=amount)
+        qs = qs.filter(amount=amount)
     if status:
-        receivables = receivables.filter(cheque__cheque_status=status)
+        qs = qs.filter(cheque__cheque_status=status)
     if name:
-        receivables = receivables.filter(cheque__name__icontains=name)
+        qs = qs.filter(cheque__name__icontains=name)
     if description:
-        receivables = receivables.filter(description__contains=description)
+        qs = qs.filter(description__contains=description)
     if debt_div:
-        receivables = receivables.filter(transaction_type='debt')
-        highlight = "receivable_debt_div"
+        qs = qs.filter(transaction_type='debt')
+        highlight = f"{transaction}_debt_div"
     if credit_div:
-        receivables = receivables.filter(transaction_type='credit')
-        highlight = "receivable_credit_div"
+        qs = qs.filter(transaction_type='credit')
+        highlight = f"{transaction}_credit_div"
     # محاسبه جمع‌ها
-    aggregates = receivables.aggregate(
+    aggregates = qs.aggregate(
         debt=Sum(
             Case(
                 When(transaction_type='debt', then='amount'),
@@ -621,6 +620,9 @@ def filter_receivable_cheques(request):
             )
         ),
     )
+    return qs, highlight, aggregates, page
+def filter_receivable_cheques(request):
+    receivables, highlight, aggregates, page = _filter_cheques(request, "دریافتنی", "receivable")
 
     paginator = Paginator(receivables, 20)
     current_page = paginator.get_page(page)
@@ -642,74 +644,7 @@ def filter_receivable_cheques(request):
 
 
 def filter_payable_cheques(request):
-    payables = BalanceSheet.objects.filter(
-        user=request.user.id,
-        cheque__cheque_type='پرداختنی',
-        cheque__isnull=False,
-        is_active=True
-    ).select_related('cheque').only(
-        'cheque__name',
-        'cheque__cheque_status',
-        'cheque__maturity_date',
-        'cheque__created_at',
-        'amount',
-        'description',
-        'cheque__cheque_type'
-    ).order_by("cheque__maturity_date")
-
-    # فیلترها
-    debt_div = request.GET.get('payable_debt_div')
-    credit_div = request.GET.get('payable_credit_div')
-    name = request.GET.get('cheque_name')
-    status = request.GET.get('cheque_status')
-    amount = request.GET.get('amount')
-    due_date_from = request.GET.get('due_date_from')
-    due_date_to = request.GET.get('due_date_to')
-    created_at_from = request.GET.get('created_at_from')
-    created_at_to = request.GET.get('created_at_to')
-    description = request.GET.get('description')
-    page = request.GET.get('page', 1)
-
-    highlight = "payable_result_div"
-
-    if due_date_from:
-        payables = payables.filter(cheque__maturity_date__gte=due_date_from).order_by("cheque__maturity_date")
-    if due_date_to:
-        payables = payables.filter(cheque__maturity_date__lte=due_date_to).order_by("cheque__maturity_date")
-    if created_at_from:
-        payables = payables.filter(document__date_created__gte=created_at_from).order_by('-document__date_created')
-    if created_at_to:
-        payables = payables.filter(document__date_created__lte=created_at_to).order_by('-document__date_created')
-    if amount:
-        payables = payables.filter(amount=amount)
-    if status:
-        payables = payables.filter(cheque__cheque_status=status)
-    if name:
-        payables = payables.filter(cheque__name__icontains=name)
-    if description:
-        payables = payables.filter(description__contains=description)
-    if debt_div:
-        payables = payables.filter(transaction_type='debt')
-        highlight = "payable_debt_div"
-    if credit_div:
-        payables = payables.filter(transaction_type='credit')
-        highlight = "payable_credit_div"
-
-    # محاسبه جمع‌ها
-    aggregates = payables.aggregate(
-        debt=Sum(
-            Case(
-                When(transaction_type='debt', then='amount'),
-                output_field=IntegerField(),
-            )
-        ),
-        credit=Sum(
-            Case(
-                When(transaction_type='credit', then='amount'),
-                output_field=IntegerField(),
-            )
-        ),
-    )
+    payables, highlight, aggregates, page = _filter_cheques(request, "پرداختنی", "payable")
     paginator = Paginator(payables, 20)
     current_page = paginator.get_page(page)
 
@@ -744,64 +679,7 @@ def csv_cheque(request):
         cheque_type = 'دریافتنی'
     elif cheque_type == 'payable':
         cheque_type = 'پرداختنی'
-    qs = BalanceSheet.objects.filter(
-        user=request.user.id,
-        cheque__cheque_type= cheque_type,
-        cheque__isnull=False,
-        is_active=True
-    ).select_related('cheque').only(
-        'cheque__name',
-        'cheque__cheque_status',
-        'cheque__maturity_date',
-        'amount',
-        'description',
-        'cheque__cheque_type'
-    ).order_by("cheque__maturity_date")
-
-    # فیلترها
-    name = request.GET.get('cheque_name')
-    status = request.GET.get('cheque_status')
-    amount = request.GET.get('amount')
-    due_date_from = request.GET.get('due_date_from')
-    due_date_to = request.GET.get('due_date_to')
-    created_at_from = request.GET.get('created_at_from')
-    created_at_to = request.GET.get('created_at_to')
-    description = request.GET.get('description')
-
-    if due_date_from:
-        qs = qs.filter(cheque__maturity_date__gte=due_date_from).order_by("cheque__maturity_date")
-    if due_date_to:
-        qs = qs.filter(cheque__maturity_date__lte=due_date_to).order_by("cheque__maturity_date")
-    if created_at_from:
-        qs = qs.filter(document__date_created__gte=created_at_from).order_by(
-            '-document__date_created')
-    if created_at_to:
-        qs = qs.filter(document__date_created__lte=created_at_to).order_by(
-            '-document__date_created')
-    if amount:
-        qs = qs.filter(amount=amount)
-    if status:
-        qs = qs.filter(cheque__cheque_status=status)
-    if name:
-        qs = qs.filter(cheque__name__icontains=name)
-    if description:
-        qs = qs.filter(description__contains=description)
-
-    # محاسبه جمع‌ها
-    aggregates = qs.aggregate(
-        debt=Sum(
-            Case(
-                When(transaction_type='debt', then='amount'),
-                output_field=IntegerField(),
-            )
-        ),
-        credit=Sum(
-            Case(
-                When(transaction_type='credit', then='amount'),
-                output_field=IntegerField(),
-            )
-        ),
-    )
+    qs, highlight, aggregates, page = _filter_cheques(request, cheque_type, 'none')
 
     receivables_debt_amount = aggregates['debt'] or 0
     receivables_credit_amount = aggregates['credit'] or 0
@@ -898,7 +776,7 @@ class BalanceListView(LoginRequiredMixin, generic.View):
         context = {}
         return render(request, 'account_base/balance_list.html', context)
 
-def filter_balance(request):
+def _filter_balance_handler(request):
     current_day = jdatetime.date.today()
     if request.GET.get('id_lists'):
         id_lists_json = request.GET.get('id_lists', '[]')
@@ -1010,6 +888,10 @@ def filter_balance(request):
         item.people = people
         balance_list.append(item)
     balance_list = list(reversed(balance_list))
+    return balance_list, page, total_credit, total_debt, pre_total_credit, pre_total_debt
+
+def filter_balance(request):
+    balance_list, page, total_debt, total_credit, pre_total_credit, pre_total_debt = _filter_balance_handler(request)
 
     paginator = Paginator(balance_list, 20)
     current_page = paginator.get_page(page)
@@ -1026,68 +908,34 @@ def filter_balance(request):
 
 
 
-# def csv_balance(request):
-#     current_day = jdatetime.date.today()
-#     if request.GET.get('id_lists'):
-#         id_lists_json = request.GET.get('id_lists', '[]')
-#         id_lists = json.loads(id_lists_json)
-#         id_lists = [int(i) for i in id_lists]
-#         qs = BalanceSheet.objects.filter(
-#             Q(user=request.user.id, id__in=id_lists),
-#         ).select_related('document').prefetch_related('document__items__account')
-#     else:
-#         qs = BalanceSheet.objects.filter(
-#             Q(user=request.user.id)).select_related('document').prefetch_related('document__items__account')
-#
-#     # فیلترها
-#     account_id = request.GET.get('account_id')
-#     amount = request.GET.get('amount')
-#     balance_id = request.GET.get('balance_id')
-#     document_id = request.GET.get('document_id')
-#     created_at_from = request.GET.get('created_at_from')
-#     created_at_to = request.GET.get('created_at_to')
-#     description = request.GET.get('description')
-#     page = request.GET.get('page')
-#     debt_condition = {'transaction_type': 'debt'}
-#     credit_condition = {'transaction_type': 'credit'}
-#     if balance_id:
-#         qs = qs.filter(id=int(balance_id))
-#     if document_id:
-#         qs = qs.filter(document_id=document_id)
-#     if amount:
-#         qs = qs.filter(amount=amount)
-#     if description:
-#         qs = qs.filter(description__contains=description)
-#     if account_id:
-#         accounts = AccountsClass.objects.get(id=account_id)
-#         accounts = accounts.get_descendants(include_self=True)
-#         qs = qs.filter(account__in=accounts)
-#     pre_qs = qs
-#
-#     wb = openpyxl.Workbook()
-#     ws = wb.active
-#     ws.title = 'balance_sheet_csv'
-#     ws.append(['حساب', "مبلغ", "صاحب چک", "در وجه", "بانک", 'شماره چک', 'وضعیت چک', "توضیحات"])
-#     for item in qs:
-#         ws.append([
-#             item.cheque.maturity_date.strftime("%Y-%m-%d") if item.cheque.maturity_date else "",
-#             item.amount,
-#             item.cheque.name,
-#             item.cheque.in_cash,
-#             item.cheque.account.__str__(),
-#             item.cheque.Cheque_numbder,
-#             item.cheque.cheque_status,
-#             item.description or "",
-#         ])
-#     response = HttpResponse(
-#         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-#     )
-#     today = str(jdatetime.date.today())
-#     filename = f"{cheque_type}_cheques_{today}.xlsx"
-#     filename = urllib.parse.quote(filename)
-#     response['Content-Disposition'] = f"attachment; filename*=UTF-8''{filename}"
-#     wb.save(response)
-#     return response
+def csv_balance(request):
+    balance_list, page, total_debt, total_credit, pre_total_credit, pre_total_debt = _filter_balance_handler(request)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'balance_sheet_csv'
+    ws.append(['حساب',"نوع حساب", "مبلغ", "صاحب چک", "طرف حساب", "مانده", "توضیحات"])
+    for item in balance_list:
+        print(item.people)
+        ws.append([
+            item.id,
+            item.transaction_type,
+            item.amount,
+            item.account.name,
+            ",".join(item.people),
+            item.running_balance,
+            item.description or "",
+
+
+        ])
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    today = str(jdatetime.date.today())
+    filename = f"balance_{today}.xlsx"
+    filename = urllib.parse.quote(filename)
+    response['Content-Disposition'] = f"attachment; filename*=UTF-8''{filename}"
+    wb.save(response)
+    return response
 
 
 

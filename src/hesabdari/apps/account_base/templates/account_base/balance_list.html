@@ -264,6 +264,9 @@
         <input type="hidden" name="credit_div" id="credit_input">
         <input type="hidden" name="result_div" id="result_input">
     </form>
+    <a id="balance-export-excel" class="btn btn-success" href="#">
+        دانلود اکسل
+    </a>
     <div id="balance-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
         <div class="col-4" id="debt_div">
             <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
@@ -353,6 +356,11 @@
     <script>
         jalaliDatepicker.startWatch();
         $(document).ready(function () {
+            $('#balance-export-excel').on('click', function(e){
+                e.preventDefault();
+                const params = $('#search-filter-form').serialize();  // current filters
+                window.location = '/accounts/export-csv-balance/?' + params;
+            });
             // highlighting, search total debt, credit and result balances
             document.addEventListener("click", function(e) {
                 const inputIds = ["debt_input", "credit_input", "result_input"];
