@@ -801,9 +801,9 @@ def _filter_balance_handler(request):
     page = request.GET.get('page')
     debt_condition = {'transaction_type': 'debt'}
     credit_condition = {'transaction_type': 'credit'}
-    if debt_div:
+    if debt_div == 'clicked':
         qs = qs.filter(transaction_type='debt')
-    if credit_div:
+    if credit_div == 'clicked':
         qs = qs.filter(transaction_type='credit')
     if balance_id:
         qs = qs.filter(id=int(balance_id))
@@ -891,7 +891,7 @@ def _filter_balance_handler(request):
     return balance_list, page, total_credit, total_debt, pre_total_credit, pre_total_debt
 
 def filter_balance(request):
-    balance_list, page, total_debt, total_credit, pre_total_credit, pre_total_debt = _filter_balance_handler(request)
+    balance_list, page,total_credit, total_debt, pre_total_credit, pre_total_debt = _filter_balance_handler(request)
 
     paginator = Paginator(balance_list, 20)
     current_page = paginator.get_page(page)
@@ -909,7 +909,7 @@ def filter_balance(request):
 
 
 def csv_balance(request):
-    balance_list, page, total_debt, total_credit, pre_total_credit, pre_total_debt = _filter_balance_handler(request)
+    balance_list, page, total_credit, total_debt, pre_total_credit, pre_total_debt = _filter_balance_handler(request)
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = 'balance_sheet_csv'
