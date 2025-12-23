@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block header %}
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.5/locales/fa.global.js"></script>
+
+
+    <!-- Jalaali -->
+    <script src="https://cdn.jsdelivr.net/npm/jalaali-js/dist/jalaali.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+{% endblock %}
+{% block body %}
+    <div id='calendar'></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar')
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'fa',
+                direction: 'rtl',
+                headerToolbar: {
+                    left: 'prev,next,today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+                },
+                selectable: true,
+                editable: true,
+                firstDay: 6,
+
+                events: '/accounts/events-list/',
+
+
+            });
+
+            calendar.render();
+        });
+    </script>
+
+{% endblock %}

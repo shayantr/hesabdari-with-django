@@ -425,7 +425,7 @@
                 $('#total-debt').text(data.sum_debt.toLocaleString());
                 $('#total-credit').text(data.sum_credit.toLocaleString());
 
-                let balance = data.total_debt - data.total_credit;
+                let balance = data.sum_debt - data.sum_credit;
                 let $balanceEl = $('#total-balance');
                 $balanceEl.text(balance.toLocaleString());
 

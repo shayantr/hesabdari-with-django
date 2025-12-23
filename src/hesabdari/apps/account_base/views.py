@@ -32,6 +32,7 @@ from hesabdari.apps.account_base.forms import BalanceSheetForm, CashierChequeFor
     DocumentForm, AccountsForm
 from hesabdari.apps.account_base.models import AccountsClass, Document, BalanceSheet, CashierCheque
 from hesabdari.apps.account_base.services.backup import backup_full_system
+from hesabdari.apps.account_base.templatetags.jinja_filters import toman
 
 User = get_user_model()
 
@@ -1092,6 +1093,28 @@ def backup_system_view(request):
     })
 def accouns_manager(request):
     return render(request, 'account_base/accounts-manager.html', {})
+def calendar_page(request):
+    return render(request, 'account_base/calendar.html')
+def all_events(request):
+    events = BalanceSheet.objects.filter(cheque__isnull=False).prefetch_related('cheque')
+
+    event_list = []
+    daily_totals = {}
+    for e in events:
+        g_date = e.cheque.maturity_date.togregorian()
+        key = g_date.isoformat()
+        if key not in daily_totals:
+            daily_totals[key] = 0
+        daily_totals[key] += e.amount
+    for date, total in daily_totals.items():
+        event_list.append({
+            'title': toman(total),
+            "start": date,
+            "allDay": True
+
+        })
+
+    return JsonResponse(event_list, safe=False)
 #endregion
 
 
