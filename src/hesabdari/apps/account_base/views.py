@@ -888,10 +888,10 @@ def _filter_balance_handler(request):
         item.people = people
         balance_list.append(item)
     balance_list = list(reversed(balance_list))
-    return balance_list, page, total_credit, total_debt, pre_total_credit, pre_total_debt
+    return balance_list, page, total_credit, total_debt, pre_total_credit, pre_total_debt, sum_debt, sum_credit
 
 def filter_balance(request):
-    balance_list, page,total_credit, total_debt, pre_total_credit, pre_total_debt = _filter_balance_handler(request)
+    balance_list, page,total_credit, total_debt, pre_total_credit, pre_total_debt, sum_debt, sum_credit = _filter_balance_handler(request)
 
     paginator = Paginator(balance_list, 20)
     current_page = paginator.get_page(page)
@@ -901,6 +901,8 @@ def filter_balance(request):
             'html': html,
             'total_debt': total_debt,
             'total_credit': total_credit,
+            'sum_debt': sum_debt,
+            'sum_credit': sum_credit,
             'pre_total_credit': pre_total_credit,
             'pre_total_debt': pre_total_debt,
             'has_next': current_page.has_next(),
@@ -909,7 +911,7 @@ def filter_balance(request):
 
 
 def csv_balance(request):
-    balance_list, page, total_credit, total_debt, pre_total_credit, pre_total_debt = _filter_balance_handler(request)
+    balance_list, page, total_credit, total_debt, pre_total_credit, pre_total_debt, sum_debt, sum_credit = _filter_balance_handler(request)
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = 'balance_sheet_csv'
@@ -936,10 +938,6 @@ def csv_balance(request):
     response['Content-Disposition'] = f"attachment; filename*=UTF-8''{filename}"
     wb.save(response)
     return response
-
-
-
-
 
 class ChangeStatusCheque(generic.View):
     def get(self, request, pk):

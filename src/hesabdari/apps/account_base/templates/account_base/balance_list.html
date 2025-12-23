@@ -258,15 +258,29 @@
             <div class="col-md-6 mb-2">
                 <input type="text" class="form-control" name="created_at_to" data-jdp placeholder="تاریخ ثبت تا">
             </div>
+
         </div>
+
 
         <input type="hidden" name="debt_div" id="debt_input">
         <input type="hidden" name="credit_div" id="credit_input">
         <input type="hidden" name="result_div" id="result_input">
     </form>
-    <a id="balance-export-excel" class="btn btn-success" href="#">
-        دانلود اکسل
-    </a>
+    <div class="row mb-3 p-3 rounded" style="background-color: #d1d1e0;">
+        <div class="col-md-12 mb-12">
+            <label class="form-check-label" for="nobalance"> بدون مانده </label>
+            <input class="form-check-input" type="checkbox" name="nobalance" id="nobalance">
+        </div>
+
+
+    </div>
+            <div class="col-md-6 mb-2">
+            <a id="balance-export-excel" class="btn btn-success" href="#">
+                دانلود اکسل
+            </a>
+        </div>
+
+
     <div id="balance-summary" class=" row bg-white shadow-md rounded-2xl p-4 mt-6 flex justify-between text-center">
         <div class="col-4" id="debt_div">
             <span class="font-semibold text-gray-700">جمع بدهکاری:</span>
@@ -403,6 +417,67 @@
                 }
 
             });
+            function applyNobalanceMode(data) {
+                // مثال
+                $('#pre-total-debt').text(0);
+                $('#pre-total-credit').text(0);
+                $('#pre-total-balance').text(0);
+                $('#total-debt').text(data.sum_debt.toLocaleString());
+                $('#total-credit').text(data.sum_credit.toLocaleString());
+
+                let balance = data.total_debt - data.total_credit;
+                let $balanceEl = $('#total-balance');
+                $balanceEl.text(balance.toLocaleString());
+
+                // تغییر رنگ مانده
+                if (balance < 0) {
+                    $balanceEl.removeClass('debt-color').addClass('text-red-600');
+                } else {
+                    $balanceEl.removeClass('text-red-600').addClass('debt-color');
+                }
+
+            }
+
+            function applybalanceMode(data) {
+                $('#pre-total-debt').text(data.pre_total_debt.toLocaleString());
+                $('#pre-total-credit').text(data.pre_total_credit.toLocaleString());
+                let pre_balance = data.pre_total_debt - data.pre_total_credit;
+                let $pre_balanceEl = $('#pre-total-balance');
+                $pre_balanceEl.text(pre_balance.toLocaleString());
+
+                // تغییر رنگ مانده
+                if (pre_balance < 0) {
+                    $pre_balanceEl.removeClass('text-red-600').addClass('text-red-600');
+                } else {
+                    $pre_balanceEl.removeClass('debt-color').addClass('debt-color');
+                }
+                $('#total-debt').text(data.total_debt.toLocaleString());
+                $('#total-credit').text(data.total_credit.toLocaleString());
+
+                let balance = data.total_debt - data.total_credit;
+                let $balanceEl = $('#total-balance');
+                $balanceEl.text(balance.toLocaleString());
+
+                // تغییر رنگ مانده
+                if (balance < 0) {
+                    $balanceEl.removeClass('debt-color').addClass('text-red-600');
+                } else {
+                    $balanceEl.removeClass('text-red-600').addClass('debt-color');
+                }
+            }
+            $('#nobalance').on('change', function () {
+                applyBalance();
+            });
+
+            function applyBalance() {
+                if (!balanceData) return;
+
+                if ($('#nobalance').is(':checked')) {
+                    applyNobalanceMode(balanceData);
+                } else {
+                    applybalanceMode(balanceData);
+                }
+            }
             // filter balance list function
             let searchtimaout = null;
             let balance_page=1;
@@ -424,31 +499,9 @@
                     data: formData,
                     success: function (data) {
                         $('#search-balance-list').html(data.html);
-                        $('#pre-total-debt').text(data.pre_total_debt.toLocaleString());
-                        $('#pre-total-credit').text(data.pre_total_credit.toLocaleString());
-                        let pre_balance = data.pre_total_debt - data.pre_total_credit;
-                        let $pre_balanceEl = $('#pre-total-balance');
-                        $pre_balanceEl.text(pre_balance.toLocaleString());
+                        balanceData = data;
+                        applyBalance();
 
-                        // تغییر رنگ مانده
-                        if (pre_balance < 0) {
-                            $pre_balanceEl.removeClass('text-red-600').addClass('text-red-600');
-                        } else {
-                            $pre_balanceEl.removeClass('debt-color').addClass('debt-color');
-                        }
-                        $('#total-debt').text(data.total_debt.toLocaleString());
-                        $('#total-credit').text(data.total_credit.toLocaleString());
-
-                        let balance = data.total_debt - data.total_credit;
-                        let $balanceEl = $('#total-balance');
-                        $balanceEl.text(balance.toLocaleString());
-
-                        // تغییر رنگ مانده
-                        if (balance < 0) {
-                            $balanceEl.removeClass('debt-color').addClass('text-red-600');
-                        } else {
-                            $balanceEl.removeClass('text-red-600').addClass('debt-color');
-                        }
                         $('#balance_loading').show();
                         observer.observe(document.querySelector('#balance_loading'));
                         if (!data.has_next) {
