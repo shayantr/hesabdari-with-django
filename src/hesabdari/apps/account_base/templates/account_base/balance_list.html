@@ -540,29 +540,8 @@
                             $('#balance_loading').hide();
                         }
                         $('#search-balance-list').append(data.html);
-                        $('#pre-total-debt').text(data.pre_total_debt.toLocaleString());
-                        $('#pre-total-credit').text(data.pre_total_credit.toLocaleString());
-                        let pre_balance = data.pre_total_debt - data.pre_total_credit;
-                        let $pre_balanceEl = $('#pre-total-balance');
-                        $pre_balanceEl.text(pre_balance.toLocaleString());
-                        // تغییر رنگ مانده
-                        if (pre_balance < 0) {
-                            $pre_balanceEl.removeClass('text-red-600').addClass('text-red-600');
-                        } else {
-                            $pre_balanceEl.removeClass('debt-color').addClass('debt-color');
-                        }
-                        $('#total-debt').text(data.total_debt.toLocaleString());
-                        $('#total-credit').text(data.total_credit.toLocaleString());
-                        let balance = data.total_debt - data.total_credit;
-                        let $balanceEl = $('#total-balance');
-                        $balanceEl.text(balance.toLocaleString());
-
-                        // تغییر رنگ مانده
-                        if (balance < 0) {
-                            $balanceEl.removeClass('text-red-600').addClass('text-red-600');
-                        } else {
-                            $balanceEl.removeClass('debt-color').addClass('debt-color');
-                        }
+                        balanceData = data;
+                        applyBalance();
 
                     }
                 });

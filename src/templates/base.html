@@ -17,7 +17,7 @@
     <meta name="author" content="phoenixcoded"/>
 
     <!-- [Favicon] icon -->
-    <link rel="icon" href="{% static 'images/favicon.svg" type="image/x-icon' %}"/>
+    <link rel="icon" href="{% static 'images/favicon.svg' %}" type="image/x-icon />
 
     <!-- map-vector css -->
     <link rel="stylesheet" href="{% static 'css/plugins/jsvectormap.min.css' %}">
@@ -68,7 +68,7 @@
     </div>
 </div>
 <!-- [ Pre-loader ] End -->
-{% render_partial 'sidebar' %}
+{% include 'sidebar.html' %}
 <!-- [ Header Topbar ] start -->
 <header class="pc-header">
     <div class="header-wrapper"> <!-- [Mobile Media Block] start -->
@@ -466,7 +466,9 @@
 
 <!-- [ Main Content ] end -->
 <footer class="pc-footer">
+<div class="footer-wrapper container-fluid">
 
+      </div>
 </footer>
 <div class="offcanvas border-0 pct-offcanvas offcanvas-end" tabindex="-1" id="offcanvas_pc_layout">
     <div class="offcanvas-header justify-content-between">
@@ -644,16 +646,19 @@
 </div>
 <!-- [Page Specific JS] start -->
 <script src="{% static 'js/plugins/apexcharts.min.js' %}"></script>
-<script src="{% static 'js/plugins/jsvectormap.min.js' %}"></script>
-<script src="{% static 'js/plugins/world.js' %}"></script>
-<script src="{% static 'js/plugins/world-merc.js' %}"></script>
-<script src="{% static 'js/pages/dashboard-default.js' %}"></script>
+{#<script src="{% static 'js/plugins/jsvectormap.min.js' %}"></script>#}
+{#<script src="{% static 'js/plugins/world.js' %}"></script>#}
+{#<script src="{% static 'js/plugins/world-merc.js' %}"></script>#}
+{#<script src="{% static 'js/pages/dashboard-default.js' %}"></script>#}
 <!-- [Page Specific JS] end -->
 <!-- Required Js -->
 <script src="{% static 'js/plugins/popper.min.js' %}"></script>
 <script src="{% static 'js/plugins/simplebar.min.js' %}"></script>
 <script src="{% static 'js/plugins/bootstrap.min.js' %}"></script>
 <script src="{% static 'js/fonts/custom-font.js' %}"></script>
+<script>
+    window.STATIC_URL = "{% static '' %}";
+</script>
 <script src="{% static 'js/pcoded.js' %}"></script>
 <script src="{% static 'js/plugins/feather.min.js' %}"></script>
 

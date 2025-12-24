@@ -5,16 +5,168 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.5/locales/fa.global.js"></script>
 
+    <link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}"/>
+    <script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
+
 
     <!-- Jalaali -->
     <script src="https://cdn.jsdelivr.net/npm/jalaali-js/dist/jalaali.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fc {
+            max-width: 100%;
+            overflow-x: auto; /* در صورت جدول شدن خیلی عریض */
+        }
 
+        @media (max-width: 768px) {
+            .fc .fc-toolbar-title {
+                font-size: 14px;
+            }
+
+            .fc-event {
+                font-size: 12px;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(.9);
+                opacity: 0
+            }
+            to {
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+
+        .animate-scale-in {
+            animation: scaleIn .15s ease-out;
+        }
+
+        /* مودال */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        #modal > div {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 300px;
+            width: 90%;
+            direction: rtl;
+        }
+
+        #modal input[type=text] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        #modal .buttons {
+            margin-top: 15px;
+            text-align: right;
+        }
+
+        #modal .buttons button {
+            padding: 6px 12px;
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
+        #modal_error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
 {% endblock %}
 {% block body %}
-    <div id='calendar'></div>
+    <div class="modal fade"
+         id="chequeModal"
+         data-bs-keyboard="false"
+         tabindex="-1"
+         aria-hidden="true">
 
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="mb-0" id="chequeModalTitle">
+                        سررسید چک‌ها
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body" id="chequeModalBody">
+                    <!-- محتوای داینامیک -->
+                </div>
+
+                <div class="modal-footer justify-content-between">
+                    <div class="flex-grow-1 text-end">
+                        <button type="button"
+                                class="btn btn-link-danger"
+                                data-bs-dismiss="modal">
+                            لغو
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div id="modal-backdrop"
+         class="fixed bg-black/40 hidden items-center justify-center z-50">
+
+        <div class="bg-white w-full max-w-md rounded-2xl p-4 animate-scale-in">
+
+            <h3 id="modal-title"
+                class="font-bold text-center mb-3 text-lg">
+            </h3>
+
+            <div id="modal-list"
+                 class="space-y-2 max-h-64 overflow-y-auto text-sm">
+            </div>
+
+            <div class="border-t mt-3 pt-2 text-center font-bold">
+                جمع کل:
+                <span id="modal-total"></span>
+                تومان
+            </div>
+
+            <button onclick="closeModal()"
+                    class="mt-4 w-full py-2 bg-gray-800 text-white rounded-xl">
+                بستن
+            </button>
+
+        </div>
+    </div>
+    <div>
+        <div class='datepicker'>
+            <input id="monthYearDropdown" data-jdp>
+        </div>
+
+        <div id='calendar' class="fc" style="max-width: 100%; margin: 0 auto;"></div>
+    </div>
     <script>
+        jalaliDatepicker.startWatch();
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden')
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar')
             var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -23,17 +175,78 @@
                 direction: 'rtl',
                 headerToolbar: {
                     left: 'prev,next,today',
-                    center: 'title',
+                    center: 'title,monthYearFilter',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
                 },
+                dayMaxEvents: 3,
                 selectable: true,
                 editable: true,
                 firstDay: 6,
+                customButtons: {
+                    monthYearFilter: {
+                        text: 'فیلتر ماه/سال',
+                        click: function () {
+                            // انگار روی input کلیک شده است
+                            var input = document.getElementById('monthYearDropdown');
+                            input.focus();  // یا input.click(); بسته به پلاگین
+                        }
+                    }
+                },
 
                 events: '/accounts/events-list/',
 
+                dateClick(info) {
+                    fetch(`/accounts/cheque-day/?date=${info.dateStr}`)
+                        .then(res => res.json())
+                        .then(data => {
+
+                            // عنوان مودال
+                            document.getElementById('chequeModalTitle').innerText =
+                                `سررسید چک‌ها – ${data.date}`
+
+                            const body = document.getElementById('chequeModalBody')
+                            body.innerHTML = ''
+
+                            if (data.items.length === 0) {
+                                body.innerHTML = `
+          <div class="text-center text-muted py-4">
+            چکی برای این روز ثبت نشده است
+          </div>
+        `
+                            } else {
+                                data.items.forEach(item => {
+                                    body.innerHTML += `
+            <div class="d-flex justify-content-between align-items-center
+                        border rounded p-2 mb-2">
+              <div>${item.name}</div>
+              <div class="fw-bold">
+                ${item.amount.toLocaleString()} تومان
+              </div>
+            </div>
+          `
+                                })
+
+                                body.innerHTML += `
+          <hr>
+          <div class="text-end fw-bold">
+            جمع کل:
+            ${data.total.toLocaleString()}
+            تومان
+          </div>
+        `
+                            }
+
+                            // نمایش مودال Bootstrap
+                            const modal = new bootstrap.Modal(
+                                document.getElementById('chequeModal')
+                            )
+                            modal.show()
+                        })
+                }
+
 
             });
+            {#calendar.gotoDate('1398-01-01');#}
 
             calendar.render();
         });

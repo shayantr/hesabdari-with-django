@@ -6,7 +6,7 @@ from hesabdari.apps.account_base.views import createbalancesheet, \
     edit_account, delete_account, BalanceListView, \
     filter_balance, create_accounts, account_report, AccountReportDetails, delete_document, \
     ChangeStatusCheque, filter_receivable_cheques, csv_cheque, UpdateBulkAccount, backup_system_view, download_backup, \
-    accouns_manager, csv_balance, all_events, calendar_page
+    accouns_manager, csv_balance, all_events, calendar_page, cheques_of_day
 
 urlpatterns = [
     path('create-document/', createbalancesheet, name='create-document'),
@@ -35,5 +35,6 @@ urlpatterns = [
     path('accounts-manager/', accouns_manager, name='accounts_manager'),
     path('events/', calendar_page, name='calendar_page'),
     path('events-list/', all_events, name='events_list'),
+    path('cheque-day/', cheques_of_day, name='cheque_day'),
 
 ]
