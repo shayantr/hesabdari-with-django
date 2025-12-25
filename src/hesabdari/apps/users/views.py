@@ -6,9 +6,9 @@ from django.views.generic import View, FormView
 from django.contrib.auth import get_user_model, login, logout
 from urllib3 import request
 
-from hesabdari.apps.accounts.forms import LoginForm, RegisterForm, CodeVerifyForm, ResetPasswordForm, PhoneForm
-from hesabdari.apps.accounts.models import ActivationCode
-from hesabdari.apps.accounts.utils.utils import send_sms_code
+from hesabdari.apps.users.forms import LoginForm, RegisterForm, CodeVerifyForm, ResetPasswordForm, PhoneForm
+from hesabdari.apps.users.models import ActivationCode
+from hesabdari.apps.users.utils.utils import send_sms_code
 
 User = get_user_model()
 

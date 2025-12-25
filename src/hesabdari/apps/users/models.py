@@ -81,3 +81,6 @@ class ActivationCode(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.code}"
 
+    class Meta:
+        db_table = 'activation_code'
+

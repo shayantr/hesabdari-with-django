@@ -1,7 +1,7 @@
 from django import forms
 from treebeard.forms import MoveNodeForm
 
-from hesabdari.apps.account_base.models import AccountsClass, BalanceSheet, CashierCheque, Document
+from hesabdari.apps.accounting.models import AccountsClass, BalanceSheet, CashierCheque, Document
 
 
 class AccountsForm(forms.ModelForm):

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AJAX Input in Django</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}"/>
     <script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
@@ -625,6 +624,7 @@
 
                         } else {
                             // نمایش خطاهای اعتبارسنجی در صفحه
+                            console.log('fucj')
                             $("#form-errors-" + response.err_id).html(response.errors);
 
                             // Toast خطا
@@ -734,7 +734,6 @@
             $('#delete-document-btn').on('click', function () {
                 const button = $(this);
                 const documentId = button.data('document-id');
-                console.log(documentId)
                 const url = `/accounts/delete-document/${documentId}/`; // مسیر view جنگو
                 {#const url = `{% url 'delete_account' pk=0 %}".replace('0', documentId)`; // مسیر view جنگو#}
 

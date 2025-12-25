@@ -2,12 +2,15 @@ from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 from treebeard.mp_tree import MP_Node
 from django_jalali.db import models as jmodels
-from hesabdari.apps.accounts.models import User
+from hesabdari.apps.users.models import User
 
 class AccountsClass(MPTTModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='accounts', blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='users', blank=True)
     name = models.CharField(max_length=255)
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+
+    class Meta:
+        db_table = 'accounts'
 
     class MPTTMeta:
         order_insertion_by = ['name']
@@ -32,6 +35,9 @@ class Document(models.Model):
     date_created = jmodels.jDateField(default=jmodels.timezone.now())
     objects = jmodels.jManager()
 
+    class Meta:
+        db_table = 'document'
+
     def delete(self, *args, **kwargs):
         for bs in self.items.all():
             if bs.is_active is False:
@@ -43,7 +49,7 @@ class Document(models.Model):
 class BalanceSheetQuerySet(models.QuerySet):
     def for_account_with_children(self, account):
         """
-        فیلتر کردن رکوردها بر اساس یک حساب و تمام زیرمجموعه‌هاش
+        filter records base on parent and child
         """
         return self.filter(
             account__tree_id=account.tree_id,
@@ -77,6 +83,9 @@ class BalanceSheet(models.Model):
     objects = jmodels.jManager()
     with_children = BalanceSheetManager()
 
+    class Meta:
+        db_table = 'balance_sheet'
+
 
 
 
@@ -108,3 +117,6 @@ class CashierCheque(models.Model):
         blank=True,
         null=True,)
     objects = jmodels.jManager()
+
+    class Meta:
+        db_table = 'cashier_cheque'

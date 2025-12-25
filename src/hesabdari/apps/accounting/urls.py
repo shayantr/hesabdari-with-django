@@ -1,12 +1,16 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from hesabdari.apps.account_base.views import createbalancesheet, \
-    GetFormFragmentView, AccountsView, UpdateBalanceView, deletechequeview, ChequeListView, filter_payable_cheques, \
-    edit_account, delete_account, BalanceListView, \
-    filter_balance, create_accounts, account_report, AccountReportDetails, delete_document, \
-    ChangeStatusCheque, filter_receivable_cheques, csv_cheque, UpdateBulkAccount, backup_system_view, download_backup, \
-    accouns_manager, csv_balance, all_events, calendar_page, cheques_of_day
+from hesabdari.apps.accounting.views.account import AccountsView, create_accounts, edit_account, delete_account, \
+    UpdateBulkAccount, accouns_manager
+from hesabdari.apps.accounting.views.backup import backup_system_view, download_backup
+from hesabdari.apps.accounting.views.balance import BalanceListView, filter_balance, csv_balance
+from hesabdari.apps.accounting.views.calendar import calendar_page, all_events, cheques_of_day
+from hesabdari.apps.accounting.views.cheque import deletechequeview, ChequeListView, filter_receivable_cheques, \
+    filter_payable_cheques, csv_cheque
+from hesabdari.apps.accounting.views.document import createbalancesheet, GetFormFragmentView, UpdateBalanceView, \
+    delete_document, ChangeStatusCheque
+from hesabdari.apps.accounting.views.reports import account_report, AccountReportDetails
 
 urlpatterns = [
     path('create-document/', createbalancesheet, name='create-document'),

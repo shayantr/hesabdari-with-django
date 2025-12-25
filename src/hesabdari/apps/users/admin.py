@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from hesabdari.apps.accounts.models import User
+from hesabdari.apps.users.models import User
 
 # Register your models here.
 

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from hesabdari.apps.accounts.views import LoginView, RegisterView, VerifyView, logout_view, ResetPasswordView, \
+from hesabdari.apps.users.views import LoginView, RegisterView, VerifyView, logout_view, ResetPasswordView, \
     ForgetPasswordView, ResetVerifyView
 
 app_name = 'profile'

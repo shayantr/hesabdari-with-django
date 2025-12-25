@@ -3,7 +3,7 @@ from mptt.admin import MPTTModelAdmin, DraggableMPTTAdmin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
-from hesabdari.apps.account_base.models import AccountsClass, CashierCheque, BalanceSheet, Document
+from hesabdari.apps.accounting.models import AccountsClass, CashierCheque, BalanceSheet, Document
 
 
 # Register your models here.
