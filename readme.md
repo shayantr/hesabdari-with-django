@@ -71,12 +71,10 @@ The structure is intentionally kept **clean and refactor-ready** for service-ori
 
 🖼 Screenshots / Demo
 
-Accounting document creation with dynamic form rows
-
 Hierarchical chart of accounts (tree view)
-(screenshots/accounts-report.png)
+![Chart of Accounts](screenshots/accounts-report.png)
 Cheque due date calendar (initial version)
-![Cheque Due Date Calendar](screenshots/cheque-calendar.png)
+![Cheque Due Date Calendar](https://raw.githubusercontent.com/shayantr/hesabdari-with-django/main/cheque_calendar.png)
 
 
 ## ▶️ How to Run Locally
