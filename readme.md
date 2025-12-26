@@ -71,10 +71,13 @@ The structure is intentionally kept **clean and refactor-ready** for service-ori
 
 🖼 Screenshots / Demo
 
+cheque list with live filter
+![cheque list with live filter](screenshots/cheque-list-1.png)
+![cheque list with live filter](screenshots/cheque-list-2.png)
 Hierarchical chart of accounts (tree view)
 ![Chart of Accounts](screenshots/accounts-report.png)
 Cheque due date calendar (initial version)
-![Cheque Due Date Calendar](https://raw.githubusercontent.com/shayantr/hesabdari-with-django/main/cheque_calendar.png)
+![Cheque Due Date Calendar](screenshots/cheque-calendar.png)
 
 
 ## ▶️ How to Run Locally
