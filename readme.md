@@ -74,9 +74,9 @@ The structure is intentionally kept **clean and refactor-ready** for service-ori
 Accounting document creation with dynamic form rows
 
 Hierarchical chart of accounts (tree view)
-
+(screenshots/accounts-report.png)
 Cheque due date calendar (initial version)
-![Cheque Due Date Calendar](screenshots/cheque_calendar.png)
+(screenshots/cheque-calendar.png)
 
 
 ## ▶️ How to Run Locally
