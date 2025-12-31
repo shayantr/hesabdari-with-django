@@ -17,14 +17,8 @@ class ChangeChequeStatusService:
         all_credit = 0
         all_debt = 0
         all_valid = True
-        if not self.balance_cheque.is_valid() or not self.update_cheque.is_valid() or not self.document.is_valid():
-            all_valid = False
-            return False, 'لطفا فیلد های فرم خود را بازبینی کنید'
+        self._validate_forms()
         all_debt, all_credit = self._update_totals(self.balance_cheque, all_debt, all_credit)
-        for balance, cheque in zip(self.all_new_balanceforms, self.all_new_chequeforms):
-            if not balance.is_valid() or not cheque.is_valid():
-                all_valid = False
-                return False, 'لطفا فیلد های فرم خود را بازبینی کنید'
         for balance in self.all_new_balanceforms:
             all_debt, all_credit = self._update_totals(balance, all_debt, all_credit)
         if all_credit != all_debt:
@@ -63,6 +57,16 @@ class ChangeChequeStatusService:
         BalanceSheet.objects.bulk_create(balances_to_create)
 
 
+    def _validate_forms(self):
+        forms = (
+            [self.document, self.balance_cheque, self.update_cheque]
+            + self.all_new_balanceforms
+            + self.all_new_chequeforms
+        )
+        for form in forms:
+            if not form.is_valid():
+                # raise ValueError('invalid form')
+                return False, 'لطفا فیلد های فرم خود را بازبینی کنید'
 
 
     def _update_totals(self, form, all_debt, all_credit):
