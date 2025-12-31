@@ -4,34 +4,32 @@ import jdatetime
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from hesabdari.apps.accounting.models import BalanceSheet
+from hesabdari.apps.accounting.models import BalanceSheet, CashierCheque
 
 
 def calendar_page(request):
-    today = jdatetime.date.today()
-    current_year = today.year
-    print(jdatetime.j_days_in_month)
-    print(jdatetime.date)
-
-    # ۱۰۰ سال قبل تا ۵ سال آینده
-    start_year = current_year - 100
-    end_year = current_year + 5
-
-    # ایجاد لیست سال‌ها
-    years = list(range(start_year, end_year + 1))
-    print(years)
     return render(request, 'account_base/calendar.html')
 def all_events(request):
-    events = BalanceSheet.objects.filter(cheque__isnull=False).prefetch_related('cheque')
+    events = BalanceSheet.objects.filter(cheque__maturity_date__isnull=False).prefetch_related('cheque')
+    cheques = CashierCheque.objects.all()
+    i=[]
+    j=0
+    for e in events:
+        j+=1
+        i.append((j, e.cheque.maturity_date))
+    print(i)
+
 
     event_list = []
     daily_totals = {}
+
     for e in events:
         g_date = e.cheque.maturity_date.togregorian()
         key = g_date.isoformat()
         if key not in daily_totals:
             daily_totals[key] = 0
         daily_totals[key] += e.amount
+
     for date, total in daily_totals.items():
         event_list.append({
             'title': 'چک',
