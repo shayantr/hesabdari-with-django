@@ -1,0 +1,5 @@
+*.py linguist-language=Python
+**/static/** linguist-vendored
+**/assets/** linguist-vendored
+**/uploads/** linguist-vendored
+**/*.css linguist-vendored

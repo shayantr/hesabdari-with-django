@@ -1,0 +1,168 @@
+{% load static %}
+{% block sidebar %}
+<!-- [ Sidebar Menu ] start -->
+<nav class="pc-sidebar">
+  <div class="navbar-wrapper">
+    <div class="m-header">
+      <a href="../dashboard/index.html" class="b-brand text-primary">
+        <!-- ========   Change your logo from here   ============ -->
+        <img src="{% static 'images/logo-dark.svg' %}" alt="logo image" class="logo-lg" />
+        <span class="badge bg-brand-color-2 rounded-pill ms-2 theme-version">v1.0</span>
+      </a>
+    </div>
+    <div class="navbar-content">
+      <ul class="pc-navbar">
+        <li class="pc-item pc-caption">
+          <label>ناوبری</label>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-gauge"></i>
+            </span>
+            <span class="pc-mtext">داشبورد</span>
+            <span class="pc-arrow"><i data-feather="chevron-left"></i></span>
+            <span class="pc-badge">2</span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="../dashboard/index.html">تجزیه و تحلیل</a></li>
+            <li class="pc-item"><a class="pc-link" href="../dashboard/affiliate.html">وابسته</a></li>
+            <li class="pc-item"><a class="pc-link" href="../dashboard/finance.html">مالی</a></li>
+            <li class="pc-item"><a class="pc-link" href="../admins/helpdesk-dashboard.html">میز راهنما</a></li>
+            <li class="pc-item"><a class="pc-link" href="../dashboard/invoice.html">فاکتور</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-caption">
+          <label>برنامه ها</label>
+          <i class="ph-duotone ph-buildings"></i>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-newspaper"></i>
+            </span>
+            <span class="pc-mtext">سند</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+          ></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="{% url 'balance_lists' %}">لیست سند ها</a></li>
+            <li class="pc-item"><a class="pc-link" href="{% url 'create-document' %}">ایجاد سند</a></li>
+          </ul>
+        </li>
+
+        <li class="pc-item">
+          <a href="{% url 'cheque-lists-view' %}" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-textbox"></i>
+            </span>
+            <span class="pc-mtext">چک‌ها</span></a
+          >
+        </li>
+          <li class="pc-item">
+          <a href="{% url 'get_accounts_report' %}" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-textbox"></i>
+            </span>
+            <span class="pc-mtext">گزارشات</span></a
+          >
+        </li>
+        <li class="pc-item">
+          <a href="{% url 'accounts_manager' %}" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-textbox"></i>
+            </span>
+            <span class="pc-mtext">مدیریت حساب ها</span></a>
+        </li>
+          <li class="pc-item">
+          <a href="{% url "calendar_page" %}" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-calendar-blank"></i>
+            </span>
+            <span class="pc-mtext">تقویم</span></a
+          >
+        </li>
+        <li class="pc-item">
+          <button id="backup-btn" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-calendar-blank"></i>
+            </span>
+            <span class="pc-mtext">دانلود بکاپ</span></button>
+        </li>
+          <div id="backup-status" class="mt-2"></div>
+
+
+
+      </ul>
+      <div class="card nav-action-card bg-brand-color-4">
+        <div class="card-body" style="background-image: url('{% static "images/layout/nav-card-bg.svg')" %}">
+          <h5 class="text-dark">مرکز راهنمایی</h5>
+          <p class="text-dark text-opacity-75">لطفا برای سوالات بیشتر با ما تماس بگیرید.</p>
+          <a href="tel:09380043744" class="btn btn-primary" target="_blank">همین حالا تماس بگیرید</a>
+        </div>
+      </div>
+    </div>
+    <div class="card pc-user-card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <img src="{% static 'images/user/avatar-1.jpg' %}" alt="user-image" class="user-avtar wid-45 rounded-circle" />
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <div class="dropdown">
+              <a href="#" class="arrow-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,20">
+                <div class="d-flex align-items-center">
+                  <div class="flex-grow-1 me-2">
+                    <h6 class="mb-0">اشکان کیانی</h6>
+                    <small>سوپر ادمین</small>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <div class="btn btn-icon btn-link-secondary avtar">
+                      <i class="ph-duotone ph-windows-logo"></i>
+                    </div>
+                  </div>
+                </div>
+              </a>
+              <div class="dropdown-menu">
+                <ul>
+                  <li>
+                    <a class="pc-user-links">
+                      <i class="ph-duotone ph-user"></i>
+                      <span>حساب کاربری</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="pc-user-links" href="{% url 'profile:logout' %}">
+                      <i class="ph-duotone ph-power"></i>
+                      <span>خروج</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+<!-- [ Sidebar Menu ] end -->
+<script>
+
+    const csrftoken = '{{ csrf_token }}';
+
+    $('#backup-btn').on('click', function () {
+        $.ajax({
+            url: '/accounts/full_backup/',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function (res) {
+                if (res.success) {
+                    window.location.href = res.download_url;
+                }
+            }
+        });
+    });
+
+</script>
+{% endblock %}

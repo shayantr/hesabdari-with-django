@@ -1,0 +1,796 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block header %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX Input in Django</title>
+    <link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}"/>
+    <script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jalaali/moment-jalaali@v0.7.0/build/moment-jalaali.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+    <style>
+        .form-wrapper {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+    <style>
+
+        #accounts_tree {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+            background: #f9f9f9;
+        }
+
+        .jstree-radio {
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        /* دکمه‌های عملیاتی کنار هر آیتم */
+        .action-buttons {
+            display: inline-flex;
+            gap: 5px;
+            margin-right: 10px;
+        }
+
+        .action-buttons button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .action-buttons button:hover {
+            color: #0b74de;
+        }
+
+        /* دکمه افزودن حساب ریشه‌ای */
+        #add_root_btn {
+            margin-bottom: 10px;
+            background-color: #0b74de;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        #add_root_btn:hover {
+            background-color: #095bb5;
+        }
+
+        /* مودال */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        #modal > div {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 300px;
+            width: 90%;
+            direction: rtl;
+        }
+
+        #modal input[type=text] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        #modal .buttons {
+            margin-top: 15px;
+            text-align: right;
+        }
+
+        #modal .buttons button {
+            padding: 6px 12px;
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
+        #modal_error {
+            color: red;
+            margin-top: 10px;
+        }
+
+        .debt {
+            background-color: #bcbfe6; /* قرمز خیلی ملایم */
+        }
+
+        .credit {
+            background-color: #ffe5e5; /* سبز خیلی ملایم */
+        }
+
+        .notactive {
+            position: relative;
+            pointer-events: none; /* هیچ کلیکی داخلش کار نکنه */
+            opacity: 0.6; /* کمی محو بشه */
+        }
+
+        .notactive::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: repeating-linear-gradient(
+                    45deg,
+                    rgba(0, 0, 0, 0.1) 0,
+                    rgba(0, 0, 0, 0.1) 10px,
+                    transparent 10px,
+                    transparent 20px
+            );
+            pointer-events: none; /* خط هاشور روی کلیک‌ها اثر نذاره */
+        }
+    </style>
+
+
+    <!-- jsTree CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css"/>
+    <!-- jsTree JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+
+
+{% endblock %}
+{% block body %}
+
+    <form id="mainForm" enctype="multipart/form-data" class="form-floating mb-0">
+        <input type="hidden" name="form_token" value="{{ form_token }}">
+        {{ document_instance.date_created }}
+        {{ document_instance.user }}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm rounded-3"
+                         role="alert">
+                        <strong>
+                            {% if message.tags == "success" %} ✅ موفقیت!
+                            {% elif message.tags == "error" %} ❌ خطا!
+                            {% elif message.tags == "warning" %} ⚠️ توجه!
+                            {% else %} ℹ️ اطلاعیه:
+                            {% endif %}
+                        </strong>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% csrf_token %}
+        <div id="forms-container">
+            <div class="debt">
+                {% for i in combined_forms %}
+                    {% if i.form_balance.transaction_type.value == "debt" %}
+                        {% include "account_base/form_fragment.html" with is_active=i.is_active balance_id=i.balance_id bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="debt" locked=i.locked %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <button type="button" id="add-form-debt">افزودن فرم بدهی</button>
+            <button type="button" id="debt-to-credit">ساخت فرم متقابل</button>
+            <div class="credit">
+                {% for i in combined_forms %}
+                    {% if i.form_balance.transaction_type.value == "credit" %}
+                        {% include "account_base/form_fragment.html" with is_active=i.is_active balance_id=i.balance_id bank_str=i.bank_str account_str=i.account_str chequeid=i.chequeid uniqueid=i.uniqueid form_balance=i.form_balance form_cheque=i.form_cheque transaction_type="credit" locked=i.locked %}
+
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <button type="button" id="add-form-credit">افزودن فرم بستانکاری</button>
+            <button type="button" id="credit-to-debt">ساخت فرم متقابل</button>
+
+        </div>
+        <div class="col-12">
+            <div class="invoice-total ms-auto">
+                <div class="row">
+                    <div class="col-6">جمع بدهکاری</div>
+                    <div class="col-6 debt-sum"><p class="f-w-600 mb-1 text-end text-danger" id="text-debt">aa</p></div>
+                    <div class="col-6">جمع بستانکاری</div>
+                    <div class="col-6 credit-sum"><p class="f-w-600 mb-1 text-end text-success" id="text-credit"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary me-2" id="saveall" type="submit">ذخیره همه</button>
+    </form>
+    {% if document_id %}
+        {% csrf_token %}
+        <button type="button" data-document-id="{{ document_id }}" id="delete-document-btn" class="btn btn-primary me-2"
+                style="margin:2px;">
+            حذف روکش سند
+        </button>
+    {% endif %}
+    {% if enable_date_check %}
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const dateInput = document.getElementById("id_date_created");
+
+                dateInput.addEventListener("change", function () {
+
+                    // مقدار وارد شده توسط کاربر
+                    let inputValue = dateInput.value.trim();
+
+                    // اگر کاربر چیزی وارد نکرده بود، کاری نکن
+                    if (!inputValue) return;
+
+                    // اعداد فارسی را به انگلیسی تبدیل کن
+                    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                    inputValue = inputValue.replace(/[۰-۹]/g, d => persianDigits.indexOf(d));
+
+                    // تبدیل رشته به تاریخ شمسی
+                    let inputDate = moment(inputValue, "jYYYY-jMM-jDD");
+                    let today = moment().startOf('day'); // تاریخ امروز شمسی
+                    // مقایسه تاریخ‌ها
+                    if (inputDate.jYear() !== today.jYear()) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'سال نامعتبر',
+                            text: 'فقط سال جاری قابل انتخاب است!',
+                            confirmButtonText: 'باشه'
+                        });
+                        dateInput.value = "";
+                        return;
+                    }
+                    if (inputDate.isAfter(today)) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'اخطار تاریخ',
+                            text: 'تاریخ انتخابی از امروز جلوتر هست!',
+                            confirmButtonText: 'متوجه شدم',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    }
+                });
+            });
+        </script>
+    {% endif %}
+    <script>
+        jalaliDatepicker.startWatch();
+
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        }
+
+        $(document).ready(function () {
+            // تبدیل اعداد فارسی به انگلیسی
+            function persianToEnglishNumbers(str) {
+                const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                return str.replace(/[۰-۹]/g, function (w) {
+                    return english[persian.indexOf(w)];
+                });
+            }
+
+            // فرمت سه‌رقمی
+            function formatNumber(value) {
+                value = persianToEnglishNumbers(value);
+                value = value.replace(/,/g, "");
+                if (!isNaN(value) && value !== "") {
+                    return Number(value).toLocaleString("en-US");
+                }
+                return value;
+            }
+
+            // پاکسازی عدد برای محاسبه
+            function cleanNumber(val) {
+                val = persianToEnglishNumbers(val || "");
+                val = val.replace(/,/g, "");
+                return parseInt(val) || 0;
+            }
+
+            // محاسبه جمع‌ها
+            function calcDebtTotal() {
+                let sum = 0;
+                $('.debt :input[name$="-balance-amount"]').each(function () {
+                    sum += cleanNumber($(this).val());
+                });
+                $('#text-debt').text(sum);
+            }
+
+            function calcCreditTotal() {
+                let sum = 0;
+                $('.credit :input[name$="-balance-amount"]').each(function () {
+                    sum += cleanNumber($(this).val());
+                });
+                $('#text-credit').text(sum);
+            }
+
+            // --- 1. فرمت اولیه هنگام load فرم (Update Form) ---
+            $("input[name$='-amount'], input[name$='-amount']").each(function () {
+                if (this.value) {
+                    this.value = formatNumber(this.value);
+                }
+            });
+
+            // --- 2. delegation برای input های -amount (دینامیک هم کار می‌کنه) ---
+            $(document).on('input', "input[name$='-amount'], input[name$='-amount']", function () {
+                this.value = formatNumber(this.value);
+                calcDebtTotal();
+                calcCreditTotal();
+            });
+
+            // --- 4. جمع اولیه هنگام load ---
+            calcDebtTotal();
+            calcCreditTotal();
+
+
+            // sum all debts into new form in credit
+            $('#debt-to-credit').click(function () {
+                let csrfToken = getCSRFToken(); // Get CSRF token
+                let transaction_type = 'credit'
+                const debtForm = $('#forms-container .debt .form-wrapper');
+                var total = 0;
+
+                debtForm.each(function () {
+                    var amount = $(this).find('[name$="-balance-amount"]').val();
+                    amount = persianToEnglishNumbers(amount);
+                    total += cleanNumber(amount);
+                });
+                var firstdesc = debtForm.find('[name$="-balance-description"]').first().val();
+                $.ajax({
+                    url: "{% url 'get_form_fragment' %}",
+                    type: "POST",
+                    {#headers: { "X-CSRFToken": csrfToken }, // Send CSRF token in headers#}
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        transaction_type: transaction_type,
+                    },
+                    success: function (response) {
+                        const $newForm = $(response.form_html);
+                        $newForm.find(`[name$="-balance-description"]`).val(firstdesc);
+                        $newForm.find(`[name$="-balance-amount"]`).val(total.toLocaleString("en-US"));
+                        $('.credit').append($newForm);
+                        calcCreditTotal();
+                    }
+                });
+            });
+
+
+            // sum all credits into new form in debt
+            $('#credit-to-debt').click(function () {
+                let csrfToken = getCSRFToken(); // Get CSRF token
+                let transaction_type = 'debt'
+                const creditForm = $('#forms-container .credit .form-wrapper');
+                var total = 0;
+
+                creditForm.each(function () {
+                    var amount = $(this).find('[name$="-balance-amount"]').val();
+                    amount = persianToEnglishNumbers(amount);
+                    total += cleanNumber(amount);
+                });
+                var firstdesc = creditForm.find('[name$="-balance-description"]').first().val();
+                $.ajax({
+                    url: "{% url 'get_form_fragment' %}",
+                    type: "POST",
+                    {#headers: { "X-CSRFToken": csrfToken }, // Send CSRF token in headers#}
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        transaction_type: transaction_type,
+                    },
+                    success: function (response) {
+                        const $newForm = $(response.form_html);
+                        $newForm.find(`[name$="-balance-description"]`).val(firstdesc);
+                        $newForm.find(`[name$="-balance-amount"]`).val(total.toLocaleString("en-US"));
+                        $('.debt').append($newForm);
+                        calcDebtTotal();
+                    }
+                });
+            });
+
+            $('#add-form-debt').click(function () {
+                let csrfToken = getCSRFToken(); // Get CSRF token
+                let transaction_type = 'debt'
+                const lastForm = $('#forms-container .debt .form-wrapper').last();
+                const Cheque_numbder = parseInt(lastForm.find('[name$="-Cheque_numbder"]').val());
+                const Cheque_account = lastForm.find('[name$="-cheque-account"]').val();
+                const maturity_date = lastForm.find('[name$="-maturity_date"]').val();
+                const balance_account = lastForm.find('[name$="-balance-account"]').val();
+                const balance_account_new = lastForm.find('[id$="-accounts-list"]').text();
+                const amount = lastForm.find('[name$="-balance-amount"]').val();
+                const description = lastForm.find('[name$="-balance-description"]').val();
+                const in_cash = lastForm.find('[name$="-cheque-in_cash"]').val();
+                $.ajax({
+                    url: "{% url 'get_form_fragment' %}",
+                    type: "POST",
+                    {#headers: { "X-CSRFToken": csrfToken }, // Send CSRF token in headers#}
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        transaction_type: transaction_type,
+                        maturity_date: maturity_date
+                    },
+                    success: function (response) {
+                        const $newForm = $(response.form_html);
+                        const datease = response.datease;
+                        const $lastForm = $('#forms-container .debt .form-wrapper').last();
+                        $newForm.find(`[name$="-balance-description"]`).val(description);
+
+
+                        if ($lastForm.length) {
+                            const wasChecked = $lastForm.find('.toggle-cheque-form').is(':checked');
+                            if (wasChecked) {
+                                $newForm.find(`[name$="-balance-account"]`).val(balance_account);
+                                $newForm.find('.toggle-cheque-form').prop('checked', true); // تیک زدن
+                                $newForm.find('.cheque-form').show(); // نمایش فرم چک
+                                $newForm.find(`[id$="-accounts-list"]`).html(`<option selected>${balance_account_new}</option>`);
+                                $newForm.find(`[name$="-Cheque_numbder"]`).val(Cheque_numbder + 1);
+                                $newForm.find(`[name$="-cheque-account"]`).val(Cheque_account);
+                                $newForm.find(`[name$="-maturity_date"]`).val(datease);
+                                $newForm.find(`[name$="-balance-amount"]`).val(amount);
+                                $newForm.find(`[name$="-cheque-in_cash"]`).val(in_cash);
+
+                                const bank_account_new = lastForm.find('[id$="-bank-list"]').text();
+
+
+                                const chequeFields = ['name', 'bank_name'];
+                                chequeFields.forEach(field => {
+                                    const val = lastForm.find(`[name$="-${field}"]`).val();
+                                    $newForm.find(`[name$="-${field}"]`).val(val);
+                                    $newForm.find(`[id$="-bank-list"]`).html(`<option selected>${bank_account_new}</option>`);
+                                });
+                            }
+                        }
+                        $('.debt').append($newForm);
+                        calcDebtTotal();
+
+                    }
+                });
+            });
+            $('#add-form-credit').click(function () {
+                let csrfToken = getCSRFToken(); // Get CSRF token
+                let transaction_type = 'credit'
+                const lastForm = $('#forms-container .credit .form-wrapper').last();
+                const Cheque_numbder = parseInt(lastForm.find('[name$="-Cheque_numbder"]').val());
+                const Cheque_account = lastForm.find('[name$="-cheque-account"]').val();
+                const maturity_date = lastForm.find('[name$="-maturity_date"]').val();
+                const balance_account = lastForm.find('[name$="-balance-account"]').val();
+                const balance_account_new = lastForm.find('[id$="-accounts-list"]').text();
+                const description = lastForm.find('[name$="-balance-description"]').val();
+                const amount = lastForm.find('[name$="-balance-amount"]').val();
+                const in_cash = lastForm.find('[name$="-cheque-in_cash"]').val();
+
+
+                $.ajax({
+                    url: "{% url 'get_form_fragment' %}",
+                    type: "POST",
+                    {#headers: { "X-CSRFToken": csrfToken }, // Send CSRF token in headers#}
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        transaction_type: transaction_type,
+                        maturity_date: maturity_date
+                    },
+                    success: function (response) {
+                        const $newForm = $(response.form_html);
+                        const $lastForm = $('#forms-container .credit .form-wrapper').last();
+                        $newForm.find(`[name$="-balance-description"]`).val(description);
+
+                        const datease = response.datease;
+                        if ($lastForm.length) {
+                            const wasChecked = $lastForm.find('.toggle-cheque-form').is(':checked');
+                            if (wasChecked) {
+                                $newForm.find('.toggle-cheque-form').prop('checked', true); // تیک زدن
+                                $newForm.find('.cheque-form').show(); // نمایش فرم چک
+                                $newForm.find(`[name$="-Cheque_numbder"]`).val(Cheque_numbder + 1);
+                                $newForm.find(`[id$="-accounts-list"]`).html(`<option selected>${balance_account_new}</option>`);
+                                $newForm.find(`[name$="-balance-account"]`).val(balance_account);
+                                $newForm.find(`[name$="-cheque-account"]`).val(Cheque_account);
+                                $newForm.find(`[name$="-maturity_date"]`).val(datease);
+                                $newForm.find(`[name$="-cheque-in_cash"]`).val(in_cash);
+                                const bank_account_new = lastForm.find('[id$="-bank-list"]').text();
+                                $newForm.find(`[name$="-balance-amount"]`).val(amount);
+                                const chequeFields = ['name', 'bank_name'];
+                                chequeFields.forEach(field => {
+                                    const val = lastForm.find(`[name$="-${field}"]`).val();
+                                    $newForm.find(`[id$="-bank-list"]`).html(`<option selected>${bank_account_new}</option>`);
+                                    $newForm.find(`[name$="-${field}"]`).val(val);
+                                });
+                            }
+                        }
+                        $('.credit').append($newForm);
+                        calcCreditTotal();
+
+
+                    }
+                });
+            });
+
+
+            $('#forms-container').on('change', '.toggle-cheque-form', function () {
+                const chequeForm = $(this).closest('.form-wrapper').find('.cheque-form');
+                if ($(this).is(':checked')) {
+                    chequeForm.show();
+                } else {
+                    chequeForm.hide();
+                    chequeForm.find('input, textarea, select').val('');
+                    chequeForm.find('select').prop('selectedIndex', 0); // برای select‌ها
+                }
+            });
+            let deleted_balances_id = [];
+            $('#forms-container').on('click', '.remove-form', function () {
+                const balance_id = $(this).attr('id');
+                const form = $(this).closest('.form-wrapper');
+
+                Swal.fire({
+                    title: "آیا مطمئن هستی؟",
+                    text: "این عملیات قابل بازگشت نیست!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "بله، حذف کن",
+                    cancelButtonText: "انصراف"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            if (balance_id) {
+                                // deleted 10
+                                deleted_balances_id.push(parseInt(balance_id));
+                            }
+                            form.remove();
+                            calcDebtTotal();
+                            calcCreditTotal();
+
+                            // نوتیف موفقیت
+                            Swal.fire({
+                                toast: true,
+                                position: "top-end",
+                                icon: "success",
+                                title: "با موفقیت حذف شد",
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true
+                            });
+                        } catch (error) {
+                            console.error(error);
+                            // نوتیف خطا
+                            Swal.fire({
+                                toast: true,
+                                position: "top-end",
+                                icon: "error",
+                                title: "خطا در حذف!",
+                                showConfirmButton: false,
+                                timer: 2500,
+                                timerProgressBar: true
+                            });
+                        }
+                    }
+                });
+            });
+            $('#mainForm').on('submit', function (e) {
+                e.preventDefault();
+
+                $(this).find("input[name$='-amount']").each(function () {
+                    this.value = persianToEnglishNumbers(this.value).replace(/,/g, "");
+                });
+
+                let csrfToken = getCSRFToken();
+                let formData = new FormData(this);
+
+                if (deleted_balances_id && deleted_balances_id.length > 0) {
+                    formData.append('deleted_balances_id', JSON.stringify(deleted_balances_id));
+                }
+
+                let url = "{{ form_action_url }}";
+                $("#form-errors").html("");  // پاک کردن خطاهای قبلی
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    headers: {"X-CSRFToken": csrfToken},
+
+                    success: function (response) {
+                        if (response.success) {
+                            // Toast موفقیت
+                            Swal.fire({
+                                toast: true,
+                                position: "top-end",
+                                icon: "success",
+                                title: "فرم با موفقیت ذخیره شد",
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true
+                            });
+
+                            // بعد از کمی مکث ری‌دایرکت کن
+                            setTimeout(function () {
+                                const redirect_page = response.redirect_url || "/";
+                                window.location.href = redirect_page;
+                            }, 1200);
+
+                        } else {
+                            // نمایش خطاهای اعتبارسنجی در صفحه
+                            $("#form-errors-" + response.err_id).html(response.errors);
+
+                            // Toast خطا
+                            Swal.fire({
+                                toast: true,
+                                position: "top-end",
+                                icon: "error",
+                                title: response.errors,
+                                showConfirmButton: false,
+                                timer: 2500,
+                                timerProgressBar: true
+                            });
+                        }
+                    },
+                    error: function () {
+                        // Toast خطای عمومی
+                        Swal.fire({
+                            toast: true,
+                            position: "top-end",
+                            icon: "error",
+                            title: "خطای شبکه یا سرور!",
+                            showConfirmButton: false,
+                            timer: 2500,
+                            timerProgressBar: true
+                        });
+                    }
+                });
+            });
+
+
+        });
+
+
+        $(document).ready(function () {
+            $('.delete-cheque-btn').on('click', function () {
+                var chequeId = $(this).data('chequeid');  // فقط همونی که کلیک شد
+                var button = $(this);  // برای حذف یا تغییر متن بعد از موفقیت
+                var formWrapper = button.closest('.form-wrapper');
+                var chequeForm = button.closest('.cheque-form');
+
+                Swal.fire({
+                    title: "حذف چک",
+                    text: "آیا از حذف این چک مطمئن هستید؟",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "بله، حذف کن",
+                    cancelButtonText: "انصراف"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '{% url "delete-cheque-view" %}',
+                            type: 'POST',
+                            data: {
+                                'cheque_id': chequeId,
+                                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    button.remove();
+                                    formWrapper.find('.toggle-cheque-form').prop('checked', false);
+                                    formWrapper.find('.toggle-cheque-form').prop('disabled', false);
+                                    chequeForm.hide();
+                                    chequeForm.find('input, textarea, select').val('');
+                                    chequeForm.find('select').prop('selectedIndex', 0); // برای select‌ها
+
+                                    // Toast موفقیت
+                                    Swal.fire({
+                                        toast: true,
+                                        position: "top-end",
+                                        icon: "success",
+                                        title: "چک با موفقیت حذف شد",
+                                        showConfirmButton: false,
+                                        timer: 2000,
+                                        timerProgressBar: true
+                                    });
+                                } else {
+                                    // Toast خطا
+                                    Swal.fire({
+                                        toast: true,
+                                        position: "top-end",
+                                        icon: "error",
+                                        title: "خطا: " + response.error,
+                                        showConfirmButton: false,
+                                        timer: 2500,
+                                        timerProgressBar: true
+                                    });
+                                }
+                            },
+                            error: function () {
+                                // Toast خطا برای مشکلات Ajax (مثلاً 500 یا قطع اینترنت)
+                                Swal.fire({
+                                    toast: true,
+                                    position: "top-end",
+                                    icon: "error",
+                                    title: "خطای سرور یا شبکه!",
+                                    showConfirmButton: false,
+                                    timer: 2500,
+                                    timerProgressBar: true
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+            $('#delete-document-btn').on('click', function () {
+                const button = $(this);
+                const documentId = button.data('document-id');
+                const url = `/accounts/delete-document/${documentId}/`; // مسیر view جنگو
+                {#const url = `{% url 'delete_account' pk=0 %}".replace('0', documentId)`; // مسیر view جنگو#}
+
+                Swal.fire({
+                    title: "حذف روکش سند",
+                    text: "آیا از حذف روکش سند مطمئن هستید؟",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "بله، حذف کن",
+                    cancelButtonText: "انصراف"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+
+                        $.ajax({
+                            url: url,
+                            type: "POST",
+                            headers: {"X-CSRFToken": csrfToken},
+                            success: function (response) {
+                                if (response.success) {
+                                    showToast("success", "روکش سند با موفقیت حذف شد");
+                                    button.remove(); // یا مخفی کردن
+                                    setTimeout(function () {
+                                        const redirect_page = response.redirect_url || "/";
+                                        window.location.href = redirect_page;
+                                    }, 1200);
+
+                                } else {
+                                    showToast("error", response.error || "خطا در حذف روکش سند");
+                                }
+                            },
+                            error: function () {
+                                showToast("error", 'مشکلی در ارتباط با سرور پیش آمده است لطفا مجددا تلاش کنید.');
+
+                            }
+                        });
+                    }
+                });
+            });
+
+            // تابع Toast مشترک
+            function showToast(type, message, timer = 2000) {
+                Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: type,
+                    title: message,
+                    showConfirmButton: false,
+                    timer: timer,
+                    timerProgressBar: true
+                });
+            }
+
+        });
+
+
+    </script>
+
+{% endblock %}

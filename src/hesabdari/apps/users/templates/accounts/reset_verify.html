@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <body data-pc-preset="preset-1" data-pc-sidebar-theme="light" data-pc-sidebar-caption="true" data-pc-direction="rtl" data-pc-theme="light">
+  <!-- [ Pre-loader ] start -->
+  <div class="loader-bg">
+    <div class="loader-track">
+      <div class="loader-fill"></div>
+    </div>
+  </div>
+  <!-- [ Pre-loader ] End -->
+
+  <div class="auth-main v1">
+    <div class="auth-wrapper">
+      <div class="auth-form">
+        <div class="card my-5">
+          <div class="card-body">
+            <div class="text-center">
+              <img src="../assets/images/authentication/img-auth-code-varify.png" alt="images" class="img-fluid mb-3">
+              <h4 class="f-w-500 mb-1">لطفاً با OTP تأیید کنید</h4>
+              <p class="mb-0">ما کد را برای شما در jone ارسال کردیم. ****@company.com</p>
+              <p class="mb-3">ایمیل را دریافت نکردید؟ <a href="#" class="link-primary ms-1">ارسال مجدد کد</a></p>
+            </div>
+              <form method="post">
+                  {% csrf_token %}
+            <div class="row my-4 g-3 text-center">
+              <div class="col">
+                {{ form.code }}
+              </div>
+            </div>
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-primary">ادامه</button>
+            </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

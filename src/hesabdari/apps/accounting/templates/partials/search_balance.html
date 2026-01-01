@@ -1,0 +1,104 @@
+{% load jinja_filters %}
+
+{% for balance in balance_lists %}
+<input type="hidden" name="selected_balances" value="{{ balance.id }}" id="chk{{ balance.id }}" data-selected="false">
+
+<div class="card balance-card mb-3 selectable
+            {% if balance.transaction_type == 'debt' %} debt-card {% else %} credit-card {% endif %}"
+     onclick="toggleHighlight(this, {{ balance.id }})"
+     id="balanceCard{{ balance.id }}"
+     role="button"
+     aria-pressed="false"
+     >
+
+    <!-- اضافه کردن نوار رنگی با pseudo-element: برای پشتیبانی بهتر، یک div کناری هم اضافه میکنیم -->
+    <div style="display:flex;">
+        <div style="width:6px;"
+             class="{% if balance.transaction_type == 'debt' %}debt-left{% else %}credit-left{% endif %}"></div>
+
+        <div style="flex:1;">
+
+            <div class="balance-header">
+                <div>
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-user-circle me-2"></i>{{ balance.account }}</h6>
+                    <small class="text-muted">
+                        {% if balance.transaction_type == 'debt' %}از{% else %}به{% endif %}
+                        {% for people in balance.people %}
+                            {{ people }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </small>
+                </div>
+
+                <div class="text-end">
+                    <div class="balance-amount text-dark">{{ balance.sum_b }}</div>
+                    <a href="{% url 'UpdateBalanceView' balance.document.id %}" class="btn btn-sm btn-outline-secondary ms-2 update-cheque" title="ویرایش">
+                        <i class="fas fa-pen"></i>
+                    </a>
+                    {{ balance.document.id }}
+
+                </div>
+            </div>
+
+            {% if balance.image %}
+            <div class="text-center">
+                <a data-fslightbox="gallery" href="{{ balance.image.url }}">
+                    <img src="{{ balance.image.url }}" alt="تصویر" class="card-thumb img-fluid">
+                </a>
+            </div>
+            {% endif %}
+            <div class="row text-center">
+                <div class="col-4 "><bold><strong>{{ balance.document.date_created }}</strong></bold></div>
+                <div class="col-4"><bold><strong class="{% if balance.transaction_type == 'debt' %}debt-color" >{{ balance.amount|toman }}بد{% else %}text-danger" >{{ balance.amount|toman }}بس {% endif %}</strong></bold> </div>
+                <div class="col-4">&nbsp;
+                    <text class="{% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">
+                        {{ balance.running_balance|toman }}
+                    </text>
+                </div>
+            </div>
+
+            <div class="balance-info">
+                {% if balance.description %}<p class="mb-0"><strong>توضیحات:</strong> {{ balance.description }}</p>{% endif %}
+
+
+{#                <div><button  class="badge-pill" type="button"#}
+{#                        data-bs-toggle="collapse"#}
+{#                        data-bs-target="#collapse{{ balance.id }}"#}
+{#                        aria-expanded="false"#}
+{#                        aria-controls="collapse{{ balance.id }}"#}
+{#                        onclick="toggleChevron(event, {{ balance.id }})">#}
+{#                    <span> جزئیات</span>#}
+{#                    <i id="chev{{ balance.id }}" class="fas fa-chevron-down rotate-icon"></i>#}
+{#                </button></div>#}
+
+            </div>
+
+{#            <div class="card-body pt-0">#}
+{#                <div class="collapse" id="collapse{{ balance.id }}">#}
+{#                    <div class="details">#}
+{#                        <p class="mb-2"><strong>چک:</strong>#}
+{#                            {% if not balance.cheque %} ندارد#}
+{#                            {% else %} {{ balance.cheque.cheque_status }} {% endif %}#}
+{#                        </p>#}
+{#                        <p class="mb-0"><strong>توضیحات:</strong> {{ balance.description }}</p>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+{#/* وقتی دکمه نمایش جزئیات کلیک میشه، آیکن بچرخد یا برگردد */#}
+{#function toggleChevron(e, id) {#}
+{#    // جلوگیری از پراپاگیشن تا onclick کارت را هم فعال نکند#}
+{#    e.stopPropagation();#}
+{##}
+{#    const icon = document.getElementById('chev' + id);#}
+{#    // تا وقتی bootstrap collapse کار کنه، بعد از کوتاهی کلاس رو toggle کن#}
+{#    setTimeout(() => {#}
+{#        icon.classList.toggle('rotated');#}
+{#    }, 10);#}
+{#}#}
+</script>
