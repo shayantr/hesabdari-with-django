@@ -22,7 +22,7 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("select2/", include("django_select2.urls")),
-    path('accounts/', include('hesabdari.apps.accounting.urls')),
+    path('accounting/', include('hesabdari.apps.accounting.api.urls')),
     path('profile/', include('hesabdari.apps.users.urls')),
     path('', include('hesabdari.apps.home.urls')),
     path('api-auth/', include('rest_framework.urls')),

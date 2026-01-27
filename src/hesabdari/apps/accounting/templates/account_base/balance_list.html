@@ -2,7 +2,9 @@
 {% load static %}
 {% load jinja_filters %}
 {% block header %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+{#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>#}
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.js' %}"></script>
     <link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}"/>
     <script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
@@ -373,7 +375,7 @@
             $('#balance-export-excel').on('click', function(e){
                 e.preventDefault();
                 const params = $('#search-filter-form').serialize();  // current filters
-                window.location = '/accounts/export-csv-balance/?' + params;
+                window.location = '/accounting/export-csv-balance/?' + params;
             });
             // highlighting, search total debt, credit and result balances
             document.addEventListener("click", function(e) {

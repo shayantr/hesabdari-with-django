@@ -8,7 +8,8 @@ from django.template.loader import render_to_string
 from django.views import generic
 
 from hesabdari.apps.accounting.forms import AccountsForm
-from hesabdari.apps.accounting.models import AccountsClass, BalanceSheet
+from hesabdari.apps.accounting.models.accounts import AccountsClass
+from hesabdari.apps.accounting.models.balancesheet import BalanceSheet
 
 
 def accouns_manager(request):

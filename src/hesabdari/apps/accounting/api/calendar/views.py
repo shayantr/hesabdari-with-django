@@ -4,7 +4,8 @@ import jdatetime
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from hesabdari.apps.accounting.models import BalanceSheet, CashierCheque
+from hesabdari.apps.accounting.models.balancesheet import BalanceSheet
+from hesabdari.apps.accounting.models.cheque import CashierCheque
 
 
 def calendar_page(request):

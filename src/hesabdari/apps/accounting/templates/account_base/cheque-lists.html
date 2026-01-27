@@ -273,12 +273,12 @@ $(document).ready(function () {
     $('#receivable-export-excel').on('click', function(e){
         e.preventDefault();
         const params = $('#recivable-filter-form').serialize() + '&tab=recivable';  // فیلترهای فعلی
-        window.location = '/accounts/export-csv-cheque/?' + params;
+        window.location = '/accounting/export-csv-cheque/?' + params;
     });
     $('#payable-export-excel').on('click', function(e){
         e.preventDefault();
         const params = $('#payable-filter-form').serialize() + '&tab=payable';  // فیلترهای فعلی
-        window.location = '/accounts/export-csv-cheque/?' + params;
+        window.location = '/accounting/export-csv-cheque/?' + params;
     });
 
     let receivablesSearchTimeout = null;

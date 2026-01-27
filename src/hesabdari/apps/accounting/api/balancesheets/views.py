@@ -11,7 +11,8 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views import generic
 
-from hesabdari.apps.accounting.models import BalanceSheet, AccountsClass
+from hesabdari.apps.accounting.models.accounts import AccountsClass
+from hesabdari.apps.accounting.models.balancesheet import BalanceSheet
 
 
 class BalanceListView(LoginRequiredMixin, generic.View):

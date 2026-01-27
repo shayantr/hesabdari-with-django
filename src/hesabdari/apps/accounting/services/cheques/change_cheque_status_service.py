@@ -1,6 +1,7 @@
 from django.db import transaction
 
-from hesabdari.apps.accounting.models import BalanceSheet, CashierCheque
+from hesabdari.apps.accounting.models.balancesheet import BalanceSheet
+from hesabdari.apps.accounting.models.cheque import CashierCheque
 
 
 class ChangeChequeStatusService:

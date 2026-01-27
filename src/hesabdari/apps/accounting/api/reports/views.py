@@ -2,7 +2,8 @@ from django.db.models import Prefetch
 from django.shortcuts import render
 from django.views import generic
 
-from hesabdari.apps.accounting.models import AccountsClass, BalanceSheet
+from hesabdari.apps.accounting.models.accounts import AccountsClass
+from hesabdari.apps.accounting.models.balancesheet import BalanceSheet
 
 
 def account_report(request):

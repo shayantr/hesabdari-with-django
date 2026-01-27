@@ -1,7 +1,10 @@
 from django import forms
 from treebeard.forms import MoveNodeForm
 
-from hesabdari.apps.accounting.models import AccountsClass, BalanceSheet, CashierCheque, Document
+from hesabdari.apps.accounting.models.accounts import AccountsClass
+from hesabdari.apps.accounting.models.balancesheet import BalanceSheet
+from hesabdari.apps.accounting.models.cheque import CashierCheque
+from hesabdari.apps.accounting.models.document import Document
 
 
 class AccountsForm(forms.ModelForm):
@@ -73,6 +76,6 @@ class CashierChequeForm(forms.ModelForm):
             'cheque_type': forms.HiddenInput(),
 
         }
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.empty_permitted =True
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.empty_permitted =True

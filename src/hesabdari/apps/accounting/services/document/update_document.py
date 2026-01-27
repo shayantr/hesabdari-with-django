@@ -37,10 +37,13 @@ class UpdateDocumentService:
             cheque_form = CashierChequeForm(
                 self.post_data or None, prefix=f"{balance.id}-update-cheque", instance=balance.cheque
             )
+            print(balance.cheque)
             if not balance_form.is_valid():
                 return False, None
             if not cheque_form.is_valid():
+                print("kharabe?")
                 return False, None
+            print(cheque_form.cleaned_data.get('name'))
 
             combined_forms.append(PostCombinedForm(balance.id, balance_form, cheque_form))
             all_debt, all_credit = self._update_totals(balance_form, all_debt, all_credit)
@@ -95,15 +98,24 @@ class UpdateDocumentService:
 
     def _save_existing(self, combined_forms):
         for item in combined_forms:
+            print('first')
             balance = item.form_balance.save(commit=False)
+            print(item.form_cheque.cleaned_data.get('name'))
+            print(item.form_balance.cleaned_data.get('description'))
             if item.form_cheque.cleaned_data.get('name'):
+                print('1')
                 cheque = item.form_cheque.save(commit=False)
+                print('commited false')
                 cheque.user = self.user
                 if cheque.cheque_type is None:
+                    print('2')
                     if balance.transaction_type == 'debt':
+                        print('3')
                         cheque.cheque_type = 'دریافتنی'
                     elif balance.transaction_type == 'credit':
+                        print('4')
                         cheque.cheque_type = 'پرداختنی'
+                print("final")
                 cheque.save()
                 balance.cheque = cheque
             balance.document = self.document

@@ -2,7 +2,7 @@ from django.db.models.signals import pre_save, post_delete
 from django.dispatch import receiver
 from twisted.python.failure import count
 
-from .models import BalanceSheet, CashierCheque
+from hesabdari.apps.accounting.models.balancesheet import BalanceSheet
 
 
 # @receiver(pre_save, sender=BalanceSheet)

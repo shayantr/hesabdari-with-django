@@ -193,10 +193,10 @@
                     }
                 },
 
-                events: '/accounts/events-list/',
+                events: '/accounting/events-list/',
 
                 dateClick(info) {
-                    fetch(`/accounts/cheque-day/?date=${info.dateStr}`)
+                    fetch(`/accounting/cheque-day/?date=${info.dateStr}`)
                         .then(res => res.json())
                         .then(data => {
 

@@ -1,4 +1,4 @@
-from hesabdari.apps.accounting.models import BalanceSheet
+from hesabdari.apps.accounting.models.balancesheet import BalanceSheet
 
 
 def get_document_balances_for_update(document, user):

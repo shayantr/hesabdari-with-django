@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 import jdatetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction, DatabaseError
+from django.db import transaction
 from django.db.models import Max
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -17,13 +17,14 @@ from django.views import generic
 from django.views.decorators.http import require_POST
 
 from hesabdari.apps.accounting.forms import DocumentForm, BalanceSheetForm, CashierChequeForm
-from hesabdari.apps.accounting.models import BalanceSheet, Document
+from hesabdari.apps.accounting.models.balancesheet import BalanceSheet
+from hesabdari.apps.accounting.models.document import Document
 from hesabdari.apps.accounting.selectors.document import get_document_balances_for_update, \
     get_document_balances_for_change_status
-from hesabdari.apps.accounting.services.change_cheque_status_service import ChangeChequeStatusService
-from hesabdari.apps.accounting.services.document_service import DocumentService
-from hesabdari.apps.accounting.services.update_document import UpdateDocumentService
-from hesabdari.apps.accounting.utils.combined_forms import CombinedForm, PostCombinedForm
+from hesabdari.apps.accounting.services.cheques.change_cheque_status_service import ChangeChequeStatusService
+from hesabdari.apps.accounting.services.document.document_service import DocumentService
+from hesabdari.apps.accounting.services.document.update_document import UpdateDocumentService
+from hesabdari.apps.accounting.utils.combined_forms import CombinedForm
 from hesabdari.apps.accounting.utils.dates import add_month_to_jalali_date
 from hesabdari.apps.accounting.utils.prefix_extractor import extract_all_prefixes
 from hesabdari.apps.accounting.utils.tokens import get_tokens
@@ -252,61 +253,3 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
                 return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")})
 
 
-class ChangeStatusCheque(generic.View):
-    def get(self, request, pk):
-        balancesheet = get_document_balances_for_change_status(id=pk, user=request.user).get()
-        document = DocumentForm(request.POST or None, initial={'user': request.user, 'date_created': balancesheet.cheque.maturity_date})
-        combined_forms = []
-        locked = True
-        combined_form = namedtuple('combined_form',
-                                   ['uniqueid', 'form_balance', 'form_cheque', 'chequeid', 'bank_str',
-                                    'balance_id', 'account_str', 'locked'])
-        if balancesheet.transaction_type == 'debt':
-            balance_forms = BalanceSheetForm(prefix=f"old-update-cheque-update-balance",
-                                             initial={"user": request.user, "transaction_type": 'credit',
-                                                      'amount': balancesheet.amount, 'account': balancesheet.account
-                                                 , 'description': balancesheet.description, 'previous_cheque_status': balancesheet.cheque.cheque_status
-                                                      })
-        else:
-            balance_forms = BalanceSheetForm(prefix=f"old-update-cheque-update-balance",
-                                             initial={"user": request.user, "transaction_type": 'debt',
-                                                      'amount': balancesheet.amount, 'account': balancesheet.account
-                                                 , 'description': balancesheet.description, 'previous_cheque_status': balancesheet.cheque.cheque_status
-                                                      })
-        balance_id = 'old-update-balance'
-        cheque_forms = CashierChequeForm(prefix=f"old-update-cheque-update-cheque", instance=balancesheet.cheque)
-        chequeid = balancesheet.cheque.id
-        bank_str = balancesheet.cheque.account.__str__()
-        combined_forms.append(
-            combined_form("old-update-cheque", balance_forms, cheque_forms, chequeid, bank_str, balance_id,
-                          balancesheet.account, locked))
-        context = {
-            'document_instance': document,
-            'combined_forms': combined_forms,
-        }
-        return render(request, "account_base/create-document.html", context)
-
-    def post(self, request, pk):
-        user = request.user
-        document = DocumentForm(request.POST or None)
-        balancesheet = get_document_balances_for_change_status(pk, user).get()
-        next_url = request.GET.get('next', reverse('cheque-lists-view'))
-        balanceCheqe = BalanceSheetForm(request.POST, request.FILES, prefix=f"old-update-cheque-update-balance")
-        update_Cheqe = CashierChequeForm(request.POST or None, prefix=f"old-update-cheque-update-cheque",
-                                         instance=balancesheet.cheque)
-
-        all_prefixes = extract_all_prefixes(request.POST, request.FILES) if request.method == "POST" else set()
-        all_new_balanceforms = [BalanceSheetForm(request.POST, request.FILES or None, prefix=f'{i}-new-balance') for i
-                                in
-                                all_prefixes]
-        all_new_chequeforms = [CashierChequeForm(request.POST or None, prefix=f'{i}-new-cheque') for i in all_prefixes]
-
-        service = ChangeChequeStatusService(balancesheet, document, balanceCheqe, update_Cheqe, all_new_balanceforms, all_new_chequeforms, user)
-        all_valid, errors = service.execute()
-        if not all_valid:
-            return JsonResponse({'success': False, 'errors': errors})
-
-        if next_url:
-            return JsonResponse({'success': True, "redirect_url": next_url}, )
-        else:
-            return JsonResponse({'success': True, "redirect_url": reverse("cheque-lists-view")}, )

@@ -22,7 +22,7 @@
     <!-- map-vector css -->
     <link rel="stylesheet" href="{% static 'css/plugins/jsvectormap.min.css' %}">
     <!-- [Google Font : Public Sans] icon -->
-    <!--<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- [Tabler Icons] https://tablericons.com -->
     <link rel="stylesheet" href="{% static 'fonts/tabler-icons.min.css' %}">
@@ -39,11 +39,14 @@
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet"
           type="text/css"/>
     <!-- SweetAlert2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+{#    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">#}
 
     <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+{#    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>#}
+{#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>#}
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+    <script src="{% static 'js/sweetalert2.all.min.js' %}"></script>
 
 
     <style>
