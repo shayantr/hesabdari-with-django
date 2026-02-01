@@ -121,7 +121,10 @@ def _filter_balance_handler(request):
     total_credit = pre_total_credit + sum_credit
 
     balance_list = []
-    running_balance = pre_total_debt - pre_total_credit
+    if request.GET.get("nobalance") == "on":
+        running_balance = 0
+    else:
+        running_balance = pre_total_debt - pre_total_credit
     for item in qs.order_by('document__date_created', 'id'):
         doc = item.document
         if item.transaction_type == 'debt':  # بدهکاری
