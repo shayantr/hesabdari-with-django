@@ -54,9 +54,9 @@ class ChequeSelector:
 
     def order(self):
         if self.filters.get('created_at_to') or self.filters.get('created_at_from'):
-            self.qs = self.qs.order_by('-id','-document__date_created')
+            self.qs = self.qs.order_by('-document__date_created', '-id')
         else:
-            self.qs = self.qs.order_by('-id','cheque__maturity_date')
+            self.qs = self.qs.order_by('cheque__maturity_date', '-id')
 
     def aggregate_totals(self):
         return self.qs.aggregate(
