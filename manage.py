@@ -7,7 +7,7 @@ import sys
 def main():
     sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'src.hesabdari.envs.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'src.Akounting.envs.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
