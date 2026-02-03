@@ -1,5 +1,7 @@
 import sqlite3
 import subprocess, os, zipfile
+
+import jalali_date
 from django.conf import settings
 from datetime import datetime
 
@@ -7,8 +9,8 @@ from django.db import connection
 
 
 def backup_full_system():
-    ts = datetime.now().strftime('%Y%m%d_%H%M%S')
-    base = f'backup_full_{ts}'
+    ts = jalali_date.date2jalali(datetime.now())
+    base = f'a{ts.__str__()}'
     backup_dir = os.path.join(settings.BASE_DIR, 'backups')
     os.makedirs(backup_dir, exist_ok=True)
 

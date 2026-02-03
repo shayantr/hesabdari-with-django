@@ -81,21 +81,19 @@
                             <span class="pc-mtext">تقویم</span></a
                         >
                     </li>
-                    <li class="pc-item">
-                        <button id="backup-btn" class="pc-link">
+                    <li class="pc-item pc-hasmenu">
+                        <a href="#!" class="pc-link">
             <span class="pc-micon">
-              <i class="ph-duotone ph-calendar-blank"></i>
+              <i class="ph-duotone ph-file-archive"></i>
             </span>
-                            <span class="pc-mtext">پشتیبان گیری اطلاعات</span></button>
+                            <span class="pc-mtext">پشتیبان گیری</span><span class="pc-arrow"><i data-feather="chevron-left"></i></span
+                        ></a>
+                        <ul class="pc-submenu">
+                            <li class="pc-item"><a href="{% url 'backup_list' %}" class="pc-link">لیست فایل های بکاپ</a></li>
+                            <li class="pc-item"><a href="#" class="pc-link" data-bs-toggle="modal" data-bs-target="#restoreModal">بازیابی اطلاعات</a></li>
+                            <li class="pc-item"><a href="#" id="backup-btn" class="pc-link">دانلود فایل پشتیبان</a></li>
+                        </ul>
                     </li>
-                    <li class="pc-item">
-                        <button class="pc-link" data-bs-toggle="modal" data-bs-target="#restoreModal">
-            <span class="pc-micon">
-              <i class="ph-duotone ph-calendar-blank"></i>
-            </span>
-                            <span class="pc-mtext">بازیابی اطلاعات</span></button>
-                    </li>
-
 
                 </ul>
                 <div class="card nav-action-card bg-brand-color-4">

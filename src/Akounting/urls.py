@@ -24,6 +24,7 @@ urlpatterns = [
     path("select2/", include("django_select2.urls")),
     path('accounting/', include('Akounting.apps.accounting.api.urls')),
     path('profile/', include('Akounting.apps.users.urls')),
+    path('core/', include('Akounting.apps.core.urls')),
     path('', include('Akounting.apps.home.urls')),
     path('api-auth/', include('rest_framework.urls')),
     ]

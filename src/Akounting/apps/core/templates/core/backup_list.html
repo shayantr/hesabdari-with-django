@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block body %}
+<h1>لیست بکاپ‌ها</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>نام فایل</th>
+            <th>تاریخ ایجاد</th>
+            <th>دانلود</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for backup in backups %}
+        <tr>
+            <td>{{ backup.name }}</td>
+            <td>{{ backup.modified_at }}</td>
+            <td>
+                <a class="button" href="{% url 'backup:download_backup' backup.name %}">
+                    دانلود
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">هیچ بکاپی وجود ندارد</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
