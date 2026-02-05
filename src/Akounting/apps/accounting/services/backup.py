@@ -9,8 +9,8 @@ from django.db import connection
 
 
 def backup_full_system():
-    ts = jalali_date.date2jalali(datetime.now())
-    base = f'a{ts.__str__()}'
+    ts = jalali_date.datetime2jalali(datetime.now())
+    base = f"{ts.year}-{ts.month}-{ts.day}-{ts.hour}-{ts.minute}"
     backup_dir = os.path.join(settings.BASE_DIR, 'backups')
     os.makedirs(backup_dir, exist_ok=True)
 
