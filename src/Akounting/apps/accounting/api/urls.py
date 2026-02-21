@@ -12,5 +12,6 @@ urlpatterns = [
     path('', include('Akounting.apps.accounting.api.reports.urls')),
     path('', include('Akounting.apps.accounting.api.calendar.urls')),
     path('', include('Akounting.apps.accounting.api.backup.urls')),
+    path('', include('Akounting.apps.accounting.api.image_gallery.urls')),
 
 ]

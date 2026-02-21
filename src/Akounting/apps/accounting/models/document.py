@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django_jalali.db import models as jmodels
 from Akounting.apps.users.models import User
 
@@ -18,3 +18,4 @@ class Document(models.Model):
             else:
                 bs.delete()
         super().delete(*args, **kwargs)
+

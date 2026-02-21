@@ -38,7 +38,7 @@ class BalanceSheet(models.Model):
     cheque = models.ForeignKey('CashierCheque', on_delete=models.SET_NULL, null=True, blank=True, related_name='balance_sheet')
     amount = models.IntegerField( verbose_name='مبلغ')
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='images/', blank=True, null=True)
+    image = models.ForeignKey('Image', on_delete=models.CASCADE, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     previous_cheque_status = models.CharField(max_length=50, null=True, blank=True)
     objects = jmodels.jManager()

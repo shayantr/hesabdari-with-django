@@ -27,12 +27,12 @@ def backup_full_system():
     with zipfile.ZipFile(zip_path, 'w', compression=zipfile.ZIP_DEFLATED) as z:
         z.write(sqlite_backup_path, arcname='database.sqlite3')
 
-        for root, _, files in os.walk(settings.MEDIA_ROOT):
-            for f in files:
-                p = os.path.join(root, f)
-                z.write(
-                    p,
-                    arcname=f'media/{os.path.relpath(p, settings.MEDIA_ROOT)}'
-                )
+        # for root, _, files in os.walk(settings.MEDIA_ROOT):
+        #     for f in files:
+        #         p = os.path.join(root, f)
+        #         z.write(
+        #             p,
+        #             arcname=f'media/{os.path.relpath(p, settings.MEDIA_ROOT)}'
+        #         )
 
     return zip_path

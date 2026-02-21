@@ -49,14 +49,26 @@
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="input-group mb-3">
-              {% if form_balance.image.value %}
-            <img src="{{ form_balance.image.value.url }}" width="150px">
-        {% endif %}
+            <div class="input-group mb-3 image-preview" id="{{ form_balance.image.id_for_label }}-selected">
+            {% if form_balance.instance.image.file.url %}
+                <a data-fslightbox="gallery" href="{{ form_balance.instance.image.file.url }}">
+                    <img src="{{ form_balance.instance.image.file.url }}" width="100px" alt="تصویر" class="card-thumb img-fluid">
+                </a>
+            {% endif %}
         {{ form_balance.image }}
                 {{ form_balance.date_created }}
-            </div>
+            <button type="button"
+                    class="btn btn-sm btn-danger file-clear" data-delete-input="{{ form_balance.image.id_for_label }}">
+                حذف فایل
+            </button>
+                        </div>
+        <button type="button" id="openImageModal" class="btn btn-secondary openImageModal" data-target-input="{{ form_balance.image.id_for_label }}">
+            انتخاب / افزودن تصویر
+        </button>
+
         </div>
+
+
     </div>
     {{ form_balance.transaction_type }}
     <div class="row p-0">
@@ -136,6 +148,7 @@
         {% endif %}
     </div>
 </div>
+
 <script>
 document.querySelectorAll(".notactive").forEach(div => {
     div.querySelectorAll("input, select, textarea, button").forEach(el => {
@@ -487,6 +500,10 @@ function handleAccountSelection(uniqueid) {
 
 
 });
+
 </script>
+
+
+
 
 <script type="text/javascript" src="{% static 'js/chrome-cancell-input.js' %}"></script>

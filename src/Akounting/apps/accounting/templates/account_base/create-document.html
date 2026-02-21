@@ -222,6 +222,11 @@
             حذف روکش سند
         </button>
     {% endif %}
+    <div class="modal fade" id="imageModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content"></div>
+        </div>
+    </div>
     {% if enable_date_check %}
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -578,6 +583,20 @@
                     }
                 });
             });
+            document.addEventListener('click', function (e) {
+                if (!e.target.classList.contains('file-clear')) return;
+
+                const wrapper = e.target.closest('[data-file-field]');
+                if (!wrapper) return;
+
+                const input = wrapper.querySelector('input[type="file"]');
+                if (!input) return;
+
+                input.value = '';
+
+                // اگر preview داشتی، اینجا پاکش کن
+                const preview = wrapper.querySelector('.file-preview');
+            });
             $('#mainForm').on('submit', function (e) {
                 e.preventDefault();
 
@@ -791,6 +810,105 @@
         });
 
 
+    </script>
+
+
+    <script>
+        /// Upload/Select/Delete Image
+        let targetInput = null;
+        let deleteInput = null;
+        $(document).on('click', '.file-clear', function () {
+            deleteInput = $(this).data('delete-input');
+            Swal.fire({
+                title: "حذف عکس",
+                text: "آیا این عکس را میخواهید از این سند حذف کنید؟",
+                icon: "danger",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "حذف",
+                cancelButtonText: 'خیر'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deletePreviewImage();
+                    Swal.fire({
+                        title: "حذف شد!",
+                        text: "عکس مورد نظر شما حذف شد",
+                        icon: "success",
+                        confirmButtonText: 'باشه'
+                    });
+                }
+            });
+        });
+        $(document).on('click', '.openImageModal', function () {
+            targetInput = $(this).data('target-input');
+            $('#imageModal .modal-content').load('{% url 'image_gallery' %}');
+            $('#imageModal').modal('show');
+        });
+
+        $(document).on('click', '.selectable-image', function () {
+            let imageId = $(this).data('id');
+            let imageUrl = $(this).attr('src');
+            $('#' + targetInput).val(imageId);
+            setPreviewImage(imageId, imageUrl);
+            $('#imageModal').modal('hide');
+        });
+
+        $(document).on('change', '#uploadImageForm', function (e) {
+            e.preventDefault();
+
+
+            let formData = new FormData();
+            formData.append('file', e.target.files[0]);
+            fetch('{% url "upload_image" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
+                .then(r => r.json())
+                .then(img => {
+                    $('#' + targetInput).val(img.id);
+                    console.log($('#' + targetInput).val());
+                    setPreviewImage(img.id, img.url);
+                    $('#imageModal').modal('hide');
+                });
+
+        });
+
+        function setPreviewImage(imageId, imageUrl) {
+            const $container = $('#' + targetInput + '-selected');
+            const $link = $container.find('a[data-fslightbox="gallery"]');
+            const $img = $container.find('img.card-thumb');
+
+            if ($link.length && $img.length) {
+                $link.attr('href', imageUrl);
+                $img.attr('src', imageUrl);
+            } else {
+                const html = `
+            <a data-fslightbox="gallery" href="${imageUrl}">
+                <img src="${imageUrl}" width="100px" alt="تصویر" class="card-thumb img-fluid">
+            </a>
+        `;
+
+                $container.append(html);
+            }
+
+        }
+
+        function deletePreviewImage() {
+            $('#' + deleteInput).val(null);
+            const $container = $('#' + deleteInput + '-selected');
+            const $link = $container.find('a[data-fslightbox="gallery"]');
+            const $img = $container.find('img.card-thumb');
+
+            if ($link.length && $img.length) {
+                $link.attr('href', null);
+                $img.attr('src', null);
+            }
+
+        }
     </script>
 
 {% endblock %}

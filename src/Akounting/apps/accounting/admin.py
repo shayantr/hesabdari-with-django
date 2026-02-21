@@ -3,6 +3,7 @@ from mptt.admin import MPTTModelAdmin, DraggableMPTTAdmin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
+from Akounting.apps.accounting.models import Image
 from Akounting.apps.accounting.models.accounts import AccountsClass
 from Akounting.apps.accounting.models.balancesheet import BalanceSheet
 from Akounting.apps.accounting.models.cheque import CashierCheque
@@ -21,6 +22,7 @@ class AccountsClassAdmin(TreeAdmin):
 
 # admin.site.register(AccountsClass, AccountsClassAdmin)
 admin.site.register(AccountsClass)
+admin.site.register(Image)
 
 admin.site.register(CashierCheque)
 admin.site.register(BalanceSheet)
