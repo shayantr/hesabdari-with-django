@@ -26,7 +26,6 @@ urlpatterns = [
     path('profile/', include('Akounting.apps.users.urls')),
     path('core/', include('Akounting.apps.core.urls')),
     path('', include('Akounting.apps.home.urls')),
-    path('api-auth/', include('rest_framework.urls')),
     ]
 
 

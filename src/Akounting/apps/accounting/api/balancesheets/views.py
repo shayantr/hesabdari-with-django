@@ -22,7 +22,6 @@ class BalanceListView(LoginRequiredMixin, generic.View):
         return render(request, 'account_base/balance_list.html', context)
 
 def _filter_balance_handler(request):
-    current_day = jdatetime.date.today()
     if request.GET.get('id_lists'):
         id_lists_json = request.GET.get('id_lists', '[]')
         id_lists = json.loads(id_lists_json)
@@ -94,27 +93,26 @@ def _filter_balance_handler(request):
         ),
     )
 
-    default_date = jdatetime.date(current_day.year, 1, 1)
-    for cond in (debt_condition, credit_condition):
-        cond.setdefault('document__date_created__lt', default_date)
-
-    pre_aggregates = pre_qs.aggregate(
-        pre_debt=Sum(
-            Case(
-                When(**debt_condition, then='amount'),
-                output_field=IntegerField(),
-            )
-        ),
-        pre_credit=Sum(
-            Case(
-                When(**credit_condition, then='amount'),
-                output_field=IntegerField(),
-            )
-        ),
-    )
-
-    pre_total_credit = pre_aggregates['pre_credit'] or 0
-    pre_total_debt = pre_aggregates['pre_debt'] or 0
+    if created_at_from:
+        pre_aggregates = pre_qs.aggregate(
+            pre_debt=Sum(
+                Case(
+                    When(**debt_condition, then='amount'),
+                    output_field=IntegerField(),
+                )
+            ),
+            pre_credit=Sum(
+                Case(
+                    When(**credit_condition, then='amount'),
+                    output_field=IntegerField(),
+                )
+            ),
+        )
+        pre_total_credit = pre_aggregates['pre_credit'] or 0
+        pre_total_debt = pre_aggregates['pre_debt'] or 0
+    else:
+        pre_total_credit = 0
+        pre_total_debt = 0
     sum_debt = aggregates['debt'] or 0
     sum_credit = aggregates['credit'] or 0
     total_debt = pre_total_debt + sum_debt
@@ -185,7 +183,6 @@ def csv_balance(request):
     response['Content-Disposition'] = f"attachment; filename*=UTF-8''{filename}"
     wb.save(response)
     return response
-
 
 
 

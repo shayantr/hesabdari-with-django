@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     'Akounting.apps.core',
     'django_render_partial',
     'django_select2',
-    'rest_framework',
 
 ]
 
