@@ -5,7 +5,7 @@ from Akounting.apps.users.models import User
 
 class Document(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents')
-    date_created = jmodels.jDateField(default=jmodels.timezone.now())
+    date_created = jmodels.jDateField(default=jmodels.timezone.now)
     objects = jmodels.jManager()
 
     class Meta:
@@ -18,4 +18,3 @@ class Document(models.Model):
             else:
                 bs.delete()
         super().delete(*args, **kwargs)
-
