@@ -218,6 +218,7 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
             'document_id': document.id,
             'document_instance': document_form,
             'enable_date_check': True,
+            'form_action_url': request.get_full_path(),
         }
         return render(request, "account_base/create-document.html", context)
 
@@ -251,5 +252,4 @@ class UpdateBalanceView(LoginRequiredMixin, generic.View):
                 return JsonResponse({'success': True, "redirect_url": next_url})
             else:
                 return JsonResponse({'success': True, "redirect_url": reverse("balance_lists")})
-
 

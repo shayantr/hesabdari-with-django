@@ -147,6 +147,7 @@ class ChangeStatusCheque(generic.View):
         context = {
             'document_instance': document,
             'combined_forms': combined_forms,
+            'form_action_url': request.get_full_path(),
         }
         return render(request, "account_base/create-document.html", context)
 
