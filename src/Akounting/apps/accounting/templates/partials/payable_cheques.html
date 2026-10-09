@@ -30,10 +30,10 @@
             <div class="card-body">
                 <!-- دکمه‌ها -->
                 <div class="d-flex flex-wrap gap-2 mb-3">
-                    <a id="change-cheque-status" href="{% url 'change_status_cheque' payable.id %}"
-                       class="btn btn-outline-secondary btn-sm flex-fill">🔄 تغییر وضعیت چک</a>
-                    <a id="edit-cheque" href="{% url 'UpdateBalanceView' payable.document.id %}"
-                       class="btn btn-outline-primary btn-sm flex-fill">✏️ ویرایش</a>
+                    <a class="btn btn-outline-secondary btn-sm flex-fill update-cheque"
+                       href="{% url 'change_status_cheque' payable.id %}">🔄 تغییر وضعیت چک</a>
+                    <a class="btn btn-outline-primary btn-sm flex-fill update-cheque"
+                       href="{% url 'UpdateBalanceView' payable.document.id %}">✏️ ویرایش</a>
                 </div>
 
                 <!-- تصویر -->
@@ -66,20 +66,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        $('#change-cheque-status').each(function () {
-            const currentUrl = window.location.href;
-            const href = $(this).attr('href');
-            const separator = href.includes('?') ? '&' : '?';
-            $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
-        });
-        $('#edit-cheque').each(function () {
-            const currentUrl = window.location.href;
-            const href = $(this).attr('href');
-            const separator = href.includes('?') ? '&' : '?';
-            $(this).attr('href', href + separator + 'next=' + encodeURIComponent(currentUrl));
-        });
-    </script>
 
 {% endfor %}

@@ -643,27 +643,22 @@ $(document).ready(function () {
 });
 
 function appendNextToUpdateLinks() {
-    const fullUrl = window.location.pathname + window.location.search; // کل آدرس فعلی
-    if (!fullUrl) return;
+    const returnUrl = new URL(window.location.href);
+    returnUrl.searchParams.delete('next');
 
     $('a.update-cheque').each(function() {
-        let href = $(this).attr('href');
+        const href = $(this).attr('href');
         if (!href) return;
 
-        // جلوگیری از دوبار اضافه شدن
-        if (href.includes('next=')) return;
-
-        if (href.includes('?')) {
-            href += '&next=' + encodeURIComponent(fullUrl);
-        } else {
-            href += '?next=' + encodeURIComponent(fullUrl);
-        }
-
-        $(this).attr('href', href);
+        const targetUrl = new URL(href, window.location.origin);
+        targetUrl.searchParams.set('next', returnUrl.toString());
+        $(this).attr('href', targetUrl.toString());
     });
 }
 
 $(document).ready(function() {
+    appendNextToUpdateLinks();
+
     // بعد از هر بار Ajax (لیست دوباره لود میشه)
     $(document).ajaxSuccess(function() {
         appendNextToUpdateLinks();
