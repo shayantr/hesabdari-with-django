@@ -1,271 +1,192 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block header %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
-<link type="text/css" rel="stylesheet" href="{% static 'js/jalalidatepicker.min.css' %}" />
-<script type="text/javascript" src="{% static 'js/jalalidatepicker.min.js' %}"></script>
+<style>
+    #default-accounts_tree .jstree-anchor {
+        align-items: center;
+        display: inline-flex;
+        min-height: 36px;
+        min-width: min(100%, 320px);
+    }
+
+    #default-accounts_tree .account-node-actions {
+        display: inline-flex;
+        gap: .15rem;
+        margin-inline-start: .4rem;
+    }
+
+    #default-accounts_tree .account-node-action {
+        align-items: center;
+        display: inline-flex;
+        justify-content: center;
+        min-height: 32px;
+        min-width: 32px;
+        padding: .2rem;
+    }
+
+    #default-accounts_tree .account-move-source {
+        background: #fff3cd;
+        border: 2px solid #f0ad4e;
+        border-radius: .35rem;
+    }
+
+    .account-move-dialog {
+        align-items: flex-end;
+        background: rgba(15, 23, 42, .5);
+        display: flex;
+        inset: 0;
+        justify-content: center;
+        padding: 1rem;
+        position: fixed;
+        z-index: 1045;
+    }
+
+    .account-move-dialog[hidden] {
+        display: none !important;
+    }
+
+    .account-move-panel [hidden] {
+        display: none !important;
+    }
+
+    .account-move-panel {
+        background: var(--bs-body-bg, #fff);
+        border-radius: 1rem 1rem .5rem .5rem;
+        box-shadow: 0 1rem 3rem rgba(15, 23, 42, .25);
+        max-height: min(86vh, 720px);
+        max-width: 680px;
+        overflow: auto;
+        padding: 1rem;
+        width: 100%;
+    }
+
+    .account-move-results {
+        display: grid;
+        gap: .5rem;
+        margin-top: .75rem;
+        max-height: 42vh;
+        overflow-y: auto;
+    }
+
+    .account-move-result {
+        background: var(--bs-body-bg, #fff);
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        border-radius: .6rem;
+        color: inherit;
+        min-height: 58px;
+        padding: .55rem .7rem;
+        text-align: right;
+        width: 100%;
+    }
+
+    .account-move-result.is-selected {
+        background: rgba(13, 110, 253, .08);
+        border-color: #0d6efd;
+    }
+
+    .account-move-result-path {
+        color: var(--bs-secondary-color, #6c757d);
+        display: block;
+        font-size: .8rem;
+        margin-top: .2rem;
+        overflow-wrap: anywhere;
+    }
+
+    .account-move-positions {
+        background: rgba(13, 110, 253, .05);
+        border: 1px solid rgba(13, 110, 253, .2);
+        border-radius: .75rem;
+        margin-top: 1rem;
+        padding: .75rem;
+    }
+
+    .account-move-position-grid {
+        display: grid;
+        gap: .5rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        #default-accounts_tree .btn-move-account {
+            display: none;
+        }
+
+        #default-accounts_tree .jstree-anchor {
+            cursor: grab;
+        }
+
+        #default-accounts_tree .jstree-anchor:active {
+            cursor: grabbing;
+        }
+    }
+
+    @media (max-width: 767.98px), (hover: none), (pointer: coarse) {
+        #default-accounts_tree .jstree-anchor {
+            min-height: 44px;
+        }
+
+        #default-accounts_tree .account-node-action {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .account-move-position-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block body %}
-<div class="row mb-3">
-
-  {% csrf_token %}
-
+<div id="accounts-manager-config"
+     data-list-url="{% url 'get_accounts_list' %}"
+     data-create-url="{% url 'create_accounts' %}"
+     data-edit-url-template="{% url 'edit_account' pk=0 %}"
+     data-delete-url-template="{% url 'delete_account' pk=0 %}"
+     data-move-url-template="{% url 'move_account' pk=0 %}">
+    {% csrf_token %}
+    <div id="accounts-report"></div>
 </div>
 
-<div id="accounts-report">
+<div id="account-move-dialog" class="account-move-dialog" hidden aria-hidden="true">
+    <section class="account-move-panel" role="dialog" aria-modal="true" aria-labelledby="account-move-title">
+        <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
+            <div>
+                <h5 id="account-move-title" class="mb-1">جابجایی حساب</h5>
+                <div id="account-move-source-label" class="small text-muted"></div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary account-move-close" aria-label="بستن">✕</button>
+        </div>
 
+        <label for="account-move-search" class="form-label">جست‌وجوی حساب مقصد</label>
+        <input type="search" id="account-move-search" class="form-control"
+               placeholder="نام حساب یا یکی از والدها را بنویسید..." autocomplete="off">
+
+        <div id="account-move-results" class="account-move-results" aria-live="polite"></div>
+
+        <div id="account-move-positions" class="account-move-positions" hidden>
+            <div id="account-move-target-label" class="fw-semibold mb-2"></div>
+            <div class="account-move-position-grid">
+                <button type="button" class="btn btn-primary account-move-position" data-relation="inside">
+                    زیرمجموعه مقصد
+                </button>
+                <button type="button" class="btn btn-outline-primary account-move-position" data-relation="before">
+                    قبل از مقصد
+                </button>
+                <button type="button" class="btn btn-outline-primary account-move-position" data-relation="after">
+                    بعد از مقصد
+                </button>
+                <button type="button" class="btn btn-primary account-move-position account-move-root-position"
+                        data-relation="root" hidden>
+                    انتهای سطح اصلی
+                </button>
+            </div>
+        </div>
+    </section>
 </div>
-<script>
-    jalaliDatepicker.startWatch();
 
-$(document).ready(function () {
-    function getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]').value;
-    }
-
-
-    function loadTree(uniqueid) {
-        $.getJSON("{% url 'get_accounts_list' %}", function (response) {
-
-            const treeElement = $(`#${uniqueid}-accounts_tree`);
-            if (!treeElement.length) return;
-
-            const tree = treeElement.jstree(true);
-            if (tree) {
-                tree.settings.core.data = response.data;
-                tree.refresh(true);
-            } else {
-                createTree(uniqueid, response.data);
-            }
-        });
-    }
-
-    function createTree(uniqueid, data) {
-        const treeElement = $(`#${uniqueid}-accounts_tree`);
-        if (!treeElement.length) return;
-
-
-        treeElement.jstree("destroy");
-        treeElement.jstree({
-            core: {
-                data: data,
-                check_callback: true,
-                themes: { stripes: true }
-            },
-            plugins: ['wholerow', 'search'],
-                }).on('ready.jstree refresh.jstree open_node.jstree', function () {
-                    addControlsToNodes(uniqueid);
-                    $(`#${uniqueid}-accounts_tree`).off('click', 'a.btn-edit').on('click', 'a.btn-edit', function (e) {
-                        e.stopPropagation(); // جلوی کلیک روی نود رو بگیر
-                    });
-                });
-    }
-    function addControlsToNodes(uniqueid) {
-        const tree = $(`#${uniqueid}-accounts_tree`).jstree(true);
-        const nodes = tree.get_json('#', { flat: true });
-
-        nodes.forEach(node => {
-            const nodeId = node.id;
-            const realId = node.original?.real_id || node.id;
-            const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
-
-            if (!$anchor.hasClass('editing') && $anchor.find('.btn-edit').length === 0) {
-                const $buttons = $('<span class="ms-auto">')
-                    .append(`<button type="button" class="btn btn-sm btn-edit" data-uid="${uniqueid}" data-id="${realId}">📝</button>`)
-                    .append(`<button type="button" class="btn btn-sm btn-delete" data-uid="${uniqueid}" data-id="${realId}">🗑</button>`)
-                    .append(`<button type="button" class="btn btn-sm btn-add-child" data-uid="${uniqueid}" data-id="${realId}">➕</button>`);
-
-                $anchor.append($buttons);
-            }
-        });
-    }
-
-    function renameAccountNode(nodeId, newText) {
-        $("select[id*='balance-account']").each(function () {
-            $(this).find(`option[value='${nodeId}']`).text(newText);
-        });
-    }
-
-    function deleteAccountNode(nodeIdToDelete) {
-        $("select[id*='balance-account']").each(function () {
-            $(this).find(`option[value='${nodeIdToDelete}']`).remove();
-        });
-    }
-
-    $(document).on('click', '.btn-edit, .btn-add-child', function () {
-        const $btn = $(this);
-        const isEdit = $btn.hasClass('btn-edit');
-        const nodeId = $btn.data('id');
-        const uniqueid = $btn.data('uid');
-        const $node = $(`#${uniqueid}-accounts_tree #${nodeId}`);
-
-        if ($node.find('.node-form-container').length) return;
-
-        const $anchor = $(`#${uniqueid}-accounts_tree #${nodeId}_anchor`);
-        const currentText = isEdit ? $anchor.clone().children().remove().end().text().trim() : '';
-
-        const $input = $('<input>', {
-            type: 'text',
-            class: 'form-control form-control-sm me-2 d-inline-block',
-            value: currentText,
-            style: 'width: 60%; max-width: 250px;'
-        });
-
-        const $save = $('<button>', {
-            type: 'button',
-            class: 'btn btn-sm btn-success me-1',
-            html: '💾'
-        });
-
-        const $cancel = $('<button>', {
-            type: 'button',
-            class: 'btn btn-sm btn-outline-secondary',
-            html: '❌'
-        });
-
-        const $form = $('<div class="node-form-container mt-1 d-flex align-items-center">')
-            .append($input, $save, $cancel);
-
-        $node.append($form);
-
-        $cancel.click(() => $form.remove());
-
-        $save.click(function () {
-            const name = $input.val().trim();
-            if (!name) return alert('نام نباید خالی باشد!');
-            const csrf = getCSRFToken();
-
-            if (isEdit) {
-                $.post("{% url 'edit_account' pk=0 %}".replace('0', nodeId), {
-                    name,
-                    csrfmiddlewaretoken: csrf
-                }, function (res) {
-                    if (res.success) {
-                        loadTree(uniqueid);
-                        renameAccountNode(nodeId, name);
-                    } else alert(res.error || 'خطا در ویرایش');
-                });
-            } else {
-                $.post("{% url 'create_accounts' %}", {
-                    name,
-                    parent: nodeId,
-                    csrfmiddlewaretoken: csrf
-                }, function (res) {
-                    if (res.success) loadTree(uniqueid);
-                    else alert('خطا در افزودن حساب');
-                });
-            }
-        });
-    });
-
-    $(document).on('click', '.btn-delete', function () {
-        const nodeId = $(this).data('id');
-        const uniqueid = $(this).data('uid');
-
-        Swal.fire({
-            title: 'حذف حساب؟',
-            text: 'آیا مطمئن هستید؟ این عملیات قابل بازگشت نیست!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'بله، حذف کن',
-            cancelButtonText: 'انصراف'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.post("{% url 'delete_account' pk=0 %}".replace('0', nodeId), {
-                    csrfmiddlewaretoken: getCSRFToken()
-                }, function (res) {
-                    if (res.success) {
-                        deleteAccountNode(nodeId);
-                        loadTree(uniqueid);
-                        Swal.fire('حذف شد!', 'حساب با موفقیت حذف شد.', 'success');
-                    } else {
-                        Swal.fire('خطا', res.error || 'خطا در حذف حساب', 'error');
-                    }
-                });
-            }
-        });
-    });
-
-    $(document).on('click', '.add-root-btn', function () {
-    const uniqueid = $(this).data('uid');
-
-    // بررسی وجود فرم قبلی فقط در همین بخش
-    if ($(`#${uniqueid}-new_root_input_row`).length) return;
-
-    const $input = $('<input>', {
-        type: 'text',
-        id: `${uniqueid}-new_root_input`,
-        class: 'form-control form-control-sm me-2 d-inline-block',
-        placeholder: 'نام حساب ریشه‌ای',
-        style: 'width: 60%; max-width: 250px;'
-    });
-
-    const $save = $('<button>', {
-        type: 'button',
-        class: 'btn btn-sm btn-success me-1',
-        html: '💾'
-    });
-
-    const $cancel = $('<button>', {
-        type: 'button',
-        class: 'btn btn-sm btn-outline-secondary',
-        html: '❌'
-    });
-
-    const $row = $(`<div id="${uniqueid}-new_root_input_row" class="mb-2 d-flex align-items-center"></div>`)
-        .append($input, $save, $cancel);
-
-    $(this).after($row);
-
-    $cancel.click(() => $row.remove());
-
-    $save.click(function () {
-        const name = $input.val().trim();
-        if (!name) return alert('نام نباید خالی باشد!');
-
-        $.post("{% url 'create_accounts' %}", {
-            name,
-            csrfmiddlewaretoken: getCSRFToken()
-        }, function (res) {
-            if (res.success) {
-                $row.remove();
-                loadTree(uniqueid);
-            } else {
-                alert('خطا در افزودن حساب');
-            }
-        });
-    });
-});
-
-    $.ajax({
-        url: "{% url 'get_accounts_list' %}",
-        type: "GET",
-        success: function (response) {
-            $('#accounts-report').html(response.form_html);
-
-            createTree('default', response.data);
-            //search bank
-            let to = false;
-            $(`#default-jstree-search`).on('keyup', function () {
-                if (to) clearTimeout(to);
-                to = setTimeout(function () {
-                    const query = $(`#default-jstree-search`).val();
-                    $(`#default-accounts_tree`).jstree(true).search(query);
-                }, 250);
-            });
-
-        }
-    });
-
-    });
-</script>
-
+<script src="{% static 'js/form/accounts-manager.js' %}"></script>
 {% endblock %}
-
-
-

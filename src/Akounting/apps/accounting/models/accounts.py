@@ -13,9 +13,6 @@ class AccountsClass(MPTTModel):
     class Meta:
         db_table = 'accounts'
 
-    class MPTTMeta:
-        order_insertion_by = ['name']
-
     def __str__(self):
         # Get all ancestors (excluding self) in order from root to parent
         ancestors = self.get_ancestors()
