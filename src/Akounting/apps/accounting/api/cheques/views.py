@@ -94,9 +94,10 @@ def csv_cheque(request):
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = cheque_type
-    ws.append(['تاریخ سررسید', "مبلغ", "صاحب چک", "در وجه", "بانک", 'شماره چک', 'وضعیت چک', "توضیحات"])
+    ws.append(['تاریخ ثبت', 'تاریخ سررسید', "مبلغ", "صاحب چک", "در وجه", "بانک", 'شماره چک', 'وضعیت چک', "توضیحات"])
     for item in selector:
         ws.append([
+            item.document.date_created.strftime("%Y-%m-%d") if item.document.date_created else "",
             item.cheque.maturity_date.strftime("%Y-%m-%d") if item.cheque.maturity_date else "",
             item.amount,
             item.cheque.name,

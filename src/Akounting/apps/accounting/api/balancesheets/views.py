@@ -161,9 +161,10 @@ def csv_balance(request):
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = 'balance_sheet_csv'
-    ws.append(['حساب',"نوع حساب", "مبلغ", "صاحب چک", "طرف حساب", "مانده", "توضیحات"])
+    ws.append(['تاریخ ثبت', 'حساب',"نوع حساب", "مبلغ", "صاحب چک", "طرف حساب", "مانده", "توضیحات"])
     for item in balance_list:
         ws.append([
+            item.document.date_created.strftime("%Y-%m-%d") if item.document.date_created else "",
             item.id,
             item.transaction_type,
             item.amount,

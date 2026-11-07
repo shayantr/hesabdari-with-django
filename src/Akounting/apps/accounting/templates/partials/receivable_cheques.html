@@ -16,6 +16,7 @@
 
             <!-- اطلاعات کلیدی -->
             <div class="d-flex flex-wrap flex-grow-1 gap-3 align-items-center">
+                <span><i class="fas fa-calendar-plus text-secondary"></i> تاریخ ثبت: {{ receivable.document.date_created }}</span>
                 <span><i class="fas fa-calendar-day text-danger"></i> {{ receivable.cheque.maturity_date }}</span>
                 <span><i class="fas fa-money-check-alt text-success"></i> {{ receivable.amount|toman }}</span>
                 <span>دروجه: {{ receivable.cheque.in_cash }}</span>
