@@ -16,9 +16,8 @@
 
             <!-- اطلاعات کلیدی -->
             <div class="d-flex flex-wrap flex-grow-1 gap-3 align-items-center">
-                <span><i class="fas fa-calendar-plus text-secondary"></i> تاریخ ثبت: {{ receivable.document.date_created }}</span>
-                <span><i class="fas fa-calendar-day text-danger"></i> {{ receivable.cheque.maturity_date }}</span>
-                <span><i class="fas fa-money-check-alt text-success"></i> {{ receivable.amount|toman }}</span>
+                <span><i class="fas fa-calendar-day text-danger"></i> <strong>{{ receivable.cheque.maturity_date }}</strong></span>
+                <span><i class="fas fa-money-check-alt text-success"></i> <strong>{{ receivable.amount|toman }}</strong></span>
                 <span>دروجه: {{ receivable.cheque.in_cash }}</span>
                 <span>{{ receivable.cheque.account }}</span>
                 <span><i class="fas fa-user-circle text-primary"></i> <b>{{ receivable.cheque.name }}</b></span>

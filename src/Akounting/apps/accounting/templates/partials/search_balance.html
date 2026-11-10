@@ -47,7 +47,7 @@
             </div>
             {% endif %}
             <div class="row text-center">
-                <div class="col-4 "><bold><strong>تاریخ ثبت: {{ balance.document.date_created }}</strong></bold></div>
+                <div class="col-4 "><bold><strong>{{ balance.document.date_created }}</strong></bold></div>
                 <div class="col-4"><bold><strong class="{% if balance.transaction_type == 'debt' %}debt-color" >{{ balance.amount|toman }}بد{% else %}text-danger" >{{ balance.amount|toman }}بس {% endif %}</strong></bold> </div>
                 <div class="col-4">&nbsp;
                     <text class="{% if balance.running_balance < 0 %}text-danger{% else %}debt-color{% endif %}">
